@@ -56,23 +56,41 @@ export function useCsharpProto() {
   const [output, setOutput] = useState('')
   const [startNumber, setStartNumber] = useState(1)
 
+  const getSafeStart = useCallback((value: number) => {
+    return Number.isFinite(value) && value >= 1 ? Math.floor(value) : 1
+  }, [])
+
   const process = useCallback(() => {
-    const start = Number.isFinite(startNumber) && startNumber >= 1 ? Math.floor(startNumber) : 1
+    const start = getSafeStart(startNumber)
     setOutput(processCsharpProtoSource(input, start))
-  }, [input, startNumber])
+  }, [getSafeStart, input, startNumber])
 
   const clear = useCallback(() => {
     setInput('')
     setOutput('')
   }, [])
 
-  const setStartNumberSafe = useCallback((value: number) => {
-    setStartNumber(Number.isFinite(value) && value >= 1 ? Math.floor(value) : 1)
-  }, [])
+  const setInputLive = useCallback(
+    (value: string) => {
+      setInput(value)
+      const start = getSafeStart(startNumber)
+      setOutput(processCsharpProtoSource(value, start))
+    },
+    [getSafeStart, startNumber],
+  )
+
+  const setStartNumberSafe = useCallback(
+    (value: number) => {
+      const safe = getSafeStart(value)
+      setStartNumber(safe)
+      setOutput(processCsharpProtoSource(input, safe))
+    },
+    [getSafeStart, input],
+  )
 
   return {
     input,
-    setInput,
+    setInput: setInputLive,
     output,
     startNumber,
     setStartNumber: setStartNumberSafe,

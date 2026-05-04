@@ -19,13 +19,16 @@ export function useYaml() {
   const onInputChange = useCallback((value: string) => {
     setInput(value)
     if (value.trim() === '') {
+      setOutput('')
       setError(null)
       return
     }
     try {
-      yaml.load(value)
+      const data = yaml.load(value)
+      setOutput(yaml.dump(data, dumpOptions))
       setError(null)
     } catch (e) {
+      setOutput('')
       setError(parseErrorMessage(e))
     }
   }, [])

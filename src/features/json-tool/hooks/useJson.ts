@@ -13,13 +13,16 @@ export function useJson() {
     setInput(value)
     const trimmed = value.trim()
     if (trimmed === '') {
+      setOutput('')
       setError(null)
       return
     }
     try {
-      JSON.parse(value)
+      const parsed = JSON.parse(value)
+      setOutput(JSON.stringify(parsed, null, 2))
       setError(null)
     } catch (e) {
+      setOutput('')
       setError(parseErrorMessage(e))
     }
   }, [])

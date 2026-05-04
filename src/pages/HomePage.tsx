@@ -22,6 +22,16 @@ const tools = [
     description: 'Encode and decode Base64 or URL-encoded text',
     route: '/encoder',
   },
+  {
+    title: 'JSON to C# POCO Generator',
+    description: 'Generate C# class definitions from JSON input',
+    route: '/json-to-csharp',
+  },
+  {
+    title: 'JWT Decoder',
+    description: 'Decode JWT header and payload locally',
+    route: '/jwt-decoder',
+  },
 ] as const
 
 export default function HomePage() {

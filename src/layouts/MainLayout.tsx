@@ -6,6 +6,8 @@ const navItems: { to: string; label: string; end?: boolean }[] = [
   { to: '/yaml', label: 'YAML Formatter' },
   { to: '/csharp-proto', label: 'C# ProtoMember' },
   { to: '/encoder', label: 'Encoder / Decoder' },
+  { to: '/json-to-csharp', label: 'JSON -> C# POCO' },
+  { to: '/jwt-decoder', label: 'JWT Decoder' },
 ]
 
 export default function MainLayout() {
