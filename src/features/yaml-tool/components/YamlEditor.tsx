@@ -67,6 +67,13 @@ function YamlMonacoPane({
         options={{
           ...editorOptions,
           readOnly,
+          ...(readOnly
+            ? {
+                readOnly: true,
+                fixedOverflowWidgets: true,
+                wordWrap: 'on' as const,
+              }
+            : {}),
         }}
         onChange={readOnly ? undefined : (v) => onChange?.(v ?? '')}
         loading={

@@ -1,6 +1,6 @@
 import Editor from '@monaco-editor/react'
 import { useCallback, useState, type ReactNode } from 'react'
-import { useJson } from '../hooks/useJson'
+import { useCsharpProto } from '../hooks/useCsharpProto'
 
 const EDITOR_THEME = 'vs-dark'
 
@@ -39,29 +39,23 @@ function ToolbarButton({
   )
 }
 
-function JsonMonacoPane({
+function CsharpMonacoPane({
   labelId,
   value,
   readOnly,
   onChange,
-  'aria-invalid': ariaInvalid,
 }: {
   labelId: string
   value: string
   readOnly: boolean
   onChange?: (value: string) => void
-  'aria-invalid'?: boolean
 }) {
   return (
-    <div
-      className="absolute inset-0 min-h-0"
-      aria-labelledby={labelId}
-      aria-invalid={ariaInvalid}
-    >
+    <div className="absolute inset-0 min-h-0" aria-labelledby={labelId}>
       <Editor
         height="100%"
         width="100%"
-        language="json"
+        language="csharp"
         theme={EDITOR_THEME}
         value={value}
         options={{
@@ -86,70 +80,83 @@ function JsonMonacoPane({
   )
 }
 
-export function JsonEditor() {
-  const { input, output, error, onInputChange, format, minify, clear } = useJson()
-  const [copyLabel, setCopyLabel] = useState('Copy')
+export function CsharpProtoEditor() {
+  const { input, setInput, output, startNumber, setStartNumber, process, clear } = useCsharpProto()
+  const [copyLabel, setCopyLabel] = useState('Copy Output')
 
-  const handleCopy = useCallback(async () => {
+  const handleCopyOutput = useCallback(async () => {
     if (!output) return
     try {
       await navigator.clipboard.writeText(output)
       setCopyLabel('Copied')
-      window.setTimeout(() => setCopyLabel('Copy'), 2000)
+      window.setTimeout(() => setCopyLabel('Copy Output'), 2000)
     } catch {
       setCopyLabel('Failed')
-      window.setTimeout(() => setCopyLabel('Copy'), 2000)
+      window.setTimeout(() => setCopyLabel('Copy Output'), 2000)
     }
   }, [output])
 
   return (
     <div className="flex min-h-0 flex-1 flex-col gap-4 p-4 sm:p-6 lg:p-8">
       <div className="shrink-0">
-        <h1 className="text-2xl font-semibold tracking-tight text-slate-100">JSON Formatter</h1>
-        <p className="mt-1 text-sm text-slate-400">Format, minify, and inspect JSON.</p>
+        <h1 className="text-2xl font-semibold tracking-tight text-slate-100">
+          C# ProtoMember Reindex
+        </h1>
+        <p className="mt-1 text-sm text-slate-400">
+          Strip existing <code className="text-violet-300">[ProtoMember(n)]</code> attributes and assign
+          sequential numbers starting from your chosen index.
+        </p>
       </div>
 
-      {error ? (
-        <p
-          className="shrink-0 rounded-md border border-red-900/50 bg-red-950/40 px-3 py-2 text-sm text-red-300"
-          role="alert"
-        >
-          {error}
-        </p>
-      ) : null}
-
-      <div className="flex shrink-0 flex-wrap gap-2">
-        <ToolbarButton onClick={format}>Format</ToolbarButton>
-        <ToolbarButton onClick={minify}>Minify</ToolbarButton>
-        <ToolbarButton onClick={clear} variant="danger">
-          Clear
-        </ToolbarButton>
-        <ToolbarButton onClick={handleCopy} disabled={!output}>
-          {copyLabel}
-        </ToolbarButton>
+      <div className="flex shrink-0 flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-end">
+        <div className="flex flex-col gap-1">
+          <label htmlFor="proto-start-number" className="text-xs font-medium text-slate-400">
+            Start Number
+          </label>
+          <input
+            id="proto-start-number"
+            type="number"
+            min={1}
+            step={1}
+            value={startNumber}
+            onChange={(e) => {
+              const v = parseInt(e.target.value, 10)
+              setStartNumber(Number.isNaN(v) ? 1 : v)
+            }}
+            className="w-28 rounded-md border border-slate-700 bg-slate-900 px-3 py-2 text-sm text-slate-100 focus:border-violet-500 focus:outline-none focus:ring-1 focus:ring-violet-500"
+          />
+        </div>
+        <div className="flex flex-wrap gap-2">
+          <ToolbarButton onClick={process}>Process</ToolbarButton>
+          <ToolbarButton onClick={clear} variant="danger">
+            Clear
+          </ToolbarButton>
+          <ToolbarButton onClick={handleCopyOutput} disabled={!output}>
+            {copyLabel}
+          </ToolbarButton>
+        </div>
       </div>
 
       <div className="grid min-h-0 flex-1 grid-cols-1 gap-4 lg:grid-cols-2 lg:gap-6">
         <div className="flex min-h-0 flex-1 flex-col gap-2">
-          <span id="json-input-label" className="shrink-0 text-sm font-medium text-slate-300">
+          <span id="csharp-proto-input-label" className="shrink-0 text-sm font-medium text-slate-300">
             Input
           </span>
           <div className="relative min-h-[min(40vh,280px)] flex-1 overflow-hidden rounded-lg border border-slate-700">
-            <JsonMonacoPane
-              labelId="json-input-label"
+            <CsharpMonacoPane
+              labelId="csharp-proto-input-label"
               value={input}
               readOnly={false}
-              onChange={onInputChange}
-              aria-invalid={error ? true : undefined}
+              onChange={setInput}
             />
           </div>
         </div>
         <div className="flex min-h-0 flex-1 flex-col gap-2">
-          <span id="json-output-label" className="shrink-0 text-sm font-medium text-slate-300">
+          <span id="csharp-proto-output-label" className="shrink-0 text-sm font-medium text-slate-300">
             Output
           </span>
           <div className="relative min-h-[min(40vh,280px)] flex-1 overflow-hidden rounded-lg border border-slate-700">
-            <JsonMonacoPane labelId="json-output-label" value={output} readOnly />
+            <CsharpMonacoPane labelId="csharp-proto-output-label" value={output} readOnly />
           </div>
         </div>
       </div>

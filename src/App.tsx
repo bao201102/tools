@@ -1,5 +1,6 @@
 import { Route, Routes } from 'react-router-dom'
 import MainLayout from './layouts/MainLayout'
+import CsharpProtoPage from './pages/CsharpProtoPage'
 import HomePage from './pages/HomePage'
 import JsonPage from './pages/JsonPage'
 import YamlPage from './pages/YamlPage'
@@ -11,6 +12,7 @@ export default function App() {
         <Route index element={<HomePage />} />
         <Route path="json" element={<JsonPage />} />
         <Route path="yaml" element={<YamlPage />} />
+        <Route path="csharp-proto" element={<CsharpProtoPage />} />
       </Route>
     </Routes>
   )

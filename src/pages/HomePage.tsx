@@ -12,6 +12,11 @@ const tools = [
     description: 'Format and validate YAML',
     route: '/yaml',
   },
+  {
+    title: 'C# ProtoMember Reindex',
+    description: 'Re-sequence [ProtoMember] attributes on C# properties',
+    route: '/csharp-proto',
+  },
 ] as const
 
 export default function HomePage() {
