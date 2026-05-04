@@ -1,0 +1,15 @@
+I want to add a new tool: [Base64 / URL Encoder & Decoder] to this project.
+
+Act as a Tech Lead. You have the full context of my current codebase @Codebase. Please analyze my existing folder structure, routing, and design system (Tailwind CSS, UI components), then propose a step-by-step implementation plan.
+
+The plan should include:
+
+    File Placement: Where exactly should we create the new component files?
+
+    UI/UX Strategy: How will it look so it matches the current layout?
+
+    Core Logic: What browser APIs or specific libraries will we use?
+
+    Integration: Which files need to be updated to add this to the routing and sidebar?
+
+CRITICAL: Do NOT write the full code yet. Just give me the detailed plan. Wait for my approval. Once I say 'Looks good', we will execute it step by step.

@@ -24,6 +24,7 @@ Dự án phù hợp dùng trực tiếp trong trình duyệt khi phát triển, 
 | **JSON Formatter & Minifier**   | Định dạng JSON với thụt dòng chuẩn, thu gọn (minify) và hiển thị trong Monaco Editor với highlight cú pháp.                                                                                                                                 |
 | **YAML Formatter & Validator**  | Parse YAML bằng `js-yaml`, format lại và báo lỗi cú pháp trực quan.                                                                                                                                                                         |
 | **C# ProtoMember Reindex Tool** | Đọc mã C# **theo từng dòng**, dùng **Regex** để gỡ `[ProtoMember(n)]` cũ và gán lại số thứ tự từ một **số bắt đầu** bạn chọn; hỗ trợ các property dạng `{ get; set; }`, `init`, `private set`, v.v.; giữ nguyên comment `//` và dòng trống. |
+| **Base64 / URL Encoder & Decoder** | Mã hóa/giải mã nhanh giữa văn bản thường, Base64 và URL encoding ngay trên client; hỗ trợ Unicode và hiển thị lỗi khi input decode không hợp lệ. |
 
 
 Điều hướng giữa các công cụ qua **React Router** (sidebar + thẻ trên trang chủ).
@@ -36,7 +37,7 @@ Dự án phù hợp dùng trực tiếp trong trình duyệt khi phát triển, 
 - **TypeScript** — Kiểm tra kiểu tĩnh, mã dễ bảo trì.
 - **Vite** — Dev server nhanh, bundling tối ưu.
 - **Tailwind CSS (v4 + `@tailwindcss/vite`)** — Styling utility-first.
-- **React Router** — Định tuyến SPA (`/`, `/json`, `/yaml`, `/csharp-proto`).
+- **React Router** — Định tuyến SPA (`/`, `/json`, `/yaml`, `/csharp-proto`, `/encoder`).
 - **Monaco Editor (`@monaco-editor/react`)** — Soạn thảo code với highlight (JSON / YAML / C#), tùy chọn read-only có `fixedOverflowWidgets` cho vùng output.
 - **js-yaml** — Parse & dump YAML trong YAML Formatter.
 - **Nginx (Alpine)** — Phục vụ bản build tĩnh trong Docker.

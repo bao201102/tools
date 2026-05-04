@@ -17,6 +17,11 @@ const tools = [
     description: 'Re-sequence [ProtoMember] attributes on C# properties',
     route: '/csharp-proto',
   },
+  {
+    title: 'Base64 / URL Encoder & Decoder',
+    description: 'Encode and decode Base64 or URL-encoded text',
+    route: '/encoder',
+  },
 ] as const
 
 export default function HomePage() {
