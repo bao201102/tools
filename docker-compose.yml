@@ -1,0 +1,7 @@
+services:
+  web-tools:
+    image: boris1120/dev-tools:latest
+    container_name: dev_tools_app
+    restart: always
+    ports:
+      - "8080:80"
