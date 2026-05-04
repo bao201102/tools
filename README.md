@@ -19,12 +19,12 @@ Dự án phù hợp dùng trực tiếp trong trình duyệt khi phát triển, 
 ## ✨ Tính năng
 
 
-| Công cụ                         | Mô tả ngắn                                                                                                                                                                                                                                  |
-| ------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **JSON Formatter & Minifier**   | Định dạng JSON với thụt dòng chuẩn, thu gọn (minify) và hiển thị trong Monaco Editor với highlight cú pháp.                                                                                                                                 |
-| **YAML Formatter & Validator**  | Parse YAML bằng `js-yaml`, format lại và báo lỗi cú pháp trực quan.                                                                                                                                                                         |
-| **C# ProtoMember Reindex Tool** | Đọc mã C# **theo từng dòng**, dùng **Regex** để gỡ `[ProtoMember(n)]` cũ và gán lại số thứ tự từ một **số bắt đầu** bạn chọn; hỗ trợ các property dạng `{ get; set; }`, `init`, `private set`, v.v.; giữ nguyên comment `//` và dòng trống. |
-| **Base64 / URL Encoder & Decoder** | Mã hóa/giải mã nhanh giữa văn bản thường, Base64 và URL encoding ngay trên client; hỗ trợ Unicode và hiển thị lỗi khi input decode không hợp lệ. |
+| Công cụ                            | Mô tả ngắn                                                                                                                                                                                                                                  |
+| ---------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **JSON Formatter & Minifier**      | Định dạng JSON với thụt dòng chuẩn, thu gọn (minify) và hiển thị trong Monaco Editor với highlight cú pháp.                                                                                                                                 |
+| **YAML Formatter & Validator**     | Parse YAML bằng `js-yaml`, format lại và báo lỗi cú pháp trực quan.                                                                                                                                                                         |
+| **C# ProtoMember Reindex Tool**    | Đọc mã C# **theo từng dòng**, dùng **Regex** để gỡ `[ProtoMember(n)]` cũ và gán lại số thứ tự từ một **số bắt đầu** bạn chọn; hỗ trợ các property dạng `{ get; set; }`, `init`, `private set`, v.v.; giữ nguyên comment `//` và dòng trống. |
+| **Base64 / URL Encoder & Decoder** | Mã hóa/giải mã nhanh giữa văn bản thường, Base64 và URL encoding ngay trên client; hỗ trợ Unicode và hiển thị lỗi khi input decode không hợp lệ.                                                                                            |
 
 
 Điều hướng giữa các công cụ qua **React Router** (sidebar + thẻ trên trang chủ).
@@ -109,11 +109,7 @@ docker buildx inspect --bootstrap
 Thay `<your-username>` và tên image cho đúng dự án của bạn.
 
 ```bash
-docker buildx build \
-  --platform linux/amd64,linux/arm64 \
-  -t boris1120/dev-tools:latest \
-  --push \
-  .
+docker buildx build --platform linux/arm64 -t boris1120/dev-tools:latest --push .
 ```
 
 - `**--platform linux/amd64,linux/arm64**` — Một manifest liệt kê cả hai kiến trúc.
@@ -123,7 +119,7 @@ docker buildx build \
 Nếu chỉ build cục bộ, không push:
 
 ```bash
-docker buildx build --platform linux/amd64,linux/arm64 -t dev-tools:local --load .
+docker buildx build --platform linux/arm64 -t dev-tools:local --load .
 ```
 
 > `**--load**` chỉ tải **một** kiến trúc trùng với máy bạn; để có cả hai thường dùng `**--push`** hoặc export qua `docker buildx build ... -o type=docker`.
