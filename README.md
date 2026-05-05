@@ -21,10 +21,14 @@ Dự án phù hợp dùng trực tiếp trong trình duyệt khi phát triển, 
 
 | Công cụ                            | Mô tả ngắn                                                                                                                                                                                                                                  |
 | ---------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **JSON Formatter & Minifier**      | Định dạng JSON với thụt dòng chuẩn, thu gọn (minify) và hiển thị trong Monaco Editor với highlight cú pháp.                                                                                                                                 |
-| **YAML Formatter & Validator**     | Parse YAML bằng `js-yaml`, format lại và báo lỗi cú pháp trực quan.                                                                                                                                                                         |
+| **JSON Formatter & Minifier**      | Pretty-print JSON theo thời gian thực khi gõ, hỗ trợ **minify theo nút bấm**, hiển thị trong Monaco Editor và báo lỗi parse rõ ràng.                                                                                                       |
+| **JSON Escaper & Unescaper**       | Chuyển đổi hai chiều giữa chuỗi JSON escaped và JSON đã format; hỗ trợ unwrap chuỗi lồng nhiều lớp (thường gặp trong log C#/payload), kiểm tra root phải là object/array, và hiển thị lỗi ngay trong ô kết quả.                           |
+| **YAML Formatter & Validator**     | Parse YAML bằng `js-yaml`, normalize theo thời gian thực và báo lỗi cú pháp trực quan.                                                                                                                                                     |
 | **C# ProtoMember Reindex Tool**    | Đọc mã C# **theo từng dòng**, dùng **Regex** để gỡ `[ProtoMember(n)]` cũ và gán lại số thứ tự từ một **số bắt đầu** bạn chọn; hỗ trợ các property dạng `{ get; set; }`, `init`, `private set`, v.v.; giữ nguyên comment `//` và dòng trống. |
-| **Base64 / URL Encoder & Decoder** | Mã hóa/giải mã nhanh giữa văn bản thường, Base64 và URL encoding ngay trên client; hỗ trợ Unicode và hiển thị lỗi khi input decode không hợp lệ.                                                                                            |
+| **Base64 / URL Encoder & Decoder** | Mã hóa/giải mã nhanh giữa văn bản thường, Base64 và URL encoding ngay trên client; hỗ trợ Unicode và hiển thị lỗi khi input decode không hợp lệ.                                                                                          |
+| **Text & Code Diff Checker**       | So sánh **Original vs Modified** bằng Monaco Diff Editor; có chế độ **Side-by-side/Inline**, chỉnh được cả hai bên, chọn ngôn ngữ highlight một lần cho cả cặp văn bản, kèm nút **Swap** và **Clear All**.                               |
+| **JSON to C# POCO Generator**      | Sinh class C# từ JSON với naming theo chuẩn C#, tự thêm `[JsonPropertyName(\"...\")]` khi cần ánh xạ tên gốc, giữ output dễ đọc để dùng trực tiếp trong API/client models.                                                                |
+| **JWT Decoder**                    | Decode JWT header/payload cục bộ trong trình duyệt, parse thành JSON đã format và báo lỗi khi token không hợp lệ.                                                                                                                          |
 
 
 Điều hướng giữa các công cụ qua **React Router** (sidebar + thẻ trên trang chủ).
@@ -37,8 +41,8 @@ Dự án phù hợp dùng trực tiếp trong trình duyệt khi phát triển, 
 - **TypeScript** — Kiểm tra kiểu tĩnh, mã dễ bảo trì.
 - **Vite** — Dev server nhanh, bundling tối ưu.
 - **Tailwind CSS (v4 + `@tailwindcss/vite`)** — Styling utility-first.
-- **React Router** — Định tuyến SPA (`/`, `/json`, `/yaml`, `/csharp-proto`, `/encoder`).
-- **Monaco Editor (`@monaco-editor/react`)** — Soạn thảo code với highlight (JSON / YAML / C#), tùy chọn read-only có `fixedOverflowWidgets` cho vùng output.
+- **React Router** — Định tuyến SPA (`/`, `/json`, `/json-escape`, `/yaml`, `/csharp-proto`, `/encoder`, `/diff-checker`, `/json-to-csharp`, `/jwt-decoder`).
+- **Monaco Editor (`@monaco-editor/react`)** — Soạn thảo code với highlight (JSON / YAML / C# / plaintext...) và Monaco Diff Editor cho tính năng so sánh văn bản/mã nguồn.
 - **js-yaml** — Parse & dump YAML trong YAML Formatter.
 - **Nginx (Alpine)** — Phục vụ bản build tĩnh trong Docker.
 
