@@ -1,6 +1,7 @@
 import { Route, Routes } from 'react-router-dom'
 import MainLayout from './layouts/MainLayout'
 import CsharpProtoPage from './pages/CsharpProtoPage'
+import DiffCheckerPage from './pages/DiffCheckerPage'
 import EncoderPage from './pages/EncoderPage'
 import HomePage from './pages/HomePage'
 import JwtDecoderPage from './pages/JwtDecoderPage'
@@ -19,6 +20,7 @@ export default function App() {
         <Route path="yaml" element={<YamlPage />} />
         <Route path="csharp-proto" element={<CsharpProtoPage />} />
         <Route path="encoder" element={<EncoderPage />} />
+        <Route path="diff-checker" element={<DiffCheckerPage />} />
         <Route path="json-to-csharp" element={<PocoGeneratorPage />} />
         <Route path="jwt-decoder" element={<JwtDecoderPage />} />
       </Route>

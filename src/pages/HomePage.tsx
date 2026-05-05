@@ -29,6 +29,11 @@ const tools = [
     route: '/encoder',
   },
   {
+    title: 'Text & Code Diff Checker',
+    description: 'Compare Original vs Modified with side-by-side or inline Monaco diff',
+    route: '/diff-checker',
+  },
+  {
     title: 'JSON to C# POCO Generator',
     description: 'Generate C# class definitions from JSON input',
     route: '/json-to-csharp',
