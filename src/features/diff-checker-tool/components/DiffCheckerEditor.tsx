@@ -1,5 +1,5 @@
 import { DiffEditor } from '@monaco-editor/react'
-import { type ReactNode } from 'react'
+import { useCallback, useRef, useState, type ReactNode } from 'react'
 import { type DiffLanguage, useDiffChecker } from '../hooks/useDiffChecker'
 
 const EDITOR_THEME = 'vs-dark'
@@ -49,17 +49,70 @@ function ToolbarButton({
 
 export function DiffCheckerEditor() {
   const {
-    original,
-    modified,
     language,
     renderSideBySide,
-    setOriginal,
-    setModified,
     setLanguage,
-    setRenderSideBySide,
-    swap,
-    clearAll,
+    toggleView,
   } = useDiffChecker()
+  const originalEditorRef = useRef<{
+    getValue: () => string
+    setValue: (value: string) => void
+  } | null>(null)
+  const modifiedEditorRef = useRef<{
+    getValue: () => string
+    setValue: (value: string) => void
+  } | null>(null)
+  const originalValueRef = useRef('')
+  const modifiedValueRef = useRef('')
+  const [originalSnapshot, setOriginalSnapshot] = useState('')
+  const [modifiedSnapshot, setModifiedSnapshot] = useState('')
+
+  const syncSnapshotsFromEditors = useCallback(() => {
+    if (originalEditorRef.current) {
+      originalValueRef.current = originalEditorRef.current.getValue()
+      setOriginalSnapshot(originalValueRef.current)
+    }
+    if (modifiedEditorRef.current) {
+      modifiedValueRef.current = modifiedEditorRef.current.getValue()
+      setModifiedSnapshot(modifiedValueRef.current)
+    }
+  }, [])
+
+  const handleChangeLanguage = useCallback(
+    (next: DiffLanguage) => {
+      syncSnapshotsFromEditors()
+      setLanguage(next)
+    },
+    [setLanguage, syncSnapshotsFromEditors],
+  )
+
+  const handleToggleView = useCallback(() => {
+    syncSnapshotsFromEditors()
+    toggleView()
+  }, [syncSnapshotsFromEditors, toggleView])
+
+  const handleSwap = useCallback(() => {
+    const currentOriginal = originalEditorRef.current?.getValue() ?? originalValueRef.current
+    const currentModified = modifiedEditorRef.current?.getValue() ?? modifiedValueRef.current
+
+    originalValueRef.current = currentModified
+    modifiedValueRef.current = currentOriginal
+
+    originalEditorRef.current?.setValue(currentModified)
+    modifiedEditorRef.current?.setValue(currentOriginal)
+
+    setOriginalSnapshot(currentModified)
+    setModifiedSnapshot(currentOriginal)
+  }, [])
+
+  const handleClearAll = useCallback(() => {
+    originalValueRef.current = ''
+    modifiedValueRef.current = ''
+    originalEditorRef.current?.setValue('')
+    modifiedEditorRef.current?.setValue('')
+    setOriginalSnapshot('')
+    setModifiedSnapshot('')
+  }, [])
 
   return (
     <div className="flex min-h-0 flex-1 flex-col gap-3 p-3 sm:gap-4 sm:p-6 lg:p-8">
@@ -79,7 +132,7 @@ export function DiffCheckerEditor() {
             <select
               className="rounded-md border border-slate-700 bg-slate-900 px-3 py-2 text-sm text-slate-100 focus:border-violet-500 focus:outline-none focus:ring-1 focus:ring-violet-500"
               value={language}
-              onChange={(e) => setLanguage(e.target.value as DiffLanguage)}
+              onChange={(e) => handleChangeLanguage(e.target.value as DiffLanguage)}
             >
               {languages.map((lang) => (
                 <option key={lang.value} value={lang.value}>
@@ -91,11 +144,11 @@ export function DiffCheckerEditor() {
         </div>
 
         <div className="flex flex-wrap gap-2">
-          <ToolbarButton onClick={() => setRenderSideBySide(!renderSideBySide)}>
+          <ToolbarButton onClick={handleToggleView}>
             {renderSideBySide ? 'Inline View' : 'Side-by-Side View'}
           </ToolbarButton>
-          <ToolbarButton onClick={swap}>Swap</ToolbarButton>
-          <ToolbarButton onClick={clearAll} variant="danger">
+          <ToolbarButton onClick={handleSwap}>Swap</ToolbarButton>
+          <ToolbarButton onClick={handleClearAll} variant="danger">
             Clear All
           </ToolbarButton>
         </div>
@@ -105,19 +158,21 @@ export function DiffCheckerEditor() {
         <DiffEditor
           height="100%"
           width="100%"
-          original={original}
-          modified={modified}
+          original={originalSnapshot}
+          modified={modifiedSnapshot}
           originalLanguage={language}
           modifiedLanguage={language}
           onMount={(editor) => {
             const originalEditor = editor.getOriginalEditor()
             const modifiedEditor = editor.getModifiedEditor()
+            originalEditorRef.current = originalEditor
+            modifiedEditorRef.current = modifiedEditor
 
             originalEditor.onDidChangeModelContent(() => {
-              setOriginal(originalEditor.getValue())
+              originalValueRef.current = originalEditor.getValue()
             })
             modifiedEditor.onDidChangeModelContent(() => {
-              setModified(modifiedEditor.getValue())
+              modifiedValueRef.current = modifiedEditor.getValue()
             })
           }}
           options={{
