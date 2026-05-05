@@ -87,9 +87,9 @@ export function JwtDecoderEditor() {
   }, [payloadOutput])
 
   return (
-    <div className="flex min-h-0 flex-1 flex-col gap-4 p-4 sm:p-6 lg:p-8">
+    <div className="flex min-h-0 flex-1 flex-col gap-3 p-3 sm:gap-4 sm:p-6 lg:p-8">
       <div className="shrink-0">
-        <h1 className="text-2xl font-semibold tracking-tight text-slate-100">JWT Decoder</h1>
+        <h1 className="text-xl font-semibold tracking-tight text-slate-100 sm:text-2xl">JWT Decoder</h1>
         <p className="mt-1 text-sm text-slate-400">
           Decode JWT header and payload locally in your browser.
         </p>
@@ -119,7 +119,7 @@ export function JwtDecoderEditor() {
           value={input}
           onChange={(event) => setInput(event.target.value)}
           spellCheck={false}
-          className="min-h-[180px] w-full resize-y rounded-lg border border-slate-700 bg-slate-900/80 p-4 font-mono text-sm leading-relaxed text-slate-100 placeholder:text-slate-600 focus:border-violet-500 focus:outline-none focus:ring-1 focus:ring-violet-500"
+          className="min-h-[140px] w-full resize-y rounded-lg border border-slate-700 bg-slate-900/80 p-3 font-mono text-sm leading-relaxed text-slate-100 placeholder:text-slate-600 focus:border-violet-500 focus:outline-none focus:ring-1 focus:ring-violet-500 sm:min-h-[180px] sm:p-4"
           placeholder="Paste JWT here (header.payload.signature)"
           aria-invalid={error ? true : undefined}
         />

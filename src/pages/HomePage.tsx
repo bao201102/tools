@@ -36,9 +36,9 @@ const tools = [
 
 export default function HomePage() {
   return (
-    <div className="p-6 sm:p-8 lg:p-10">
-      <header className="mb-8 sm:mb-10">
-        <h1 className="text-3xl font-bold tracking-tight text-slate-100 sm:text-4xl">
+    <div className="p-4 sm:p-8 lg:p-10">
+      <header className="mb-6 sm:mb-10">
+        <h1 className="text-2xl font-bold tracking-tight text-slate-100 sm:text-4xl">
           Developer Tools
         </h1>
         <p className="mt-2 max-w-2xl text-slate-400">

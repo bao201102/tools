@@ -105,9 +105,9 @@ export function PocoGeneratorEditor() {
   }, [output])
 
   return (
-    <div className="flex min-h-0 flex-1 flex-col gap-4 p-4 sm:p-6 lg:p-8">
+    <div className="flex min-h-0 flex-1 flex-col gap-3 p-3 sm:gap-4 sm:p-6 lg:p-8">
       <div className="shrink-0">
-        <h1 className="text-2xl font-semibold tracking-tight text-slate-100">
+        <h1 className="text-xl font-semibold tracking-tight text-slate-100 sm:text-2xl">
           JSON to C# POCO Generator
         </h1>
         <p className="mt-1 text-sm text-slate-400">
@@ -136,7 +136,7 @@ export function PocoGeneratorEditor() {
             type="text"
             value={rootClassName}
             onChange={(event) => setRootClassName(event.target.value)}
-            className="w-56 rounded-md border border-slate-700 bg-slate-900 px-3 py-2 text-sm text-slate-100 focus:border-violet-500 focus:outline-none focus:ring-1 focus:ring-violet-500"
+            className="w-full max-w-xs rounded-md border border-slate-700 bg-slate-900 px-3 py-2 text-sm text-slate-100 focus:border-violet-500 focus:outline-none focus:ring-1 focus:ring-violet-500 sm:w-56 sm:max-w-none"
             placeholder="Root"
           />
         </div>
@@ -156,7 +156,7 @@ export function PocoGeneratorEditor() {
           <span id="poco-input-label" className="shrink-0 text-sm font-medium text-slate-300">
             Input JSON
           </span>
-          <div className="relative min-h-[min(40vh,280px)] flex-1 overflow-hidden rounded-lg border border-slate-700">
+          <div className="relative min-h-[min(36vh,220px)] flex-1 overflow-hidden rounded-lg border border-slate-700 sm:min-h-[min(40vh,280px)]">
             <EditorPane
               labelId="poco-input-label"
               language="json"
@@ -172,7 +172,7 @@ export function PocoGeneratorEditor() {
           <span id="poco-output-label" className="shrink-0 text-sm font-medium text-slate-300">
             Generated C#
           </span>
-          <div className="relative min-h-[min(40vh,280px)] flex-1 overflow-hidden rounded-lg border border-slate-700">
+          <div className="relative min-h-[min(36vh,220px)] flex-1 overflow-hidden rounded-lg border border-slate-700 sm:min-h-[min(40vh,280px)]">
             <EditorPane labelId="poco-output-label" language="csharp" value={output} readOnly />
           </div>
         </div>

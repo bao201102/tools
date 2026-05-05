@@ -103,9 +103,9 @@ export function YamlEditor() {
   }, [output])
 
   return (
-    <div className="flex min-h-0 flex-1 flex-col gap-4 p-4 sm:p-6 lg:p-8">
+    <div className="flex min-h-0 flex-1 flex-col gap-3 p-3 sm:gap-4 sm:p-6 lg:p-8">
       <div className="shrink-0">
-        <h1 className="text-2xl font-semibold tracking-tight text-slate-100">YAML Formatter</h1>
+        <h1 className="text-xl font-semibold tracking-tight text-slate-100 sm:text-2xl">YAML Formatter</h1>
         <p className="mt-1 text-sm text-slate-400">Normalize and validate YAML as you type.</p>
       </div>
 
@@ -132,7 +132,7 @@ export function YamlEditor() {
           <span id="yaml-input-label" className="shrink-0 text-sm font-medium text-slate-300">
             Input
           </span>
-          <div className="relative min-h-[min(40vh,280px)] flex-1 overflow-hidden rounded-lg border border-slate-700">
+          <div className="relative min-h-[min(36vh,220px)] flex-1 overflow-hidden rounded-lg border border-slate-700 sm:min-h-[min(40vh,280px)]">
             <YamlMonacoPane
               labelId="yaml-input-label"
               value={input}
@@ -146,7 +146,7 @@ export function YamlEditor() {
           <span id="yaml-output-label" className="shrink-0 text-sm font-medium text-slate-300">
             Output
           </span>
-          <div className="relative min-h-[min(40vh,280px)] flex-1 overflow-hidden rounded-lg border border-slate-700">
+          <div className="relative min-h-[min(36vh,220px)] flex-1 overflow-hidden rounded-lg border border-slate-700 sm:min-h-[min(40vh,280px)]">
             <YamlMonacoPane labelId="yaml-output-label" value={output} readOnly />
           </div>
         </div>

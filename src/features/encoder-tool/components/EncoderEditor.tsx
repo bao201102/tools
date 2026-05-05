@@ -55,9 +55,11 @@ export function EncoderEditor() {
   }, [output])
 
   return (
-    <div className="flex min-h-0 flex-1 flex-col gap-4 p-4 sm:p-6 lg:p-8">
+    <div className="flex min-h-0 flex-1 flex-col gap-4 p-3 sm:p-6 lg:p-8">
       <div className="shrink-0">
-        <h1 className="text-2xl font-semibold tracking-tight text-slate-100">Encoder / Decoder</h1>
+        <h1 className="text-xl font-semibold tracking-tight text-slate-100 sm:text-2xl">
+          Encoder / Decoder
+        </h1>
         <p className="mt-1 text-sm text-slate-400">
           Encode or decode text with Base64 and URL transformations.
         </p>
@@ -73,24 +75,32 @@ export function EncoderEditor() {
       ) : null}
 
       <div className="flex shrink-0 flex-col gap-3">
-        <div className="flex flex-wrap items-center gap-2">
-          <span className="text-xs font-semibold uppercase tracking-wide text-slate-500">Mode</span>
-          <ToggleButton active={mode === 'base64'} onClick={() => setMode('base64')}>
-            Base64
-          </ToggleButton>
-          <ToggleButton active={mode === 'url'} onClick={() => setMode('url')}>
-            URL
-          </ToggleButton>
+        <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center">
+          <span className="shrink-0 text-xs font-semibold uppercase tracking-wide text-slate-500">
+            Mode
+          </span>
+          <div className="flex flex-wrap gap-2">
+            <ToggleButton active={mode === 'base64'} onClick={() => setMode('base64')}>
+              Base64
+            </ToggleButton>
+            <ToggleButton active={mode === 'url'} onClick={() => setMode('url')}>
+              URL
+            </ToggleButton>
+          </div>
         </div>
-        <div className="flex flex-wrap items-center gap-2">
-          <span className="text-xs font-semibold uppercase tracking-wide text-slate-500">Direction</span>
-          <ToggleButton active={direction === 'encode'} onClick={() => setDirection('encode')}>
-            Encode
-          </ToggleButton>
-          <ToggleButton active={direction === 'decode'} onClick={() => setDirection('decode')}>
-            Decode
-          </ToggleButton>
-          <div className="ml-auto flex flex-wrap gap-2">
+        <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center sm:gap-2">
+          <span className="shrink-0 text-xs font-semibold uppercase tracking-wide text-slate-500">
+            Direction
+          </span>
+          <div className="flex flex-wrap gap-2">
+            <ToggleButton active={direction === 'encode'} onClick={() => setDirection('encode')}>
+              Encode
+            </ToggleButton>
+            <ToggleButton active={direction === 'decode'} onClick={() => setDirection('decode')}>
+              Decode
+            </ToggleButton>
+          </div>
+          <div className="flex flex-wrap gap-2 border-t border-slate-800/80 pt-3 sm:ml-auto sm:border-t-0 sm:pt-0">
             <ToolbarButton onClick={swap} disabled={!output}>
               Swap
             </ToolbarButton>
@@ -114,7 +124,7 @@ export function EncoderEditor() {
             value={input}
             onChange={(event) => setInput(event.target.value)}
             spellCheck={false}
-            className="min-h-[280px] w-full flex-1 resize-y rounded-lg border border-slate-700 bg-slate-900/80 p-4 font-mono text-sm leading-relaxed text-slate-100 placeholder:text-slate-600 focus:border-violet-500 focus:outline-none focus:ring-1 focus:ring-violet-500"
+            className="min-h-[200px] w-full flex-1 resize-y rounded-lg border border-slate-700 bg-slate-900/80 p-3 font-mono text-sm leading-relaxed text-slate-100 placeholder:text-slate-600 focus:border-violet-500 focus:outline-none focus:ring-1 focus:ring-violet-500 sm:min-h-[280px] sm:p-4"
             placeholder="Enter text to encode or decode"
             aria-invalid={error ? true : undefined}
           />
@@ -128,7 +138,7 @@ export function EncoderEditor() {
             readOnly
             value={output}
             spellCheck={false}
-            className="min-h-[280px] w-full flex-1 resize-y rounded-lg border border-slate-700 bg-slate-950/80 p-4 font-mono text-sm leading-relaxed text-slate-200 focus:outline-none"
+            className="min-h-[200px] w-full flex-1 resize-y rounded-lg border border-slate-700 bg-slate-950/80 p-3 font-mono text-sm leading-relaxed text-slate-200 focus:outline-none sm:min-h-[280px] sm:p-4"
             placeholder="Output appears here"
           />
         </div>

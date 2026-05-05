@@ -97,9 +97,9 @@ export function CsharpProtoEditor() {
   }, [output])
 
   return (
-    <div className="flex min-h-0 flex-1 flex-col gap-4 p-4 sm:p-6 lg:p-8">
+    <div className="flex min-h-0 flex-1 flex-col gap-3 p-3 sm:gap-4 sm:p-6 lg:p-8">
       <div className="shrink-0">
-        <h1 className="text-2xl font-semibold tracking-tight text-slate-100">
+        <h1 className="text-xl font-semibold tracking-tight text-slate-100 sm:text-2xl">
           C# ProtoMember Reindex
         </h1>
         <p className="mt-1 text-sm text-slate-400">
@@ -123,7 +123,7 @@ export function CsharpProtoEditor() {
               const v = parseInt(e.target.value, 10)
               setStartNumber(Number.isNaN(v) ? 1 : v)
             }}
-            className="w-28 rounded-md border border-slate-700 bg-slate-900 px-3 py-2 text-sm text-slate-100 focus:border-violet-500 focus:outline-none focus:ring-1 focus:ring-violet-500"
+            className="w-full max-w-[8rem] rounded-md border border-slate-700 bg-slate-900 px-3 py-2 text-sm text-slate-100 focus:border-violet-500 focus:outline-none focus:ring-1 focus:ring-violet-500 sm:w-28 sm:max-w-none"
           />
         </div>
         <div className="flex flex-wrap gap-2">
@@ -141,7 +141,7 @@ export function CsharpProtoEditor() {
           <span id="csharp-proto-input-label" className="shrink-0 text-sm font-medium text-slate-300">
             Input
           </span>
-          <div className="relative min-h-[min(40vh,280px)] flex-1 overflow-hidden rounded-lg border border-slate-700">
+          <div className="relative min-h-[min(36vh,220px)] flex-1 overflow-hidden rounded-lg border border-slate-700 sm:min-h-[min(40vh,280px)]">
             <CsharpMonacoPane
               labelId="csharp-proto-input-label"
               value={input}
@@ -154,7 +154,7 @@ export function CsharpProtoEditor() {
           <span id="csharp-proto-output-label" className="shrink-0 text-sm font-medium text-slate-300">
             Output
           </span>
-          <div className="relative min-h-[min(40vh,280px)] flex-1 overflow-hidden rounded-lg border border-slate-700">
+          <div className="relative min-h-[min(36vh,220px)] flex-1 overflow-hidden rounded-lg border border-slate-700 sm:min-h-[min(40vh,280px)]">
             <CsharpMonacoPane labelId="csharp-proto-output-label" value={output} readOnly />
           </div>
         </div>
