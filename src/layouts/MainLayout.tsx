@@ -4,6 +4,7 @@ import { NavLink, Outlet, useLocation } from 'react-router-dom'
 const navItems: { to: string; label: string; end?: boolean }[] = [
   { to: '/', label: 'Home', end: true },
   { to: '/json', label: 'JSON Formatter' },
+  { to: '/json-escape', label: 'JSON Escape / Unescape' },
   { to: '/yaml', label: 'YAML Formatter' },
   { to: '/csharp-proto', label: 'C# ProtoMember' },
   { to: '/encoder', label: 'Encoder / Decoder' },

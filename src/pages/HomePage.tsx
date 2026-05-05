@@ -8,6 +8,12 @@ const tools = [
     route: '/json',
   },
   {
+    title: 'JSON Escaper & Unescaper',
+    description:
+      'Convert escaped string payloads ↔ pretty JSON — bidirectional realtime with smart unwrap.',
+    route: '/json-escape',
+  },
+  {
     title: 'YAML Formatter',
     description: 'Normalize and validate YAML as you type',
     route: '/yaml',
