@@ -87,7 +87,7 @@ function YamlMonacoPane({
 }
 
 export function YamlEditor() {
-  const { input, output, error, onInputChange, format, clear } = useYaml()
+  const { input, output, error, onInputChange, clear } = useYaml()
   const [copyLabel, setCopyLabel] = useState('Copy')
 
   const handleCopy = useCallback(async () => {
@@ -106,7 +106,7 @@ export function YamlEditor() {
     <div className="flex min-h-0 flex-1 flex-col gap-4 p-4 sm:p-6 lg:p-8">
       <div className="shrink-0">
         <h1 className="text-2xl font-semibold tracking-tight text-slate-100">YAML Formatter</h1>
-        <p className="mt-1 text-sm text-slate-400">Format and validate YAML.</p>
+        <p className="mt-1 text-sm text-slate-400">Normalize and validate YAML as you type.</p>
       </div>
 
       {error ? (
@@ -119,7 +119,6 @@ export function YamlEditor() {
       ) : null}
 
       <div className="flex shrink-0 flex-wrap gap-2">
-        <ToolbarButton onClick={format}>Format</ToolbarButton>
         <ToolbarButton onClick={clear} variant="danger">
           Clear
         </ToolbarButton>

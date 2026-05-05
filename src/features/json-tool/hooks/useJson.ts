@@ -27,22 +27,6 @@ export function useJson() {
     }
   }, [])
 
-  const format = useCallback(() => {
-    const trimmed = input.trim()
-    if (trimmed === '') {
-      setOutput('')
-      setError(null)
-      return
-    }
-    try {
-      const parsed = JSON.parse(input)
-      setOutput(JSON.stringify(parsed, null, 2))
-      setError(null)
-    } catch (e) {
-      setError(parseErrorMessage(e))
-    }
-  }, [input])
-
   const minify = useCallback(() => {
     const trimmed = input.trim()
     if (trimmed === '') {
@@ -70,7 +54,6 @@ export function useJson() {
     output,
     error,
     onInputChange,
-    format,
     minify,
     clear,
   }

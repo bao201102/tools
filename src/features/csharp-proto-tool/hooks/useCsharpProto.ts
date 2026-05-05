@@ -60,11 +60,6 @@ export function useCsharpProto() {
     return Number.isFinite(value) && value >= 1 ? Math.floor(value) : 1
   }, [])
 
-  const process = useCallback(() => {
-    const start = getSafeStart(startNumber)
-    setOutput(processCsharpProtoSource(input, start))
-  }, [getSafeStart, input, startNumber])
-
   const clear = useCallback(() => {
     setInput('')
     setOutput('')
@@ -94,7 +89,6 @@ export function useCsharpProto() {
     output,
     startNumber,
     setStartNumber: setStartNumberSafe,
-    process,
     clear,
   }
 }

@@ -1,5 +1,3 @@
-export type AttributeStyle = 'newtonsoft' | 'systemTextJson'
-
 type ClassProperty = {
   rawName: string
   propertyName: string
@@ -17,13 +15,55 @@ type GeneratorContext = {
   usedClassNames: Set<string>
 }
 
-function toPascalCase(value: string): string {
-  const sanitized = value.replace(/[^a-zA-Z0-9]+/g, ' ').trim()
+/** Simple identifier: one token, valid as a C# identifier (no separators like `-`, `.`, spaces). */
+const SIMPLE_CSHARP_ID = /^[a-zA-Z_][a-zA-Z0-9_]*$/
+
+function escapeForCSharpString(value: string): string {
+  return value.replace(/\\/g, '\\\\').replace(/"/g, '\\"')
+}
+
+/**
+ * Add [JsonPropertyName] only when the JSON key can't be reflected as-is on the POCO member name.
+ * — Key is not a simple C# identifier (e.g. contains `-`, `.`, unicode idiosyncrasies trimmed away), or
+ * — Mapped property name differs from the raw JSON key (e.g. camelCase vs PascalCase, snake-case merge).
+ */
+function needsJsonPropertyName(rawName: string, propertyName: string): boolean {
+  const trimmed = rawName.trim()
+  if (!trimmed) return true
+  if (!SIMPLE_CSHARP_ID.test(trimmed)) return true
+  return trimmed !== propertyName
+}
+
+function anyPropertyNeedsAttribute(classes: ClassDef[]): boolean {
+  for (const classDef of classes) {
+    for (const prop of classDef.properties) {
+      if (needsJsonPropertyName(prop.rawName, prop.propertyName)) return true
+    }
+  }
+  return false
+}
+
+/**
+ * Map a JSON property name to a C# member name.
+ * Preserves acronym / mixed casing when the key is already a single identifier (e.g. CCServiceID).
+ * For keys with separators (snake_case, kebab, spaces), merges segments with "first char upper, rest unchanged" each.
+ */
+function jsonKeyToCSharpIdentifier(rawName: string): string {
+  const trimmed = rawName.trim()
+  if (!trimmed) return 'Value'
+
+  if (/^[0-9]/.test(trimmed)) {
+    return `_${trimmed}`
+  }
+
+  if (SIMPLE_CSHARP_ID.test(trimmed)) {
+    return trimmed.charAt(0).toUpperCase() + trimmed.slice(1)
+  }
+
+  const sanitized = trimmed.replace(/[^a-zA-Z0-9]+/g, ' ').trim()
   if (!sanitized) return 'Value'
-  const parts = sanitized.split(/\s+/)
-  const merged = parts
-    .map((part) => part.charAt(0).toUpperCase() + part.slice(1).toLowerCase())
-    .join('')
+  const parts = sanitized.split(/\s+/).filter(Boolean)
+  const merged = parts.map((p) => p.charAt(0).toUpperCase() + p.slice(1)).join('')
   if (/^[0-9]/.test(merged)) return `Value${merged}`
   return merged
 }
@@ -33,10 +73,10 @@ function singularize(value: string): string {
 }
 
 function uniqueClassName(base: string, ctx: GeneratorContext): string {
-  let candidate = toPascalCase(base)
+  let candidate = jsonKeyToCSharpIdentifier(base)
   let index = 2
   while (ctx.usedClassNames.has(candidate)) {
-    candidate = `${toPascalCase(base)}${index}`
+    candidate = `${jsonKeyToCSharpIdentifier(base)}${index}`
     index += 1
   }
   ctx.usedClassNames.add(candidate)
@@ -100,23 +140,20 @@ function buildClassDefinition(source: Record<string, unknown>, className: string
   ctx.classes.push(classDef)
 
   for (const [rawName, value] of Object.entries(source)) {
-    const propertyName = toPascalCase(rawName)
+    const propertyName = jsonKeyToCSharpIdentifier(rawName)
     const typeName = inferType(value, propertyName, ctx)
     classDef.properties.push({ rawName, propertyName, typeName })
   }
 }
 
-function attributeLine(rawName: string, style: AttributeStyle): string {
-  if (style === 'newtonsoft') return `[JsonProperty("${rawName}")]`
-  return `[JsonPropertyName("${rawName}")]`
+function formatProperty(rawName: string, propertyName: string, typeName: string): string {
+  const body = `public ${typeName} ${propertyName} { get; set; }`
+  if (!needsJsonPropertyName(rawName, propertyName)) return `    ${body}`
+  const keyLiteral = escapeForCSharpString(rawName)
+  return `    [JsonPropertyName("${keyLiteral}")]\n    ${body}`
 }
 
-function usingLine(style: AttributeStyle): string {
-  if (style === 'newtonsoft') return 'using Newtonsoft.Json;'
-  return 'using System.Text.Json.Serialization;'
-}
-
-export function generatePocoCode(input: string, rootClassName: string, style: AttributeStyle): string {
+export function generatePocoCode(input: string, rootClassName: string): string {
   let parsed: unknown
   try {
     parsed = JSON.parse(input)
@@ -128,7 +165,7 @@ export function generatePocoCode(input: string, rootClassName: string, style: At
     throw new Error('Root JSON must be an object')
   }
 
-  const rootName = toPascalCase(rootClassName || 'Root')
+  const rootName = jsonKeyToCSharpIdentifier(rootClassName || 'Root')
   const ctx: GeneratorContext = {
     classes: [],
     classesByName: new Map(),
@@ -138,16 +175,17 @@ export function generatePocoCode(input: string, rootClassName: string, style: At
   ctx.usedClassNames.add(rootName)
   buildClassDefinition(parsed, rootName, ctx)
 
+  const serializationUsing = anyPropertyNeedsAttribute(ctx.classes)
+    ? 'using System.Text.Json.Serialization;\n'
+    : ''
+
   const classBlocks = ctx.classes.map((classDef) => {
     const properties = classDef.properties
-      .map(
-        (prop) =>
-          `    ${attributeLine(prop.rawName, style)}\n    public ${prop.typeName} ${prop.propertyName} { get; set; }`,
-      )
-      .join('\n\n')
+      .map((prop) => formatProperty(prop.rawName, prop.propertyName, prop.typeName))
+      .join('\n')
 
     return `public class ${classDef.name}\n{\n${properties}\n}`
   })
 
-  return `${usingLine(style)}\nusing System.Collections.Generic;\n\n${classBlocks.join('\n\n')}\n`
+  return `${serializationUsing}using System.Collections.Generic;\n\n${classBlocks.join('\n\n')}\n`
 }

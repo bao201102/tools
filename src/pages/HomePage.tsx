@@ -4,12 +4,12 @@ import { Card } from '../components/ui/Card'
 const tools = [
   {
     title: 'JSON Formatter',
-    description: 'Format and minify JSON strings',
+    description: 'Pretty-print as you type; minify to one line on demand',
     route: '/json',
   },
   {
     title: 'YAML Formatter',
-    description: 'Format and validate YAML',
+    description: 'Normalize and validate YAML as you type',
     route: '/yaml',
   },
   {

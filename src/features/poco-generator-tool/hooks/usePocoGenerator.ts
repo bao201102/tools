@@ -1,14 +1,13 @@
 import { useCallback, useState } from 'react'
-import { generatePocoCode, type AttributeStyle } from '../utils/pocoGenerator'
+import { generatePocoCode } from '../utils/pocoGenerator'
 
 export function usePocoGenerator() {
   const [input, setInputState] = useState('')
   const [output, setOutput] = useState('')
   const [error, setError] = useState<string | null>(null)
   const [rootClassName, setRootClassName] = useState('Root')
-  const [attributeStyle, setAttributeStyle] = useState<AttributeStyle>('newtonsoft')
 
-  const applyGenerate = useCallback((nextInput: string, nextRootClassName: string, nextStyle: AttributeStyle) => {
+  const applyGenerate = useCallback((nextInput: string, nextRootClassName: string) => {
     if (nextInput.trim() === '') {
       setOutput('')
       setError(null)
@@ -16,7 +15,7 @@ export function usePocoGenerator() {
     }
 
     try {
-      const result = generatePocoCode(nextInput, nextRootClassName.trim() || 'Root', nextStyle)
+      const result = generatePocoCode(nextInput, nextRootClassName.trim() || 'Root')
       setOutput(result)
       setError(null)
     } catch (err) {
@@ -28,30 +27,18 @@ export function usePocoGenerator() {
   const setInput = useCallback(
     (value: string) => {
       setInputState(value)
-      applyGenerate(value, rootClassName, attributeStyle)
+      applyGenerate(value, rootClassName)
     },
-    [applyGenerate, attributeStyle, rootClassName],
+    [applyGenerate, rootClassName],
   )
 
   const setRootClassNameLive = useCallback(
     (value: string) => {
       setRootClassName(value)
-      applyGenerate(input, value, attributeStyle)
+      applyGenerate(input, value)
     },
-    [applyGenerate, attributeStyle, input],
+    [applyGenerate, input],
   )
-
-  const setAttributeStyleLive = useCallback(
-    (value: AttributeStyle) => {
-      setAttributeStyle(value)
-      applyGenerate(input, rootClassName, value)
-    },
-    [applyGenerate, input, rootClassName],
-  )
-
-  const generate = useCallback(() => {
-    applyGenerate(input, rootClassName, attributeStyle)
-  }, [applyGenerate, attributeStyle, input, rootClassName])
 
   const clear = useCallback(() => {
     setInput('')
@@ -67,9 +54,6 @@ export function usePocoGenerator() {
     error,
     rootClassName,
     setRootClassName: setRootClassNameLive,
-    attributeStyle,
-    setAttributeStyle: setAttributeStyleLive,
-    generate,
     clear,
   }
 }

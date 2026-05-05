@@ -87,7 +87,7 @@ function JsonMonacoPane({
 }
 
 export function JsonEditor() {
-  const { input, output, error, onInputChange, format, minify, clear } = useJson()
+  const { input, output, error, onInputChange, minify, clear } = useJson()
   const [copyLabel, setCopyLabel] = useState('Copy')
 
   const handleCopy = useCallback(async () => {
@@ -106,7 +106,9 @@ export function JsonEditor() {
     <div className="flex min-h-0 flex-1 flex-col gap-4 p-4 sm:p-6 lg:p-8">
       <div className="shrink-0">
         <h1 className="text-2xl font-semibold tracking-tight text-slate-100">JSON Formatter</h1>
-        <p className="mt-1 text-sm text-slate-400">Format, minify, and inspect JSON.</p>
+        <p className="mt-1 text-sm text-slate-400">
+          Pretty-print and validate JSON as you type. Use Minify for a single-line output.
+        </p>
       </div>
 
       {error ? (
@@ -119,7 +121,6 @@ export function JsonEditor() {
       ) : null}
 
       <div className="flex shrink-0 flex-wrap gap-2">
-        <ToolbarButton onClick={format}>Format</ToolbarButton>
         <ToolbarButton onClick={minify}>Minify</ToolbarButton>
         <ToolbarButton onClick={clear} variant="danger">
           Clear

@@ -81,7 +81,7 @@ function CsharpMonacoPane({
 }
 
 export function CsharpProtoEditor() {
-  const { input, setInput, output, startNumber, setStartNumber, process, clear } = useCsharpProto()
+  const { input, setInput, output, startNumber, setStartNumber, clear } = useCsharpProto()
   const [copyLabel, setCopyLabel] = useState('Copy Output')
 
   const handleCopyOutput = useCallback(async () => {
@@ -104,7 +104,7 @@ export function CsharpProtoEditor() {
         </h1>
         <p className="mt-1 text-sm text-slate-400">
           Strip existing <code className="text-violet-300">[ProtoMember(n)]</code> attributes and assign
-          sequential numbers starting from your chosen index.
+          sequential numbers starting from your chosen index. Output updates as you edit.
         </p>
       </div>
 
@@ -127,7 +127,6 @@ export function CsharpProtoEditor() {
           />
         </div>
         <div className="flex flex-wrap gap-2">
-          <ToolbarButton onClick={process}>Process</ToolbarButton>
           <ToolbarButton onClick={clear} variant="danger">
             Clear
           </ToolbarButton>

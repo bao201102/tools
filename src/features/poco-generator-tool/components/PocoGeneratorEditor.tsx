@@ -1,6 +1,5 @@
 import Editor from '@monaco-editor/react'
 import { useCallback, useState, type ReactNode } from 'react'
-import type { AttributeStyle } from '../utils/pocoGenerator'
 import { usePocoGenerator } from '../hooks/usePocoGenerator'
 
 const EDITOR_THEME = 'vs-dark'
@@ -90,17 +89,7 @@ function EditorPane({
 }
 
 export function PocoGeneratorEditor() {
-  const {
-    input,
-    setInput,
-    output,
-    error,
-    rootClassName,
-    setRootClassName,
-    attributeStyle,
-    setAttributeStyle,
-    clear,
-  } = usePocoGenerator()
+  const { input, setInput, output, error, rootClassName, setRootClassName, clear } = usePocoGenerator()
   const [copyLabel, setCopyLabel] = useState('Copy C# Code')
 
   const handleCopy = useCallback(async () => {
@@ -122,7 +111,9 @@ export function PocoGeneratorEditor() {
           JSON to C# POCO Generator
         </h1>
         <p className="mt-1 text-sm text-slate-400">
-          Generate C# class models from JSON with selectable attribute style.
+          Generate C# class models from JSON; adds{' '}
+          <code className="text-violet-300">[JsonPropertyName]</code> only when the JSON key can’t match the
+          property name as-is.
         </p>
       </div>
 
@@ -148,21 +139,6 @@ export function PocoGeneratorEditor() {
             className="w-56 rounded-md border border-slate-700 bg-slate-900 px-3 py-2 text-sm text-slate-100 focus:border-violet-500 focus:outline-none focus:ring-1 focus:ring-violet-500"
             placeholder="Root"
           />
-        </div>
-
-        <div className="flex flex-col gap-1">
-          <label htmlFor="attribute-style" className="text-xs font-medium text-slate-400">
-            Attribute Style
-          </label>
-          <select
-            id="attribute-style"
-            value={attributeStyle}
-            onChange={(event) => setAttributeStyle(event.target.value as AttributeStyle)}
-            className="w-56 rounded-md border border-slate-700 bg-slate-900 px-3 py-2 text-sm text-slate-100 focus:border-violet-500 focus:outline-none focus:ring-1 focus:ring-violet-500"
-          >
-            <option value="newtonsoft">Newtonsoft.Json [JsonProperty]</option>
-            <option value="systemTextJson">System.Text.Json [JsonPropertyName]</option>
-          </select>
         </div>
 
         <div className="flex flex-wrap gap-2 sm:ml-auto">

@@ -33,21 +33,6 @@ export function useYaml() {
     }
   }, [])
 
-  const format = useCallback(() => {
-    if (input.trim() === '') {
-      setOutput('')
-      setError(null)
-      return
-    }
-    try {
-      const data = yaml.load(input)
-      setOutput(yaml.dump(data, dumpOptions))
-      setError(null)
-    } catch (e) {
-      setError(parseErrorMessage(e))
-    }
-  }, [input])
-
   const clear = useCallback(() => {
     setInput('')
     setOutput('')
@@ -59,7 +44,6 @@ export function useYaml() {
     output,
     error,
     onInputChange,
-    format,
     clear,
   }
 }
