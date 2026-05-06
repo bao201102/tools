@@ -8,6 +8,7 @@ import JwtDecoderPage from './pages/JwtDecoderPage'
 import JsonEscapePage from './pages/JsonEscapePage'
 import JsonPage from './pages/JsonPage'
 import PocoGeneratorPage from './pages/PocoGeneratorPage'
+import SqlToPocoPage from './pages/SqlToPocoPage'
 import YamlPage from './pages/YamlPage'
 
 export default function App() {
@@ -22,6 +23,7 @@ export default function App() {
         <Route path="encoder" element={<EncoderPage />} />
         <Route path="diff-checker" element={<DiffCheckerPage />} />
         <Route path="json-to-csharp" element={<PocoGeneratorPage />} />
+        <Route path="sql-to-csharp" element={<SqlToPocoPage />} />
         <Route path="jwt-decoder" element={<JwtDecoderPage />} />
       </Route>
     </Routes>

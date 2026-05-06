@@ -28,6 +28,7 @@ Dự án phù hợp dùng trực tiếp trong trình duyệt khi phát triển, 
 | **Base64 / URL Encoder & Decoder** | Mã hóa/giải mã nhanh giữa văn bản thường, Base64 và URL encoding ngay trên client; hỗ trợ Unicode và hiển thị lỗi khi input decode không hợp lệ.                                                                                          |
 | **Text & Code Diff Checker**       | So sánh **Original vs Modified** bằng Monaco Diff Editor; có chế độ **Side-by-side/Inline**, chỉnh được cả hai bên, chọn ngôn ngữ highlight một lần cho cả cặp văn bản, kèm nút **Swap** và **Clear All**.                               |
 | **JSON to C# POCO Generator**      | Sinh class C# từ JSON với naming theo chuẩn C#, tự thêm `[JsonPropertyName(\"...\")]` khi cần ánh xạ tên gốc, giữ output dễ đọc để dùng trực tiếp trong API/client models.                                                                |
+| **SQL Table to C# POCO Generator** | Parse câu lệnh `CREATE TABLE` (SQL Server/PostgreSQL), map kiểu dữ liệu SQL sang C#, áp dụng nullable `?` cho value type khi cột cho phép `NULL` (riêng `string` luôn giữ nguyên), và chuyển tên cột sang PascalCase.                     |
 | **JWT Decoder**                    | Decode JWT header/payload cục bộ trong trình duyệt, parse thành JSON đã format và báo lỗi khi token không hợp lệ.                                                                                                                          |
 
 
@@ -41,7 +42,7 @@ Dự án phù hợp dùng trực tiếp trong trình duyệt khi phát triển, 
 - **TypeScript** — Kiểm tra kiểu tĩnh, mã dễ bảo trì.
 - **Vite** — Dev server nhanh, bundling tối ưu.
 - **Tailwind CSS (v4 + `@tailwindcss/vite`)** — Styling utility-first.
-- **React Router** — Định tuyến SPA (`/`, `/json`, `/json-escape`, `/yaml`, `/csharp-proto`, `/encoder`, `/diff-checker`, `/json-to-csharp`, `/jwt-decoder`).
+- **React Router** — Định tuyến SPA (`/`, `/json`, `/json-escape`, `/yaml`, `/csharp-proto`, `/encoder`, `/diff-checker`, `/json-to-csharp`, `/sql-to-csharp`, `/jwt-decoder`).
 - **Monaco Editor (`@monaco-editor/react`)** — Soạn thảo code với highlight (JSON / YAML / C# / plaintext...) và Monaco Diff Editor cho tính năng so sánh văn bản/mã nguồn.
 - **js-yaml** — Parse & dump YAML trong YAML Formatter.
 - **Nginx (Alpine)** — Phục vụ bản build tĩnh trong Docker.

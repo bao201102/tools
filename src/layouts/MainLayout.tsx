@@ -11,6 +11,7 @@ const navItems: { to: string; label: string; end?: boolean }[] = [
   { to: '/encoder', label: 'Encoder / Decoder' },
   { to: '/diff-checker', label: 'Text & Code Diff' },
   { to: '/json-to-csharp', label: 'JSON → C# POCO' },
+  { to: '/sql-to-csharp', label: 'SQL Table → C# POCO' },
   { to: '/jwt-decoder', label: 'JWT Decoder' },
 ]
 

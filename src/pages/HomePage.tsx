@@ -39,6 +39,11 @@ const tools = [
     route: '/json-to-csharp',
   },
   {
+    title: 'SQL Table to C# POCO Generator',
+    description: 'Parse CREATE TABLE scripts and generate nullable-safe C# POCO properties',
+    route: '/sql-to-csharp',
+  },
+  {
     title: 'JWT Decoder',
     description: 'Decode JWT header and payload locally',
     route: '/jwt-decoder',

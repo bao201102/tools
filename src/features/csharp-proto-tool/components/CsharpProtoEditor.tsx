@@ -8,7 +8,7 @@ const editorOptions = {
   minimap: { enabled: false },
   fontSize: 14,
   scrollBeyondLastLine: false,
-  wordWrap: 'on' as const,
+  wordWrap: 'off' as const,
   padding: { top: 8, bottom: 8 },
   automaticLayout: true,
   tabSize: 2,
@@ -65,7 +65,7 @@ function CsharpMonacoPane({
             ? {
                 readOnly: true,
                 fixedOverflowWidgets: true,
-                wordWrap: 'on' as const,
+                wordWrap: 'off' as const,
               }
             : {}),
         }}

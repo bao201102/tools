@@ -8,7 +8,7 @@ const editorOptions = {
   minimap: { enabled: false },
   fontSize: 14,
   scrollBeyondLastLine: false,
-  wordWrap: 'on' as const,
+  wordWrap: 'off' as const,
   automaticLayout: true,
   renderSideBySideInlineBreakpoint: 0,
   originalEditable: true,
