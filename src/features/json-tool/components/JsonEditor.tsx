@@ -1,5 +1,6 @@
 import Editor from '@monaco-editor/react'
 import { useCallback, useState, type ReactNode } from 'react'
+import { Button } from '../../../components/ui/Button'
 import { useJson } from '../hooks/useJson'
 
 const EDITOR_THEME = 'vs-dark'
@@ -87,7 +88,20 @@ function JsonMonacoPane({
 }
 
 export function JsonEditor() {
-  const { input, output, error, onInputChange, minify, clear } = useJson()
+  const {
+    input,
+    output,
+    error,
+    arrayInspection,
+    sortKey,
+    setSortKey,
+    sortDirection,
+    setSortDirection,
+    applySort,
+    onInputChange,
+    minify,
+    clear,
+  } = useJson()
   const [copyLabel, setCopyLabel] = useState('Copy')
 
   const handleCopy = useCallback(async () => {
@@ -132,9 +146,11 @@ export function JsonEditor() {
 
       <div className="grid min-h-0 flex-1 grid-cols-1 gap-4 lg:grid-cols-2 lg:gap-6">
         <div className="flex min-h-0 flex-1 flex-col gap-2">
-          <span id="json-input-label" className="shrink-0 text-sm font-medium text-slate-300">
-            Input
-          </span>
+          <div className="flex min-h-10 shrink-0 items-center">
+            <span id="json-input-label" className="text-sm font-medium text-slate-300">
+              Input
+            </span>
+          </div>
           <div className="relative min-h-[min(36vh,220px)] flex-1 overflow-hidden rounded-lg border border-slate-700 sm:min-h-[min(40vh,280px)]">
             <JsonMonacoPane
               labelId="json-input-label"
@@ -146,9 +162,63 @@ export function JsonEditor() {
           </div>
         </div>
         <div className="flex min-h-0 flex-1 flex-col gap-2">
-          <span id="json-output-label" className="shrink-0 text-sm font-medium text-slate-300">
-            Output
-          </span>
+          <div
+            className="flex min-h-10 shrink-0 flex-wrap items-center justify-between gap-x-[var(--ds-spacing-md)] gap-y-[var(--ds-spacing-xs)] lg:flex-nowrap lg:gap-y-0"
+            aria-label={arrayInspection ? 'Output and array sorting' : undefined}
+          >
+            <div className="flex min-h-10 shrink-0 items-center">
+              <span id="json-output-label" className="text-sm font-medium text-slate-300">
+                Output
+              </span>
+            </div>
+            {arrayInspection ? (
+              <div className="flex min-h-10 min-w-0 flex-1 flex-wrap items-center justify-end gap-[var(--ds-spacing-xs)] lg:flex-nowrap">
+                <span className="shrink-0 text-caption text-ink-muted" aria-live="polite">
+                  <span className="text-ink">{arrayInspection.itemCount}</span>
+                  {' items detected'}
+                </span>
+                <label className="sr-only" htmlFor="json-array-sort-field">
+                  Sort by field
+                </label>
+                <select
+                  id="json-array-sort-field"
+                  value={sortKey}
+                  onChange={(e) => setSortKey(e.target.value)}
+                  className={[
+                    'min-h-10 min-w-[6.5rem] max-w-[12rem] shrink cursor-pointer rounded-md border border-hairline',
+                    'bg-surface-1 px-3 py-2 text-body text-ink outline-none transition-colors',
+                    'hover:border-hairline-strong focus-visible:border-hairline-strong focus-visible:ds-focus-ring',
+                  ].join(' ')}
+                >
+                  <option value="">Select field…</option>
+                  {arrayInspection.keys.map((k) => (
+                    <option key={k} value={k}>
+                      {k}
+                    </option>
+                  ))}
+                </select>
+                <label className="sr-only" htmlFor="json-array-sort-direction">
+                  Sort direction
+                </label>
+                <select
+                  id="json-array-sort-direction"
+                  value={sortDirection}
+                  onChange={(e) => setSortDirection(e.target.value as 'asc' | 'desc')}
+                  className={[
+                    'min-h-10 w-[5.75rem] shrink-0 cursor-pointer rounded-md border border-hairline',
+                    'bg-surface-1 px-3 py-2 text-body text-ink outline-none transition-colors',
+                    'hover:border-hairline-strong focus-visible:border-hairline-strong focus-visible:ds-focus-ring',
+                  ].join(' ')}
+                >
+                  <option value="asc">ASC</option>
+                  <option value="desc">DESC</option>
+                </select>
+                <Button type="button" variant="primary" disabled={!sortKey} onClick={applySort}>
+                  Sort
+                </Button>
+              </div>
+            ) : null}
+          </div>
           <div className="relative min-h-[min(36vh,220px)] flex-1 overflow-hidden rounded-lg border border-slate-700 sm:min-h-[min(40vh,280px)]">
             <JsonMonacoPane labelId="json-output-label" value={output} readOnly />
           </div>
