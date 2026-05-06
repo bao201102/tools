@@ -1,5 +1,232 @@
 @import 'tailwindcss';
+@config "../tailwind.config.js";
 
+/*
+ * Design system source: DESIGN.md (Linear marketing canvas + dev-tool extensions).
+ * Canonical tokens: --ds-* on :root. Tailwind @theme maps them to utilities (bg-*, text-*, etc.).
+ */
+
+:root {
+  /* -------------------------------------------------------------------------
+   * Brand & accent
+   * ------------------------------------------------------------------------- */
+  --ds-color-primary: #5e6ad2;
+  --ds-color-primary-hover: #828fff;
+  --ds-color-primary-focus: #5e69d1;
+  --ds-color-brand-secure: #7a7fad;
+  --ds-color-on-primary: #fbfbfc;
+
+  /* -------------------------------------------------------------------------
+   * Surfaces (four-step ladder on canvas — approximate Linear bg-level scale)
+   * ------------------------------------------------------------------------- */
+  --ds-color-canvas: #010102;
+  --ds-color-surface-1: #111114;
+  --ds-color-surface-2: #1a1b22;
+  --ds-color-surface-3: #23252e;
+  --ds-color-surface-4: #2e313a;
+
+  /* -------------------------------------------------------------------------
+   * Hairlines
+   * ------------------------------------------------------------------------- */
+  --ds-color-hairline: #23252a;
+  --ds-color-hairline-strong: #3f434c;
+  --ds-color-hairline-tertiary: #1d1f24;
+
+  /* -------------------------------------------------------------------------
+   * Text
+   * ------------------------------------------------------------------------- */
+  --ds-color-ink: #f7f8f8;
+  --ds-color-ink-muted: #d0d6e0;
+  --ds-color-ink-subtle: #8a8f98;
+  --ds-color-ink-tertiary: #62666d;
+
+  /* -------------------------------------------------------------------------
+   * Inverse (button-inverse, light surfaces)
+   * ------------------------------------------------------------------------- */
+  --ds-color-inverse-canvas: #ffffff;
+  --ds-color-inverse-surface-1: #f7f8f8;
+  --ds-color-inverse-surface-2: #eef0f3;
+  --ds-color-inverse-ink: #0e0e11;
+
+  /* -------------------------------------------------------------------------
+   * Semantic
+   * ------------------------------------------------------------------------- */
+  --ds-color-semantic-success: #27a644;
+  --ds-color-semantic-overlay: rgb(0 0 0 / 0.6);
+
+  /* -------------------------------------------------------------------------
+   * Dev-tool errors (locked): muted red — hairline + wash, not saturated red
+   * ------------------------------------------------------------------------- */
+  --ds-color-error-fg: #e8c4c6;
+  --ds-color-error-border: #5c3338;
+  --ds-color-error-surface: rgb(42 20 24 / 0.55);
+  --ds-color-error-surface-strong: rgb(52 24 28 / 0.72);
+
+  /* -------------------------------------------------------------------------
+   * Focus ring helper (DESIGN.md: 2px primary-focus @ 50% opacity)
+   * ------------------------------------------------------------------------- */
+  --ds-color-focus-ring: color-mix(in srgb, var(--ds-color-primary-focus) 50%, transparent);
+  --ds-focus-ring-width: 2px;
+  --ds-focus-ring-offset: 2px;
+
+  /* -------------------------------------------------------------------------
+   * Typography — Inter + system (DESIGN.md font substitutes); mono for code
+   * ------------------------------------------------------------------------- */
+  --ds-font-sans: 'Inter', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica,
+    Arial, sans-serif;
+  --ds-font-display: 'Inter', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica,
+    Arial, sans-serif;
+  --ds-font-mono: ui-monospace, 'JetBrains Mono', 'SF Mono', 'Menlo', Monaco, Consolas, monospace;
+
+  /* -------------------------------------------------------------------------
+   * Spacing scale (base 4px)
+   * ------------------------------------------------------------------------- */
+  --ds-spacing-xxs: 4px;
+  --ds-spacing-xs: 8px;
+  --ds-spacing-sm: 12px;
+  --ds-spacing-md: 16px;
+  --ds-spacing-lg: 24px;
+  --ds-spacing-xl: 32px;
+  --ds-spacing-xxl: 48px;
+  --ds-spacing-section: 96px;
+
+  /* -------------------------------------------------------------------------
+   * Radius (DESIGN.md shapes; Monaco / feature cards use 12px = lg)
+   * ------------------------------------------------------------------------- */
+  --ds-radius-xs: 4px;
+  --ds-radius-sm: 6px;
+  --ds-radius-md: 8px;
+  --ds-radius-lg: 12px;
+  --ds-radius-xl: 16px;
+  --ds-radius-xxl: 24px;
+  --ds-radius-pill: 9999px;
+
+  /* -------------------------------------------------------------------------
+   * Layout
+   * ------------------------------------------------------------------------- */
+  --ds-max-width-content: 1280px;
+}
+
+/* ---------------------------------------------------------------------------
+ * Tailwind theme → utilities (bg-canvas, text-ink, rounded-lg, etc.)
+ * --------------------------------------------------------------------------- */
+@theme {
+  /* Colors */
+  --color-primary: var(--ds-color-primary);
+  --color-primary-hover: var(--ds-color-primary-hover);
+  --color-primary-focus: var(--ds-color-primary-focus);
+  --color-brand-secure: var(--ds-color-brand-secure);
+  --color-on-primary: var(--ds-color-on-primary);
+
+  --color-canvas: var(--ds-color-canvas);
+  --color-surface-1: var(--ds-color-surface-1);
+  --color-surface-2: var(--ds-color-surface-2);
+  --color-surface-3: var(--ds-color-surface-3);
+  --color-surface-4: var(--ds-color-surface-4);
+
+  --color-hairline: var(--ds-color-hairline);
+  --color-hairline-strong: var(--ds-color-hairline-strong);
+  --color-hairline-tertiary: var(--ds-color-hairline-tertiary);
+
+  --color-ink: var(--ds-color-ink);
+  --color-ink-muted: var(--ds-color-ink-muted);
+  --color-ink-subtle: var(--ds-color-ink-subtle);
+  --color-ink-tertiary: var(--ds-color-ink-tertiary);
+
+  --color-inverse-canvas: var(--ds-color-inverse-canvas);
+  --color-inverse-surface-1: var(--ds-color-inverse-surface-1);
+  --color-inverse-surface-2: var(--ds-color-inverse-surface-2);
+  --color-inverse-ink: var(--ds-color-inverse-ink);
+
+  --color-semantic-success: var(--ds-color-semantic-success);
+  --color-semantic-overlay: var(--ds-color-semantic-overlay);
+
+  --color-error-fg: var(--ds-color-error-fg);
+  --color-error-border: var(--ds-color-error-border);
+  --color-error-surface: var(--ds-color-error-surface);
+  --color-error-surface-strong: var(--ds-color-error-surface-strong);
+  --color-focus-ring: var(--ds-color-focus-ring);
+
+  /* Fonts */
+  --font-sans: var(--ds-font-sans);
+  --font-display: var(--ds-font-display);
+  --font-mono: var(--ds-font-mono);
+
+  /*
+   * Spacing tokens ({spacing.xxs} … {spacing.section}) live only on :root as --ds-spacing-*
+   * to avoid clashing with Tailwind’s scale utilities (e.g. max-w-xs). Use
+   * p-[var(--ds-spacing-lg)] / gap-[var(--ds-spacing-md)] until Phase 2 maps them intentionally.
+   */
+
+  /*
+   * Radius scale — DESIGN.md tokens mapped to Tailwind rounded-*.
+   * Default Tailwind `rounded-md` becomes 8px (buttons, inputs).
+   */
+  --radius-xs: var(--ds-radius-xs);
+  --radius-sm: var(--ds-radius-sm);
+  --radius-md: var(--ds-radius-md);
+  --radius-lg: var(--ds-radius-lg);
+  --radius-xl: var(--ds-radius-xl);
+  --radius-2xl: var(--ds-radius-xxl);
+  --radius-pill: var(--ds-radius-pill);
+
+  /* Max width — content column ~1280px */
+  --max-width-content: var(--ds-max-width-content);
+
+  /* Typography sizes (DESIGN.md hierarchy) — use text-display-xl, text-body, … */
+  --text-display-xl: 5rem;
+  --text-display-xl--line-height: 1.05;
+  --text-display-xl--letter-spacing: -0.0375em;
+
+  --text-display-lg: 3.5rem;
+  --text-display-lg--line-height: 1.1;
+  --text-display-lg--letter-spacing: -0.032em;
+
+  --text-display-md: 2.5rem;
+  --text-display-md--line-height: 1.15;
+  --text-display-md--letter-spacing: -0.025em;
+
+  --text-headline: 1.75rem;
+  --text-headline--line-height: 1.2;
+  --text-headline--letter-spacing: -0.021em;
+
+  --text-card-title: 1.375rem;
+  --text-card-title--line-height: 1.25;
+  --text-card-title--letter-spacing: -0.018em;
+  --text-card-title--font-weight: 500;
+
+  --text-subhead: 1.25rem;
+  --text-subhead--line-height: 1.4;
+  --text-subhead--letter-spacing: -0.01em;
+
+  --text-body-lg: 1.125rem;
+  --text-body-lg--line-height: 1.5;
+  --text-body-lg--letter-spacing: -0.006em;
+
+  --text-body: 1rem;
+  --text-body--line-height: 1.5;
+  --text-body--letter-spacing: -0.003em;
+
+  --text-body-sm: 0.875rem;
+  --text-body-sm--line-height: 1.5;
+
+  --text-caption: 0.75rem;
+  --text-caption--line-height: 1.4;
+
+  --text-button: 0.875rem;
+  --text-button--line-height: 1.2;
+  --text-button--font-weight: 500;
+
+  --text-eyebrow: 0.8125rem;
+  --text-eyebrow--line-height: 1.3;
+  --text-eyebrow--letter-spacing: 0.025em;
+  --text-eyebrow--font-weight: 500;
+
+  --text-mono: 0.8125rem;
+  --text-mono--line-height: 1.5;
+}
+
+/* Base document surface (components still use their own classes until Phase 2+) */
 html {
   -webkit-text-size-adjust: 100%;
 }
@@ -7,8 +234,28 @@ html {
 body {
   margin: 0;
   min-height: 100dvh;
+  background-color: var(--ds-color-canvas);
+  color: var(--ds-color-ink);
+  font-family: var(--ds-font-sans);
+  font-size: 1rem;
+  line-height: 1.5;
+  letter-spacing: -0.003em;
+  font-weight: 400;
 }
 
 #root {
   min-height: 100dvh;
+}
+
+/* Reusable focus style for interactive controls (match text-input-focused / buttons) */
+@layer utilities {
+  .ds-focus-ring {
+    outline: var(--ds-focus-ring-width) solid var(--ds-color-focus-ring);
+    outline-offset: var(--ds-focus-ring-offset);
+  }
+
+  .ds-focus-ring-inset {
+    outline: var(--ds-focus-ring-width) solid var(--ds-color-focus-ring);
+    outline-offset: calc(var(--ds-focus-ring-offset) * -1);
+  }
 }
