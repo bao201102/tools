@@ -9,17 +9,33 @@ export type ArrayOfObjectsInspection = {
   keys: string[]
 }
 
+/**
+ * Walk the array from index 0 onward. For each object, take `Object.keys` in order and append keys
+ * the first time they appear. No sorting — first object defines the top of the list; keys that
+ * only appear in later objects are appended in encounter order.
+ */
+function collectUniqueKeysInOrder(items: PlainObjectRecord[]): string[] {
+  const ordered: string[] = []
+  const seen = new Set<string>()
+
+  for (let i = 0; i < items.length; i++) {
+    for (const k of Object.keys(items[i])) {
+      if (seen.has(k)) continue
+      seen.add(k)
+      ordered.push(k)
+    }
+  }
+  return ordered
+}
+
 /** Non-empty arrays of plain objects only; `[]` and mixed arrays return `null`. */
 export function inspectArrayOfObjects(parsed: unknown): ArrayOfObjectsInspection | null {
   if (!Array.isArray(parsed) || parsed.length === 0) return null
   if (!parsed.every(isPlainObject)) return null
-  const keysSet = new Set<string>()
-  for (const obj of parsed) {
-    for (const k of Object.keys(obj)) keysSet.add(k)
-  }
+  const items = parsed as PlainObjectRecord[]
   return {
-    itemCount: parsed.length,
-    keys: [...keysSet].sort((a, b) => a.localeCompare(b)),
+    itemCount: items.length,
+    keys: collectUniqueKeysInOrder(items),
   }
 }
 
