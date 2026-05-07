@@ -1,12 +1,12 @@
-# Developer Tools — Bộ công cụ cho lập trình viên
+# NUB Portal — Your Workspace Hub
 
-Ứng dụng web tập hợp các công cụ phát triển chạy hoàn toàn trên trình duyệt: nhanh, gọn và không cần máy chủ xử lý dữ liệu nhạy cảm của bạn.
+Ứng dụng web tập hợp các công cụ phát triển và dashboard chạy hoàn toàn trên trình duyệt: nhanh, gọn và không cần máy chủ xử lý dữ liệu nhạy cảm của bạn.
 
 ---
 
 ## 📌 Giới thiệu
 
-**Developer Tools** là một **ứng dụng web toolkit** dành cho lập trình viên, được thiết kế để:
+**NUB Portal** là một **ứng dụng web toolkit** dành cho lập trình viên và quản lý workspace, được thiết kế để:
 
 - **Tốc độ cao** — Giao diện SPA nhẹ, xử lý phía client, không tải dữ liệu lên máy chủ.
 - **Riêng tư** — Mã nguồn, YAML, JSON và bản gõ C# của bạn **không bắt buộc** phải gửi ra ngoài (trừ khi bạn tự triển khai server riêng).

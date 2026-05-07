@@ -259,3 +259,35 @@ body {
     outline-offset: calc(var(--ds-focus-ring-offset) * -1);
   }
 }
+
+/* ---------------------------------------------------------------------------
+ * Scrollbar styling (thin + subtle, matches dark UI aesthetic)
+ * - WebKit: ::-webkit-scrollbar*
+ * - Firefox: scrollbar-width + scrollbar-color
+ * This is intentionally global so sidebar and main content share the same feel.
+ * --------------------------------------------------------------------------- */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.12) transparent;
+}
+
+*::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+*::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+*::-webkit-scrollbar-thumb {
+  border-radius: 9999px;
+  background: rgba(255, 255, 255, 0.12);
+  border: 2px solid transparent; /* creates padding so the thumb looks inset */
+  background-clip: content-box;
+}
+
+*::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.18);
+  background-clip: content-box;
+}
