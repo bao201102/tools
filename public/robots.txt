@@ -1,0 +1,7 @@
+User-agent: *
+Allow: /
+
+Disallow: /node_modules/
+Disallow: /.env
+
+Sitemap: https://nub.io.vn/sitemap.xml
