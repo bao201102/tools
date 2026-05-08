@@ -1,12 +1,22 @@
 import { DiffEditor } from '@monaco-editor/react'
 import { useCallback, useRef, useState, type ReactNode } from 'react'
-import { type DiffLanguage, useDiffChecker } from '../hooks/useDiffChecker'
+import { useDiffChecker } from '../hooks/useDiffChecker'
 
 const EDITOR_THEME = 'vs-dark'
+type DiffLanguage =
+  | 'json'
+  | 'plaintext'
+  | 'xml'
+  | 'yaml'
+  | 'javascript'
+  | 'typescript'
+  | 'csharp'
+  | 'sql'
 
 const editorOptions = {
   minimap: { enabled: false },
-  fontSize: 14,
+  fontSize: 13,
+  lineHeight: 18,
   scrollBeyondLastLine: false,
   wordWrap: 'off' as const,
   automaticLayout: true,
@@ -14,16 +24,27 @@ const editorOptions = {
   originalEditable: true,
 }
 
-const languages: { value: DiffLanguage; label: string }[] = [
-  { value: 'json', label: 'JSON' },
-  { value: 'plaintext', label: 'Plain Text' },
-  { value: 'xml', label: 'XML' },
-  { value: 'yaml', label: 'YAML' },
-  { value: 'javascript', label: 'JavaScript' },
-  { value: 'typescript', label: 'TypeScript' },
-  { value: 'csharp', label: 'C#' },
-  { value: 'sql', label: 'SQL' },
-]
+function detectLanguageFromText(text: string): DiffLanguage {
+  const trimmed = text.trim()
+  if (!trimmed) return 'plaintext'
+
+  try {
+    JSON.parse(trimmed)
+    return 'json'
+  } catch {
+    // Keep scanning with simple heuristics.
+  }
+
+  if (/^<\?xml|^<[\w-]+[\s>]/i.test(trimmed)) return 'xml'
+  if (/^---\s*$|^\s*[\w-]+\s*:\s*.+/m.test(trimmed)) return 'yaml'
+  if (/\bnamespace\b|\busing\s+[A-Z][\w.]*\s*;|\bpublic\s+class\b/.test(trimmed)) return 'csharp'
+  if (/\bSELECT\b|\bINSERT\b|\bUPDATE\b|\bDELETE\b|\bFROM\b|\bWHERE\b/i.test(trimmed)) return 'sql'
+  if (/\binterface\b|\btype\b|\benum\b|\bimplements\b|:\s*[A-Z][\w<>\[\]\|& ,]*/.test(trimmed))
+    return 'typescript'
+  if (/\bfunction\b|\bconst\b|\blet\b|\bvar\b|=>/.test(trimmed)) return 'javascript'
+
+  return 'plaintext'
+}
 
 function ToolbarButton({
   children,
@@ -48,12 +69,7 @@ function ToolbarButton({
 }
 
 export function DiffCheckerEditor() {
-  const {
-    language,
-    renderSideBySide,
-    setLanguage,
-    toggleView,
-  } = useDiffChecker()
+  const { renderSideBySide, toggleView } = useDiffChecker()
   const originalEditorRef = useRef<{
     getValue: () => string
     setValue: (value: string) => void
@@ -66,6 +82,12 @@ export function DiffCheckerEditor() {
   const modifiedValueRef = useRef('')
   const [originalSnapshot, setOriginalSnapshot] = useState('')
   const [modifiedSnapshot, setModifiedSnapshot] = useState('')
+  const [language, setLanguage] = useState<DiffLanguage>('plaintext')
+
+  const updateDetectedLanguage = useCallback((original: string, modified: string) => {
+    const source = modified.trim() ? modified : original
+    setLanguage(detectLanguageFromText(source))
+  }, [])
 
   const syncSnapshotsFromEditors = useCallback(() => {
     if (originalEditorRef.current) {
@@ -77,14 +99,6 @@ export function DiffCheckerEditor() {
       setModifiedSnapshot(modifiedValueRef.current)
     }
   }, [])
-
-  const handleChangeLanguage = useCallback(
-    (next: DiffLanguage) => {
-      syncSnapshotsFromEditors()
-      setLanguage(next)
-    },
-    [setLanguage, syncSnapshotsFromEditors],
-  )
 
   const handleToggleView = useCallback(() => {
     syncSnapshotsFromEditors()
@@ -103,7 +117,8 @@ export function DiffCheckerEditor() {
 
     setOriginalSnapshot(currentModified)
     setModifiedSnapshot(currentOriginal)
-  }, [])
+    updateDetectedLanguage(currentModified, currentOriginal)
+  }, [updateDetectedLanguage])
 
   const handleClearAll = useCallback(() => {
     originalValueRef.current = ''
@@ -112,6 +127,7 @@ export function DiffCheckerEditor() {
     modifiedEditorRef.current?.setValue('')
     setOriginalSnapshot('')
     setModifiedSnapshot('')
+    setLanguage('plaintext')
   }, [])
 
   return (
@@ -126,23 +142,6 @@ export function DiffCheckerEditor() {
       </header>
 
       <div className="flex shrink-0 flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
-        <div className="grid grid-cols-1 gap-3">
-          <label className="flex flex-col gap-1">
-            <span className="text-xs font-medium text-slate-400">Language</span>
-            <select
-              className="rounded-md border border-slate-700 bg-slate-900 px-3 py-2 text-sm text-slate-100 focus:border-violet-500 focus:outline-none focus:ring-1 focus:ring-violet-500"
-              value={language}
-              onChange={(e) => handleChangeLanguage(e.target.value as DiffLanguage)}
-            >
-              {languages.map((lang) => (
-                <option key={lang.value} value={lang.value}>
-                  {lang.label}
-                </option>
-              ))}
-            </select>
-          </label>
-        </div>
-
         <div className="flex flex-wrap gap-2">
           <ToolbarButton onClick={handleToggleView}>
             {renderSideBySide ? 'Inline View' : 'Side-by-Side View'}
@@ -170,9 +169,11 @@ export function DiffCheckerEditor() {
 
             originalEditor.onDidChangeModelContent(() => {
               originalValueRef.current = originalEditor.getValue()
+              updateDetectedLanguage(originalValueRef.current, modifiedValueRef.current)
             })
             modifiedEditor.onDidChangeModelContent(() => {
               modifiedValueRef.current = modifiedEditor.getValue()
+              updateDetectedLanguage(originalValueRef.current, modifiedValueRef.current)
             })
           }}
           options={{
