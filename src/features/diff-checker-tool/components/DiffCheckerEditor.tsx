@@ -73,16 +73,21 @@ export function DiffCheckerEditor() {
   const originalEditorRef = useRef<{
     getValue: () => string
     setValue: (value: string) => void
+    getLayoutInfo: () => { width: number }
   } | null>(null)
   const modifiedEditorRef = useRef<{
     getValue: () => string
     setValue: (value: string) => void
+    getLayoutInfo: () => { width: number }
   } | null>(null)
   const originalValueRef = useRef('')
   const modifiedValueRef = useRef('')
   const [originalSnapshot, setOriginalSnapshot] = useState('')
   const [modifiedSnapshot, setModifiedSnapshot] = useState('')
   const [language, setLanguage] = useState<DiffLanguage>('plaintext')
+  const [originalLabel, setOriginalLabel] = useState('Original')
+  const [modifiedLabel, setModifiedLabel] = useState('Modified')
+  const [splitWidths, setSplitWidths] = useState({ left: 1, right: 1 })
 
   const updateDetectedLanguage = useCallback((original: string, modified: string) => {
     const source = modified.trim() ? modified : original
@@ -130,6 +135,14 @@ export function DiffCheckerEditor() {
     setLanguage('plaintext')
   }, [])
 
+  const syncSplitWidths = useCallback(() => {
+    const leftWidth = originalEditorRef.current?.getLayoutInfo().width ?? 0
+    const rightWidth = modifiedEditorRef.current?.getLayoutInfo().width ?? 0
+    if (leftWidth > 0 && rightWidth > 0) {
+      setSplitWidths({ left: leftWidth, right: rightWidth })
+    }
+  }, [])
+
   return (
     <div className="flex min-h-0 flex-1 flex-col gap-3 p-3 sm:gap-4 sm:p-6 lg:p-8">
       <header className="shrink-0 space-y-1">
@@ -153,6 +166,28 @@ export function DiffCheckerEditor() {
         </div>
       </div>
 
+      <div
+        className="grid shrink-0 grid-cols-1 gap-2 sm:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]"
+        style={{
+          gridTemplateColumns: renderSideBySide ? `${splitWidths.left}fr ${splitWidths.right}fr` : undefined,
+        }}
+      >
+        <input
+          type="text"
+          className="rounded-md border border-slate-700 bg-slate-900 px-3 py-2 text-sm text-slate-100 placeholder:text-slate-500 focus:border-violet-500 focus:outline-none focus:ring-1 focus:ring-violet-500"
+          value={originalLabel}
+          onChange={(e) => setOriginalLabel(e.target.value)}
+          placeholder="Original"
+        />
+        <input
+          type="text"
+          className="rounded-md border border-slate-700 bg-slate-900 px-3 py-2 text-sm text-slate-100 placeholder:text-slate-500 focus:border-violet-500 focus:outline-none focus:ring-1 focus:ring-violet-500"
+          value={modifiedLabel}
+          onChange={(e) => setModifiedLabel(e.target.value)}
+          placeholder="Modified"
+        />
+      </div>
+
       <div className="relative min-h-[min(70vh,680px)] flex-1 overflow-hidden rounded-lg border border-slate-700">
         <DiffEditor
           height="100%"
@@ -161,19 +196,28 @@ export function DiffCheckerEditor() {
           modified={modifiedSnapshot}
           originalLanguage={language}
           modifiedLanguage={language}
+          originalModelPath={`inmemory://model/${originalLabel.trim() || 'original'}.txt`}
+          modifiedModelPath={`inmemory://model/${modifiedLabel.trim() || 'modified'}.txt`}
           onMount={(editor) => {
             const originalEditor = editor.getOriginalEditor()
             const modifiedEditor = editor.getModifiedEditor()
             originalEditorRef.current = originalEditor
             modifiedEditorRef.current = modifiedEditor
+            syncSplitWidths()
 
             originalEditor.onDidChangeModelContent(() => {
               originalValueRef.current = originalEditor.getValue()
               updateDetectedLanguage(originalValueRef.current, modifiedValueRef.current)
             })
+            originalEditor.onDidLayoutChange(() => {
+              syncSplitWidths()
+            })
             modifiedEditor.onDidChangeModelContent(() => {
               modifiedValueRef.current = modifiedEditor.getValue()
               updateDetectedLanguage(originalValueRef.current, modifiedValueRef.current)
+            })
+            modifiedEditor.onDidLayoutChange(() => {
+              syncSplitWidths()
             })
           }}
           options={{
