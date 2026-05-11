@@ -1,6 +1,7 @@
 import Editor from '@monaco-editor/react'
 import { useCallback, useState, type ReactNode } from 'react'
 import { Button } from '../../../components/ui/Button'
+import { useLocale } from '../../../lib/i18n'
 import { useJson } from '../hooks/useJson'
 
 const EDITOR_THEME = 'vs-dark'
@@ -53,6 +54,7 @@ function JsonMonacoPane({
   onChange?: (value: string) => void
   'aria-invalid'?: boolean
 }) {
+  const { t } = useLocale()
   return (
     <div
       className="absolute inset-0 min-h-0"
@@ -79,7 +81,7 @@ function JsonMonacoPane({
         onChange={readOnly ? undefined : (v) => onChange?.(v ?? '')}
         loading={
           <div className="flex h-full items-center justify-center bg-slate-900 text-sm text-slate-400">
-            Loading editor…
+            {t('common.loadingEditor')}
           </div>
         }
       />
@@ -88,6 +90,7 @@ function JsonMonacoPane({
 }
 
 export function JsonEditor() {
+  const { t } = useLocale()
   const {
     input,
     output,
@@ -102,26 +105,28 @@ export function JsonEditor() {
     minify,
     clear,
   } = useJson()
-  const [copyLabel, setCopyLabel] = useState('Copy')
+  const [copyState, setCopyState] = useState<'idle' | 'copied' | 'failed'>('idle')
 
   const handleCopy = useCallback(async () => {
     if (!output) return
     try {
       await navigator.clipboard.writeText(output)
-      setCopyLabel('Copied')
-      window.setTimeout(() => setCopyLabel('Copy'), 2000)
+      setCopyState('copied')
     } catch {
-      setCopyLabel('Failed')
-      window.setTimeout(() => setCopyLabel('Copy'), 2000)
+      setCopyState('failed')
     }
+    window.setTimeout(() => setCopyState('idle'), 2000)
   }, [output])
+
+  const copyLabel =
+    copyState === 'copied' ? t('common.copied') : copyState === 'failed' ? t('common.failed') : t('common.copy')
 
   return (
     <div className="flex min-h-0 flex-1 flex-col gap-3 p-3 sm:gap-4 sm:p-6 lg:p-8">
       <div className="shrink-0">
-        <h1 className="text-xl font-semibold tracking-tight text-slate-100 sm:text-2xl">JSON Formatter</h1>
+        <h1 className="text-xl font-semibold tracking-tight text-slate-100 sm:text-2xl">{t('tool.json.title')}</h1>
         <p className="mt-1 text-sm text-slate-400">
-          Pretty-print and validate JSON as you type. Use Minify for a single-line output.
+          {t('tool.json.desc')}
         </p>
       </div>
 
@@ -135,9 +140,9 @@ export function JsonEditor() {
       ) : null}
 
       <div className="flex shrink-0 flex-wrap gap-2">
-        <ToolbarButton onClick={minify}>Minify</ToolbarButton>
+        <ToolbarButton onClick={minify}>{t('tool.json.minify')}</ToolbarButton>
         <ToolbarButton onClick={clear} variant="danger">
-          Clear
+          {t('common.clear')}
         </ToolbarButton>
         <ToolbarButton onClick={handleCopy} disabled={!output}>
           {copyLabel}
@@ -148,7 +153,7 @@ export function JsonEditor() {
         <div className="flex min-h-0 flex-1 flex-col gap-2">
           <div className="flex min-h-10 shrink-0 items-center">
             <span id="json-input-label" className="text-sm font-medium text-slate-300">
-              Input
+              {t('common.input')}
             </span>
           </div>
           <div className="relative min-h-[min(36vh,220px)] flex-1 overflow-hidden rounded-lg border border-slate-700 sm:min-h-[min(40vh,280px)]">
@@ -164,21 +169,20 @@ export function JsonEditor() {
         <div className="flex min-h-0 flex-1 flex-col gap-2">
           <div
             className="flex min-h-10 shrink-0 flex-wrap items-center justify-between gap-x-[var(--ds-spacing-md)] gap-y-[var(--ds-spacing-xs)] lg:flex-nowrap lg:gap-y-0"
-            aria-label={arrayInspection ? 'Output and array sorting' : undefined}
+            aria-label={arrayInspection ? t('tool.json.outputAndSort') : undefined}
           >
             <div className="flex min-h-10 shrink-0 items-center">
               <span id="json-output-label" className="text-sm font-medium text-slate-300">
-                Output
+                {t('common.output')}
               </span>
             </div>
             {arrayInspection ? (
               <div className="flex min-h-10 min-w-0 flex-1 flex-wrap items-center justify-end gap-[var(--ds-spacing-xs)] lg:flex-nowrap">
                 <span className="shrink-0 text-caption text-ink-muted" aria-live="polite">
-                  <span className="text-ink">{arrayInspection.itemCount}</span>
-                  {' items detected'}
+                  {t('tool.json.itemsDetected', { count: arrayInspection.itemCount })}
                 </span>
                 <label className="sr-only" htmlFor="json-array-sort-field">
-                  Sort by field
+                  {t('tool.json.sortByField')}
                 </label>
                 <select
                   id="json-array-sort-field"
@@ -190,7 +194,7 @@ export function JsonEditor() {
                     'hover:border-hairline-strong focus-visible:border-hairline-strong focus-visible:ds-focus-ring',
                   ].join(' ')}
                 >
-                  <option value="">Select field…</option>
+                  <option value="">{t('tool.json.selectField')}</option>
                   {arrayInspection.keys.map((k) => (
                     <option key={k} value={k}>
                       {k}
@@ -198,7 +202,7 @@ export function JsonEditor() {
                   ))}
                 </select>
                 <label className="sr-only" htmlFor="json-array-sort-direction">
-                  Sort direction
+                  {t('tool.json.sortDirection')}
                 </label>
                 <select
                   id="json-array-sort-direction"
@@ -214,7 +218,7 @@ export function JsonEditor() {
                   <option value="desc">DESC</option>
                 </select>
                 <Button type="button" variant="primary" disabled={!sortKey} onClick={applySort}>
-                  Sort
+                  {t('tool.json.sort')}
                 </Button>
               </div>
             ) : null}

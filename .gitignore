@@ -2,3 +2,4 @@ node_modules
 dist
 *.local
 public/sitemap.xml
+public/version.json

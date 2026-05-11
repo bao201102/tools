@@ -1,5 +1,6 @@
 import Editor from '@monaco-editor/react'
 import { useCallback, useMemo, useState, type ReactNode } from 'react'
+import { useLocale } from '../../../lib/i18n'
 import { ERROR_PANEL_PREFIX, useJsonEscape } from '../hooks/useJsonEscape'
 
 const EDITOR_THEME = 'vs-dark'
@@ -69,6 +70,7 @@ function EscapeMonacoPane({
   onChange: (value: string) => void
   onEditorFocus?: () => void
 }) {
+  const { t } = useLocale()
   return (
     <div className="absolute inset-0 min-h-0" aria-labelledby={labelId}>
       <Editor
@@ -86,7 +88,7 @@ function EscapeMonacoPane({
         }}
         loading={
           <div className="flex h-full items-center justify-center bg-slate-900 text-sm text-slate-400">
-            Loading editor…
+            {t('common.loadingEditor')}
           </div>
         }
       />
@@ -95,6 +97,7 @@ function EscapeMonacoPane({
 }
 
 export function JsonEscaper() {
+  const { t } = useLocale()
   const {
     escaped,
     formatted,
@@ -105,8 +108,8 @@ export function JsonEscaper() {
     swap,
   } = useJsonEscape()
 
-  const [copyEscapedLabel, setCopyEscapedLabel] = useState('Copy escaped')
-  const [copyFormattedLabel, setCopyFormattedLabel] = useState('Copy JSON')
+  const [copyEscapedState, setCopyEscapedState] = useState<'idle' | 'copied' | 'failed'>('idle')
+  const [copyFormattedState, setCopyFormattedState] = useState<'idle' | 'copied' | 'failed'>('idle')
 
   const formattedLanguage: MonacoLang = useMemo(() => {
     return formatted.startsWith(ERROR_PANEL_PREFIX) ? 'plaintext' : 'json'
@@ -115,40 +118,49 @@ export function JsonEscaper() {
   const copyEscaped = useCallback(async () => {
     try {
       await navigator.clipboard.writeText(escaped)
-      setCopyEscapedLabel('Copied')
-      window.setTimeout(() => setCopyEscapedLabel('Copy escaped'), 2000)
+      setCopyEscapedState('copied')
     } catch {
-      setCopyEscapedLabel('Failed')
-      window.setTimeout(() => setCopyEscapedLabel('Copy escaped'), 2000)
+      setCopyEscapedState('failed')
     }
+    window.setTimeout(() => setCopyEscapedState('idle'), 2000)
   }, [escaped])
 
   const copyFormatted = useCallback(async () => {
     try {
       await navigator.clipboard.writeText(formatted)
-      setCopyFormattedLabel('Copied')
-      window.setTimeout(() => setCopyFormattedLabel('Copy JSON'), 2000)
+      setCopyFormattedState('copied')
     } catch {
-      setCopyFormattedLabel('Failed')
-      window.setTimeout(() => setCopyFormattedLabel('Copy JSON'), 2000)
+      setCopyFormattedState('failed')
     }
+    window.setTimeout(() => setCopyFormattedState('idle'), 2000)
   }, [formatted])
+
+  const copyEscapedLabel =
+    copyEscapedState === 'copied'
+      ? t('common.copied')
+      : copyEscapedState === 'failed'
+        ? t('common.failed')
+        : t('tool.jsonEscape.copyEscaped')
+
+  const copyFormattedLabel =
+    copyFormattedState === 'copied'
+      ? t('common.copied')
+      : copyFormattedState === 'failed'
+        ? t('common.failed')
+        : t('tool.jsonEscape.copyJson')
 
   return (
     <div className="flex min-h-0 flex-1 flex-col gap-3 p-3 sm:gap-4 sm:p-6 lg:p-8">
       <header className="shrink-0 space-y-1">
         <h1 className="text-xl font-semibold tracking-tight text-slate-100 sm:text-2xl">
-          JSON Escaper &amp; Unescaper
+          {t('tool.jsonEscape.title')}
         </h1>
-        <p className="text-sm text-slate-400">
-          Bidirectional realtime sync: edits in the escaped string update formatted JSON — and vice
-          versa — based on the editor you&apos;re typing in (focus/active pane).
-        </p>
+        <p className="text-sm text-slate-400">{t('tool.jsonEscape.desc')}</p>
       </header>
 
       <div className="flex shrink-0 flex-wrap gap-2">
         <ToolbarButton onClick={clear} variant="danger">
-          Clear
+          {t('common.clear')}
         </ToolbarButton>
       </div>
 
@@ -156,7 +168,7 @@ export function JsonEscaper() {
         <section className="flex min-h-0 flex-col gap-2 lg:col-start-1 lg:col-end-2">
           <div className="flex flex-wrap items-center justify-between gap-2">
             <span id="json-escaped-label" className="text-sm font-medium text-slate-300">
-              Escaped string
+              {t('tool.jsonEscape.escaped')}
             </span>
             <ToolbarButton onClick={copyEscaped} disabled={!escaped}>
               {copyEscapedLabel}
@@ -178,17 +190,17 @@ export function JsonEscaper() {
             type="button"
             onClick={swap}
             className="flex items-center gap-2 rounded-lg border border-slate-700 bg-slate-800 px-4 py-2.5 text-sm font-medium text-slate-200 hover:bg-slate-700 lg:w-full lg:justify-center"
-            aria-label="Swap escaped string and formatted JSON"
+            aria-label={t('tool.jsonEscape.swapAria')}
           >
             <SwapIcon />
-            <span className="hidden sm:inline">Swap</span>
+            <span className="hidden sm:inline">{t('common.swap')}</span>
           </button>
         </div>
 
         <section className="flex min-h-0 flex-col gap-2 lg:col-start-3 lg:col-end-4">
           <div className="flex flex-wrap items-center justify-between gap-2">
             <span id="json-formatted-label" className="text-sm font-medium text-slate-300">
-              Formatted JSON
+              {t('tool.jsonEscape.formatted')}
             </span>
             <ToolbarButton onClick={copyFormatted} disabled={!formatted}>
               {copyFormattedLabel}

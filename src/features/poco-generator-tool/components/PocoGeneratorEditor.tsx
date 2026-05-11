@@ -1,5 +1,6 @@
 import Editor from '@monaco-editor/react'
 import { useCallback, useState, type ReactNode } from 'react'
+import { useLocale } from '../../../lib/i18n'
 import { usePocoGenerator } from '../hooks/usePocoGenerator'
 
 const EDITOR_THEME = 'vs-dark'
@@ -54,6 +55,7 @@ function EditorPane({
   onChange?: (value: string) => void
   'aria-invalid'?: boolean
 }) {
+  const { t } = useLocale()
   return (
     <div
       className="absolute inset-0 min-h-0"
@@ -80,7 +82,7 @@ function EditorPane({
         onChange={readOnly ? undefined : (v) => onChange?.(v ?? '')}
         loading={
           <div className="flex h-full items-center justify-center bg-slate-900 text-sm text-slate-400">
-            Loading editor…
+            {t('common.loadingEditor')}
           </div>
         }
       />
@@ -89,31 +91,38 @@ function EditorPane({
 }
 
 export function PocoGeneratorEditor() {
+  const { t } = useLocale()
   const { input, setInput, output, error, rootClassName, setRootClassName, clear } = usePocoGenerator()
-  const [copyLabel, setCopyLabel] = useState('Copy C# Code')
+  const [copyState, setCopyState] = useState<'idle' | 'copied' | 'failed'>('idle')
 
   const handleCopy = useCallback(async () => {
     if (!output) return
     try {
       await navigator.clipboard.writeText(output)
-      setCopyLabel('Copied')
-      window.setTimeout(() => setCopyLabel('Copy C# Code'), 2000)
+      setCopyState('copied')
     } catch {
-      setCopyLabel('Failed')
-      window.setTimeout(() => setCopyLabel('Copy C# Code'), 2000)
+      setCopyState('failed')
     }
+    window.setTimeout(() => setCopyState('idle'), 2000)
   }, [output])
+
+  const copyLabel =
+    copyState === 'copied'
+      ? t('common.copied')
+      : copyState === 'failed'
+        ? t('common.failed')
+        : t('tool.poco.copyCsharp')
 
   return (
     <div className="flex min-h-0 flex-1 flex-col gap-3 p-3 sm:gap-4 sm:p-6 lg:p-8">
       <div className="shrink-0">
         <h1 className="text-xl font-semibold tracking-tight text-slate-100 sm:text-2xl">
-          JSON to C# POCO Generator
+          {t('tool.poco.title')}
         </h1>
         <p className="mt-1 text-sm text-slate-400">
-          Generate C# class models from JSON; adds{' '}
-          <code className="text-violet-300">[JsonPropertyName]</code> only when the JSON key can’t match the
-          property name as-is.
+          {t('tool.poco.descBefore')}
+          <code className="text-violet-300">[JsonPropertyName]</code>
+          {t('tool.poco.descAfter')}
         </p>
       </div>
 
@@ -129,7 +138,7 @@ export function PocoGeneratorEditor() {
       <div className="flex shrink-0 flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-end">
         <div className="flex flex-col gap-1">
           <label htmlFor="root-class-name" className="text-xs font-medium text-slate-400">
-            Root Class Name
+            {t('tool.poco.rootClassName')}
           </label>
           <input
             id="root-class-name"
@@ -137,13 +146,13 @@ export function PocoGeneratorEditor() {
             value={rootClassName}
             onChange={(event) => setRootClassName(event.target.value)}
             className="w-full max-w-xs rounded-md border border-slate-700 bg-slate-900 px-3 py-2 text-sm text-slate-100 focus:border-violet-500 focus:outline-none focus:ring-1 focus:ring-violet-500 sm:w-56 sm:max-w-none"
-            placeholder="Root"
+            placeholder={t('tool.poco.rootPlaceholder')}
           />
         </div>
 
         <div className="flex flex-wrap gap-2 sm:ml-auto">
           <ToolbarButton onClick={clear} variant="danger">
-            Clear
+            {t('common.clear')}
           </ToolbarButton>
           <ToolbarButton onClick={handleCopy} disabled={!output}>
             {copyLabel}
@@ -154,7 +163,7 @@ export function PocoGeneratorEditor() {
       <div className="grid min-h-0 flex-1 grid-cols-1 gap-4 lg:grid-cols-2 lg:gap-6">
         <div className="flex min-h-0 flex-1 flex-col gap-2">
           <span id="poco-input-label" className="shrink-0 text-sm font-medium text-slate-300">
-            Input JSON
+            {t('tool.poco.inputJson')}
           </span>
           <div className="relative min-h-[min(36vh,220px)] flex-1 overflow-hidden rounded-lg border border-slate-700 sm:min-h-[min(40vh,280px)]">
             <EditorPane
@@ -170,7 +179,7 @@ export function PocoGeneratorEditor() {
 
         <div className="flex min-h-0 flex-1 flex-col gap-2">
           <span id="poco-output-label" className="shrink-0 text-sm font-medium text-slate-300">
-            Generated C#
+            {t('tool.poco.generatedCsharp')}
           </span>
           <div className="relative min-h-[min(36vh,220px)] flex-1 overflow-hidden rounded-lg border border-slate-700 sm:min-h-[min(40vh,280px)]">
             <EditorPane labelId="poco-output-label" language="csharp" value={output} readOnly />

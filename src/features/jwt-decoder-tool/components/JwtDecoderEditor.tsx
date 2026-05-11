@@ -1,4 +1,5 @@
 import { useCallback, useState, type ReactNode } from 'react'
+import { useLocale } from '../../../lib/i18n'
 import { useJwtDecoder } from '../hooks/useJwtDecoder'
 
 function ToolbarButton({
@@ -35,6 +36,7 @@ type OutputPaneProps = {
 }
 
 function OutputPane({ id, label, value, copyLabel, onCopy }: OutputPaneProps) {
+  const { t } = useLocale()
   return (
     <div className="flex min-h-0 flex-1 flex-col gap-2">
       <div className="flex items-center justify-between gap-2">
@@ -51,48 +53,61 @@ function OutputPane({ id, label, value, copyLabel, onCopy }: OutputPaneProps) {
         value={value}
         spellCheck={false}
         className="min-h-[240px] w-full flex-1 resize-y rounded-lg border border-slate-700 bg-slate-950/80 p-4 font-mono text-sm leading-relaxed text-slate-200 focus:outline-none"
-        placeholder={`${label} JSON appears here`}
+        placeholder={t('tool.jwt.placeholder', { label })}
       />
     </div>
   )
 }
 
+type CopyState = 'idle' | 'copied' | 'failed'
+
 export function JwtDecoderEditor() {
+  const { t } = useLocale()
   const { input, setInput, headerOutput, payloadOutput, error, clear } = useJwtDecoder()
-  const [copyHeaderLabel, setCopyHeaderLabel] = useState('Copy Header')
-  const [copyPayloadLabel, setCopyPayloadLabel] = useState('Copy Payload')
+  const [copyHeaderState, setCopyHeaderState] = useState<CopyState>('idle')
+  const [copyPayloadState, setCopyPayloadState] = useState<CopyState>('idle')
 
   const handleCopyHeader = useCallback(async () => {
     if (!headerOutput) return
     try {
       await navigator.clipboard.writeText(headerOutput)
-      setCopyHeaderLabel('Copied')
-      window.setTimeout(() => setCopyHeaderLabel('Copy Header'), 2000)
+      setCopyHeaderState('copied')
     } catch {
-      setCopyHeaderLabel('Failed')
-      window.setTimeout(() => setCopyHeaderLabel('Copy Header'), 2000)
+      setCopyHeaderState('failed')
     }
+    window.setTimeout(() => setCopyHeaderState('idle'), 2000)
   }, [headerOutput])
 
   const handleCopyPayload = useCallback(async () => {
     if (!payloadOutput) return
     try {
       await navigator.clipboard.writeText(payloadOutput)
-      setCopyPayloadLabel('Copied')
-      window.setTimeout(() => setCopyPayloadLabel('Copy Payload'), 2000)
+      setCopyPayloadState('copied')
     } catch {
-      setCopyPayloadLabel('Failed')
-      window.setTimeout(() => setCopyPayloadLabel('Copy Payload'), 2000)
+      setCopyPayloadState('failed')
     }
+    window.setTimeout(() => setCopyPayloadState('idle'), 2000)
   }, [payloadOutput])
+
+  const copyHeaderLabel =
+    copyHeaderState === 'copied'
+      ? t('common.copied')
+      : copyHeaderState === 'failed'
+        ? t('common.failed')
+        : t('tool.jwt.copyHeader')
+
+  const copyPayloadLabel =
+    copyPayloadState === 'copied'
+      ? t('common.copied')
+      : copyPayloadState === 'failed'
+        ? t('common.failed')
+        : t('tool.jwt.copyPayload')
 
   return (
     <div className="flex min-h-0 flex-1 flex-col gap-3 p-3 sm:gap-4 sm:p-6 lg:p-8">
       <div className="shrink-0">
-        <h1 className="text-xl font-semibold tracking-tight text-slate-100 sm:text-2xl">JWT Decoder</h1>
-        <p className="mt-1 text-sm text-slate-400">
-          Decode JWT header and payload locally in your browser.
-        </p>
+        <h1 className="text-xl font-semibold tracking-tight text-slate-100 sm:text-2xl">{t('tool.jwt.title')}</h1>
+        <p className="mt-1 text-sm text-slate-400">{t('tool.jwt.desc')}</p>
       </div>
 
       {error ? (
@@ -106,13 +121,13 @@ export function JwtDecoderEditor() {
 
       <div className="flex shrink-0 flex-wrap gap-2">
         <ToolbarButton onClick={clear} variant="danger">
-          Clear
+          {t('common.clear')}
         </ToolbarButton>
       </div>
 
       <div className="flex min-h-0 flex-1 flex-col gap-2">
         <label htmlFor="jwt-input" className="text-sm font-medium text-slate-300">
-          Input JWT
+          {t('tool.jwt.input')}
         </label>
         <textarea
           id="jwt-input"
@@ -120,7 +135,7 @@ export function JwtDecoderEditor() {
           onChange={(event) => setInput(event.target.value)}
           spellCheck={false}
           className="min-h-[140px] w-full resize-y rounded-lg border border-slate-700 bg-slate-900/80 p-3 font-mono text-sm leading-relaxed text-slate-100 placeholder:text-slate-600 focus:border-violet-500 focus:outline-none focus:ring-1 focus:ring-violet-500 sm:min-h-[180px] sm:p-4"
-          placeholder="Paste JWT here (header.payload.signature)"
+          placeholder={t('tool.jwt.inputPlaceholder')}
           aria-invalid={error ? true : undefined}
         />
       </div>
@@ -128,14 +143,14 @@ export function JwtDecoderEditor() {
       <div className="grid min-h-0 flex-1 grid-cols-1 gap-4 lg:grid-cols-2 lg:gap-6">
         <OutputPane
           id="jwt-header-output"
-          label="Header"
+          label={t('tool.jwt.header')}
           value={headerOutput}
           copyLabel={copyHeaderLabel}
           onCopy={handleCopyHeader}
         />
         <OutputPane
           id="jwt-payload-output"
-          label="Payload"
+          label={t('tool.jwt.payload')}
           value={payloadOutput}
           copyLabel={copyPayloadLabel}
           onCopy={handleCopyPayload}

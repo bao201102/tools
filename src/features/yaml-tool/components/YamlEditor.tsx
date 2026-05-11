@@ -1,5 +1,6 @@
 import Editor from '@monaco-editor/react'
 import { useCallback, useState, type ReactNode } from 'react'
+import { useLocale } from '../../../lib/i18n'
 import { useYaml } from '../hooks/useYaml'
 
 const EDITOR_THEME = 'vs-dark'
@@ -52,6 +53,7 @@ function YamlMonacoPane({
   onChange?: (value: string) => void
   'aria-invalid'?: boolean
 }) {
+  const { t } = useLocale()
   return (
     <div
       className="absolute inset-0 min-h-0"
@@ -78,7 +80,7 @@ function YamlMonacoPane({
         onChange={readOnly ? undefined : (v) => onChange?.(v ?? '')}
         loading={
           <div className="flex h-full items-center justify-center bg-slate-900 text-sm text-slate-400">
-            Loading editor…
+            {t('common.loadingEditor')}
           </div>
         }
       />
@@ -87,26 +89,29 @@ function YamlMonacoPane({
 }
 
 export function YamlEditor() {
+  const { t } = useLocale()
   const { input, output, error, onInputChange, clear } = useYaml()
-  const [copyLabel, setCopyLabel] = useState('Copy')
+  const [copyState, setCopyState] = useState<'idle' | 'copied' | 'failed'>('idle')
 
   const handleCopy = useCallback(async () => {
     if (!output) return
     try {
       await navigator.clipboard.writeText(output)
-      setCopyLabel('Copied')
-      window.setTimeout(() => setCopyLabel('Copy'), 2000)
+      setCopyState('copied')
     } catch {
-      setCopyLabel('Failed')
-      window.setTimeout(() => setCopyLabel('Copy'), 2000)
+      setCopyState('failed')
     }
+    window.setTimeout(() => setCopyState('idle'), 2000)
   }, [output])
+
+  const copyLabel =
+    copyState === 'copied' ? t('common.copied') : copyState === 'failed' ? t('common.failed') : t('common.copy')
 
   return (
     <div className="flex min-h-0 flex-1 flex-col gap-3 p-3 sm:gap-4 sm:p-6 lg:p-8">
       <div className="shrink-0">
-        <h1 className="text-xl font-semibold tracking-tight text-slate-100 sm:text-2xl">YAML Formatter</h1>
-        <p className="mt-1 text-sm text-slate-400">Normalize and validate YAML as you type.</p>
+        <h1 className="text-xl font-semibold tracking-tight text-slate-100 sm:text-2xl">{t('tool.yaml.title')}</h1>
+        <p className="mt-1 text-sm text-slate-400">{t('tool.yaml.desc')}</p>
       </div>
 
       {error ? (
@@ -120,7 +125,7 @@ export function YamlEditor() {
 
       <div className="flex shrink-0 flex-wrap gap-2">
         <ToolbarButton onClick={clear} variant="danger">
-          Clear
+          {t('common.clear')}
         </ToolbarButton>
         <ToolbarButton onClick={handleCopy} disabled={!output}>
           {copyLabel}
@@ -130,7 +135,7 @@ export function YamlEditor() {
       <div className="grid min-h-0 flex-1 grid-cols-1 gap-4 lg:grid-cols-2 lg:gap-6">
         <div className="flex min-h-0 flex-1 flex-col gap-2">
           <span id="yaml-input-label" className="shrink-0 text-sm font-medium text-slate-300">
-            Input
+            {t('common.input')}
           </span>
           <div className="relative min-h-[min(36vh,220px)] flex-1 overflow-hidden rounded-lg border border-slate-700 sm:min-h-[min(40vh,280px)]">
             <YamlMonacoPane
@@ -144,7 +149,7 @@ export function YamlEditor() {
         </div>
         <div className="flex min-h-0 flex-1 flex-col gap-2">
           <span id="yaml-output-label" className="shrink-0 text-sm font-medium text-slate-300">
-            Output
+            {t('common.output')}
           </span>
           <div className="relative min-h-[min(36vh,220px)] flex-1 overflow-hidden rounded-lg border border-slate-700 sm:min-h-[min(40vh,280px)]">
             <YamlMonacoPane labelId="yaml-output-label" value={output} readOnly />

@@ -1,5 +1,6 @@
 import Editor from '@monaco-editor/react'
 import { useCallback, useState, type ReactNode } from 'react'
+import { useLocale } from '../../../lib/i18n'
 import { useCsharpProto } from '../hooks/useCsharpProto'
 
 const EDITOR_THEME = 'vs-dark'
@@ -50,6 +51,7 @@ function CsharpMonacoPane({
   readOnly: boolean
   onChange?: (value: string) => void
 }) {
+  const { t } = useLocale()
   return (
     <div className="absolute inset-0 min-h-0" aria-labelledby={labelId}>
       <Editor
@@ -72,7 +74,7 @@ function CsharpMonacoPane({
         onChange={readOnly ? undefined : (v) => onChange?.(v ?? '')}
         loading={
           <div className="flex h-full items-center justify-center bg-slate-900 text-sm text-slate-400">
-            Loading editor…
+            {t('common.loadingEditor')}
           </div>
         }
       />
@@ -81,37 +83,45 @@ function CsharpMonacoPane({
 }
 
 export function CsharpProtoEditor() {
+  const { t } = useLocale()
   const { input, setInput, output, startNumber, setStartNumber, clear } = useCsharpProto()
-  const [copyLabel, setCopyLabel] = useState('Copy Output')
+  const [copyState, setCopyState] = useState<'idle' | 'copied' | 'failed'>('idle')
 
   const handleCopyOutput = useCallback(async () => {
     if (!output) return
     try {
       await navigator.clipboard.writeText(output)
-      setCopyLabel('Copied')
-      window.setTimeout(() => setCopyLabel('Copy Output'), 2000)
+      setCopyState('copied')
     } catch {
-      setCopyLabel('Failed')
-      window.setTimeout(() => setCopyLabel('Copy Output'), 2000)
+      setCopyState('failed')
     }
+    window.setTimeout(() => setCopyState('idle'), 2000)
   }, [output])
+
+  const copyLabel =
+    copyState === 'copied'
+      ? t('common.copied')
+      : copyState === 'failed'
+        ? t('common.failed')
+        : t('tool.csharpProto.copyOutput')
 
   return (
     <div className="flex min-h-0 flex-1 flex-col gap-3 p-3 sm:gap-4 sm:p-6 lg:p-8">
       <div className="shrink-0">
         <h1 className="text-xl font-semibold tracking-tight text-slate-100 sm:text-2xl">
-          C# ProtoMember Reindex
+          {t('tool.csharpProto.title')}
         </h1>
         <p className="mt-1 text-sm text-slate-400">
-          Strip existing <code className="text-violet-300">[ProtoMember(n)]</code> attributes and assign
-          sequential numbers starting from your chosen index. Output updates as you edit.
+          {t('tool.csharpProto.descBefore')}
+          <code className="text-violet-300">[ProtoMember(n)]</code>
+          {t('tool.csharpProto.descAfter')}
         </p>
       </div>
 
       <div className="flex shrink-0 flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-end">
         <div className="flex flex-col gap-1">
           <label htmlFor="proto-start-number" className="text-xs font-medium text-slate-400">
-            Start Number
+            {t('tool.csharpProto.startNumber')}
           </label>
           <input
             id="proto-start-number"
@@ -128,7 +138,7 @@ export function CsharpProtoEditor() {
         </div>
         <div className="flex flex-wrap gap-2">
           <ToolbarButton onClick={clear} variant="danger">
-            Clear
+            {t('common.clear')}
           </ToolbarButton>
           <ToolbarButton onClick={handleCopyOutput} disabled={!output}>
             {copyLabel}
@@ -139,7 +149,7 @@ export function CsharpProtoEditor() {
       <div className="grid min-h-0 flex-1 grid-cols-1 gap-4 lg:grid-cols-2 lg:gap-6">
         <div className="flex min-h-0 flex-1 flex-col gap-2">
           <span id="csharp-proto-input-label" className="shrink-0 text-sm font-medium text-slate-300">
-            Input
+            {t('common.input')}
           </span>
           <div className="relative min-h-[min(36vh,220px)] flex-1 overflow-hidden rounded-lg border border-slate-700 sm:min-h-[min(40vh,280px)]">
             <CsharpMonacoPane
@@ -152,7 +162,7 @@ export function CsharpProtoEditor() {
         </div>
         <div className="flex min-h-0 flex-1 flex-col gap-2">
           <span id="csharp-proto-output-label" className="shrink-0 text-sm font-medium text-slate-300">
-            Output
+            {t('common.output')}
           </span>
           <div className="relative min-h-[min(36vh,220px)] flex-1 overflow-hidden rounded-lg border border-slate-700 sm:min-h-[min(40vh,280px)]">
             <CsharpMonacoPane labelId="csharp-proto-output-label" value={output} readOnly />
