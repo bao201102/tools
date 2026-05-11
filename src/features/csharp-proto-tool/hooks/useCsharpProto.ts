@@ -1,6 +1,9 @@
 import { useCallback, useState } from 'react'
 
 const PROTO_MEMBER_ATTR_RE = /\[ProtoMember\s*\(\s*\d+\s*\)\s*\]\s*/g
+const CLASS_DECL_RE = /^\s*(?:public|private|protected|internal|abstract|sealed|static|partial|\s)*\bclass\b/
+const NAMESPACE_DECL_RE = /^\s*(?:namespace)\b/
+const PROTOBUF_USING_RE = /^\s*(?:global\s+)?using\s+ProtoBuf\s*;/
 
 function isCommentLine(line: string): boolean {
   return /^\s*\/\//.test(line)
@@ -14,6 +17,34 @@ function stripProtoMemberAttributes(line: string): string {
   return line.replace(PROTO_MEMBER_ATTR_RE, '')
 }
 
+function isClassDeclarationLine(line: string): boolean {
+  return CLASS_DECL_RE.test(line)
+}
+
+function hasNamespace(lines: string[]): boolean {
+  return lines.some((line) => NAMESPACE_DECL_RE.test(line))
+}
+
+function hasProtoBufUsing(lines: string[]): boolean {
+  return lines.some((line) => PROTOBUF_USING_RE.test(line))
+}
+
+function ensureProtoBufUsing(lines: string[]): string[] {
+  if (!hasNamespace(lines) || hasProtoBufUsing(lines)) return lines
+
+  const result = [...lines]
+  let insertIndex = 0
+  while (insertIndex < result.length && (isBlankLine(result[insertIndex]) || isCommentLine(result[insertIndex]))) {
+    insertIndex += 1
+  }
+  while (insertIndex < result.length && /^\s*using\b/.test(result[insertIndex])) {
+    insertIndex += 1
+  }
+
+  result.splice(insertIndex, 0, 'using ProtoBuf;')
+  return result
+}
+
 /**
  * Detects typical C# auto-properties (including virtual/static and private/protected set/init).
  */
@@ -25,11 +56,15 @@ function isPropertyLine(line: string): boolean {
 }
 
 export function processCsharpProtoSource(input: string, startNumber: number): string {
-  const lines = input.split(/\r?\n/)
+  const lines = ensureProtoBufUsing(input.split(/\r?\n/))
   let current = startNumber
   const out: string[] = []
 
   for (const line of lines) {
+    if (isClassDeclarationLine(line)) {
+      current = startNumber
+    }
+
     if (isBlankLine(line) || isCommentLine(line)) {
       out.push(line)
       continue

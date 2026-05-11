@@ -32,6 +32,7 @@ const sections: readonly Section[] = [
       { kind: 'internal', titleKey: 'home.tool.jsonEscape.title', descKey: 'home.tool.jsonEscape.desc', route: '/json-escape' },
       { kind: 'internal', titleKey: 'home.tool.yaml.title', descKey: 'home.tool.yaml.desc', route: '/yaml' },
       { kind: 'internal', titleKey: 'home.tool.csharpProto.title', descKey: 'home.tool.csharpProto.desc', route: '/csharp-proto' },
+      { kind: 'internal', titleKey: 'home.tool.csharpProtoRemove.title', descKey: 'home.tool.csharpProtoRemove.desc', route: '/csharp-proto-remove' },
       { kind: 'internal', titleKey: 'home.tool.encoder.title', descKey: 'home.tool.encoder.desc', route: '/encoder' },
       { kind: 'internal', titleKey: 'home.tool.diff.title', descKey: 'home.tool.diff.desc', route: '/diff-checker' },
       { kind: 'internal', titleKey: 'home.tool.poco.title', descKey: 'home.tool.poco.desc', route: '/json-to-csharp' },

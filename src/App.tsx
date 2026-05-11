@@ -1,6 +1,7 @@
 import { Route, Routes } from 'react-router-dom'
 import MainLayout from './layouts/MainLayout'
 import CsharpProtoPage from './pages/CsharpProtoPage'
+import CsharpProtoRemovePage from './pages/CsharpProtoRemovePage'
 import DiffCheckerPage from './pages/DiffCheckerPage'
 import EncoderPage from './pages/EncoderPage'
 import HomePage from './pages/HomePage'
@@ -20,6 +21,7 @@ export default function App() {
         <Route path="json-escape" element={<JsonEscapePage />} />
         <Route path="yaml" element={<YamlPage />} />
         <Route path="csharp-proto" element={<CsharpProtoPage />} />
+        <Route path="csharp-proto-remove" element={<CsharpProtoRemovePage />} />
         <Route path="encoder" element={<EncoderPage />} />
         <Route path="diff-checker" element={<DiffCheckerPage />} />
         <Route path="json-to-csharp" element={<PocoGeneratorPage />} />

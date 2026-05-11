@@ -16,6 +16,7 @@ const routes = [
   { path: '/json-escape', priority: '0.8', changefreq: 'monthly' },
   { path: '/yaml', priority: '0.8', changefreq: 'monthly' },
   { path: '/csharp-proto', priority: '0.8', changefreq: 'monthly' },
+  { path: '/csharp-proto-remove', priority: '0.8', changefreq: 'monthly' },
   { path: '/encoder', priority: '0.8', changefreq: 'monthly' },
   { path: '/diff-checker', priority: '0.8', changefreq: 'monthly' },
   { path: '/json-to-csharp', priority: '0.8', changefreq: 'monthly' },

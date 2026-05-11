@@ -28,6 +28,7 @@ const navGroups: NavGroup[] = [
       { kind: 'internal', to: '/json-escape', labelKey: 'nav.item.jsonEscape' },
       { kind: 'internal', to: '/yaml', labelKey: 'nav.item.yamlFormatter' },
       { kind: 'internal', to: '/csharp-proto', labelKey: 'nav.item.csharpProto' },
+      { kind: 'internal', to: '/csharp-proto-remove', labelKey: 'nav.item.csharpProtoRemove' },
       { kind: 'internal', to: '/encoder', labelKey: 'nav.item.encoder' },
       { kind: 'internal', to: '/diff-checker', labelKey: 'nav.item.diffChecker' },
       { kind: 'internal', to: '/json-to-csharp', labelKey: 'nav.item.jsonToCsharp' },
