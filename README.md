@@ -18,19 +18,35 @@ Dự án phù hợp dùng trực tiếp trong trình duyệt khi phát triển, 
 
 ## ✨ Tính năng
 
+### JSON Tools
+| Công cụ                            | Route | Mô tả ngắn                                                                                                                                                                                                                                  |
+| ---------------------------------- | ----- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **JSON Formatter & Minifier**      | `/json` | Pretty-print JSON theo thời gian thực khi gõ, hỗ trợ **minify theo nút bấm**, hiển thị trong Monaco Editor và báo lỗi parse rõ ràng.                                                                                                       |
+| **JSON Escaper & Unescaper**       | `/json-escape` | Chuyển đổi hai chiều giữa chuỗi JSON escaped và JSON đã format; hỗ trợ unwrap chuỗi lồng nhiều lớp (thường gặp trong log C#/payload), kiểm tra root phải là object/array, và hiển thị lỗi ngay trong ô kết quả.                           |
+| **JSON to C# POCO Generator**      | `/json-to-csharp` | Sinh class C# từ JSON với naming theo chuẩn C# (PascalCase), tự thêm `[JsonPropertyName("...")]` khi cần ánh xạ tên gốc, hỗ trợ nested objects và arrays, giữ output dễ đọc để dùng trực tiếp trong API/client models.                                                                |
 
-| Công cụ                            | Mô tả ngắn                                                                                                                                                                                                                                  |
-| ---------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **JSON Formatter & Minifier**      | Pretty-print JSON theo thời gian thực khi gõ, hỗ trợ **minify theo nút bấm**, hiển thị trong Monaco Editor và báo lỗi parse rõ ràng.                                                                                                       |
-| **JSON Escaper & Unescaper**       | Chuyển đổi hai chiều giữa chuỗi JSON escaped và JSON đã format; hỗ trợ unwrap chuỗi lồng nhiều lớp (thường gặp trong log C#/payload), kiểm tra root phải là object/array, và hiển thị lỗi ngay trong ô kết quả.                           |
-| **YAML Formatter & Validator**     | Parse YAML bằng `js-yaml`, normalize theo thời gian thực và báo lỗi cú pháp trực quan.                                                                                                                                                     |
-| **C# ProtoMember Reindex Tool**    | Đọc mã C# **theo từng dòng**, dùng **Regex** để gỡ `[ProtoMember(n)]` cũ và gán lại số thứ tự từ một **số bắt đầu** bạn chọn; hỗ trợ các property dạng `{ get; set; }`, `init`, `private set`, v.v.; giữ nguyên comment `//` và dòng trống. |
-| **Base64 / URL Encoder & Decoder** | Mã hóa/giải mã nhanh giữa văn bản thường, Base64 và URL encoding ngay trên client; hỗ trợ Unicode và hiển thị lỗi khi input decode không hợp lệ.                                                                                          |
-| **Text & Code Diff Checker**       | So sánh **Original vs Modified** bằng Monaco Diff Editor; có chế độ **Side-by-side/Inline**, chỉnh được cả hai bên, chọn ngôn ngữ highlight một lần cho cả cặp văn bản, kèm nút **Swap** và **Clear All**.                               |
-| **JSON to C# POCO Generator**      | Sinh class C# từ JSON với naming theo chuẩn C#, tự thêm `[JsonPropertyName(\"...\")]` khi cần ánh xạ tên gốc, giữ output dễ đọc để dùng trực tiếp trong API/client models.                                                                |
-| **SQL Table to C# POCO Generator** | Parse câu lệnh `CREATE TABLE` (SQL Server/PostgreSQL), map kiểu dữ liệu SQL sang C#, áp dụng nullable `?` cho value type khi cột cho phép `NULL` (riêng `string` luôn giữ nguyên), và chuyển tên cột sang PascalCase.                     |
-| **JWT Decoder**                    | Decode JWT header/payload cục bộ trong trình duyệt, parse thành JSON đã format và báo lỗi khi token không hợp lệ.                                                                                                                          |
+### YAML Tools
+| Công cụ                            | Route | Mô tả ngắn                                                                                                                                                                                                                                  |
+| ---------------------------------- | ----- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **YAML Formatter & Validator**     | `/yaml` | Parse YAML bằng `js-yaml`, normalize theo thời gian thực và báo lỗi cú pháp trực quan.                                                                                                                                                     |
 
+### C# Tools
+| Công cụ                            | Route | Mô tả ngắn                                                                                                                                                                                                                                  |
+| ---------------------------------- | ----- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **C# ProtoMember Reindex Tool**    | `/csharp-proto` | Đọc mã C# **theo từng dòng**, dùng **Regex** để gỡ `[ProtoMember(n)]` cũ và gán lại số thứ tự từ một **số bắt đầu** bạn chọn; hỗ trợ các property dạng `{ get; set; }`, `init`, `private set`, v.v.; giữ nguyên comment `//` và dòng trống. |
+| **C# Remove ProtoMember Tool**     | `/csharp-proto-remove` | Xóa tất cả `[ProtoMember(n)]` attributes, hỗ trợ optional digit matching, giữ nguyên cấu trúc code.                                                                                                                                        |
+| **SQL Table to C# POCO Generator** | `/sql-to-csharp` | Parse câu lệnh `CREATE TABLE` (SQL Server/PostgreSQL), map kiểu dữ liệu SQL sang C#, áp dụng nullable `?` cho value type khi cột cho phép `NULL` (riêng `string` luôn giữ nguyên), và chuyển tên cột sang PascalCase.                     |
+
+### Encoding Tools
+| Công cụ                            | Route | Mô tả ngắn                                                                                                                                                                                                                                  |
+| ---------------------------------- | ----- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Base64 / URL Encoder & Decoder** | `/encoder` | Mã hóa/giải mã nhanh giữa văn bản thường, Base64 và URL encoding ngay trên client; hỗ trợ Unicode và hiển thị lỗi khi input decode không hợp lệ.                                                                                          |
+| **JWT Decoder**                    | `/jwt-decoder` | Decode JWT header/payload cục bộ trong trình duyệt, parse thành JSON đã format và báo lỗi khi token không hợp lệ.                                                                                                                          |
+
+### Diff & Comparison Tools
+| Công cụ                            | Route | Mô tả ngắn                                                                                                                                                                                                                                  |
+| ---------------------------------- | ----- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Text & Code Diff Checker**       | `/diff-checker` | So sánh **Original vs Modified** bằng Monaco Diff Editor; có chế độ **Side-by-side/Inline**, chỉnh được cả hai bên, chọn ngôn ngữ highlight, kèm nút **Swap** và **Clear All**, auto-detect diff mode, customizable labels, dynamic split widths.                               |
 
 Điều hướng giữa các công cụ qua **React Router** (sidebar + thẻ trên trang chủ).
 
@@ -38,14 +54,26 @@ Dự án phù hợp dùng trực tiếp trong trình duyệt khi phát triển, 
 
 ## 🛠️ Công nghệ sử dụng
 
-- **React 19** — Giao diện và trạng thái component.
-- **TypeScript** — Kiểm tra kiểu tĩnh, mã dễ bảo trì.
-- **Vite** — Dev server nhanh, bundling tối ưu.
-- **Tailwind CSS (v4 + `@tailwindcss/vite`)** — Styling utility-first.
-- **React Router** — Định tuyến SPA (`/`, `/json`, `/json-escape`, `/yaml`, `/csharp-proto`, `/encoder`, `/diff-checker`, `/json-to-csharp`, `/sql-to-csharp`, `/jwt-decoder`).
-- **Monaco Editor (`@monaco-editor/react`)** — Soạn thảo code với highlight (JSON / YAML / C# / plaintext...) và Monaco Diff Editor cho tính năng so sánh văn bản/mã nguồn.
-- **js-yaml** — Parse & dump YAML trong YAML Formatter.
-- **Nginx (Alpine)** — Phục vụ bản build tĩnh trong Docker.
+### Frontend Stack
+- **React 19.0.0** — Giao diện và trạng thái component
+- **TypeScript 5.8.0** — Kiểm tra kiểu tĩnh, mã dễ bảo trì
+- **Vite 6.3.0** — Dev server nhanh, bundling tối ưu
+- **Tailwind CSS 4.1.0** (`@tailwindcss/vite`) — Styling utility-first
+- **React Router 7.6.0** — Định tuyến SPA
+- **Monaco Editor 0.55.1** (`@monaco-editor/react` 4.7.0) — Code editor với syntax highlighting và diff viewer
+- **js-yaml 4.1.0** — Parse & dump YAML
+- **lucide-react 1.14.0** — Icon library
+
+### Infrastructure & DevOps
+- **Docker** — Multi-stage build (Node 20 Alpine + Nginx Alpine)
+- **Nginx Alpine** — Phục vụ bản build tĩnh với SPA fallback
+- **GitHub Actions** — CI/CD pipeline tự động build và deploy
+- **Multi-architecture support** — AMD64 + ARM64
+
+### SEO & Utilities
+- **Sitemap generation** — Auto-generate sitemap.xml
+- **Version checking** — Client-side version detection với auto-refresh notification
+- **robots.txt** — SEO configuration
 
 ---
 
@@ -53,8 +81,8 @@ Dự án phù hợp dùng trực tiếp trong trình duyệt khi phát triển, 
 
 ### Yêu cầu
 
-- [Node.js](https://nodejs.org/) **18+** (khuyến nghị **20 LTS** để khớp Dockerfile).
-- npm (đi kèm Node).
+- [Node.js](https://nodejs.org/) **18+** (khuyến nghị **20 LTS** để khớp Dockerfile)
+- npm (đi kèm Node)
 
 ### Các bước
 
@@ -72,12 +100,17 @@ npm run dev
 
 Mở trình duyệt tại địa chỉ Vite in ra (thường là `http://localhost:5173`).
 
-### Build kiểm tra production cục bộ
+### Scripts có sẵn
 
 ```bash
-npm run build
-npm run preview
+npm run dev              # Chạy dev server với HMR
+npm run build            # Build production (tự động generate sitemap + version)
+npm run preview          # Preview bản build production
+npm run generate-sitemap # Generate sitemap.xml
+npm run generate-version # Generate version.json
 ```
+
+**Lưu ý:** `npm run build` tự động chạy `prebuild` hook để generate sitemap và version trước khi build.
 
 ---
 
@@ -181,9 +214,59 @@ docker compose logs -f web
 
 ---
 
+## 📁 Cấu trúc dự án
+
+```
+tools/
+├── .github/
+│   └── workflows/
+│       └── deploy.yml          # CI/CD pipeline
+├── public/
+│   ├── sitemap.xml            # Auto-generated sitemap
+│   └── robots.txt             # SEO configuration
+├── scripts/
+│   ├── generate-sitemap.js    # Sitemap generator
+│   └── generate-version.js    # Version generator
+├── src/
+│   ├── features/              # Feature-based structure
+│   │   ├── json-tool/
+│   │   ├── json-escape-tool/
+│   │   ├── yaml-tool/
+│   │   ├── csharp-proto-tool/
+│   │   ├── csharp-proto-remove-tool/
+│   │   ├── encoder-tool/
+│   │   ├── diff-checker-tool/
+│   │   ├── poco-generator-tool/
+│   │   ├── sql-to-poco-tool/
+│   │   └── jwt-decoder-tool/
+│   ├── lib/                   # Utilities
+│   │   └── versionCheck.ts    # Client-side version checking
+│   └── ...
+├── Dockerfile                 # Multi-stage Docker build
+├── docker-compose.yml         # Docker Compose configuration
+├── nginx.conf                 # Nginx SPA configuration
+└── package.json
+```
+
+---
+
+## 🚀 CI/CD Pipeline
+
+Dự án sử dụng **GitHub Actions** để tự động build và deploy:
+
+- **Trigger:** Push to `main` branch
+- **Build:** Multi-architecture Docker image (AMD64 + ARM64)
+- **Deploy:** Push to Docker Hub (`boris1120/dev-tools:latest`)
+- **Workflow file:** `.github/workflows/deploy.yml`
+
+---
+
 ## 📄 License & đóng góp
 
 Nếu dự án mở nguồn, hãy bổ sung file `LICENSE` và hướng dẫn đóng góp (CONTRIBUTING). Mọi ý kiến cải thiện công cụ hoặc bản dịch README đều được chào đón.
 
 ---
+
+**Phiên bản:** 0.0.0  
+**Cập nhật lần cuối:** 2026-05-12
 
