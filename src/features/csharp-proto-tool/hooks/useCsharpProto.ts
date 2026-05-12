@@ -1,6 +1,6 @@
 import { useCallback, useState } from 'react'
 
-const PROTO_MEMBER_ATTR_RE = /\[ProtoMember\s*\(\s*\d+\s*\)\s*\]\s*/g
+const PROTO_MEMBER_ATTR_RE = /\[ProtoMember\s*\(\s*\d*\s*\)\s*\]\s*/g
 const CLASS_DECL_RE = /^\s*(?:public|private|protected|internal|abstract|sealed|static|partial|\s)*\bclass\b/
 const NAMESPACE_DECL_RE = /^\s*(?:namespace)\b/
 const PROTOBUF_USING_RE = /^\s*(?:global\s+)?using\s+ProtoBuf\s*;/

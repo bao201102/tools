@@ -1,6 +1,6 @@
 import { useCallback, useState } from 'react'
 
-const PROTO_MEMBER_ATTR_RE = /\[ProtoMember\s*\(\s*\d+\s*\)\s*\]\s*/g
+const PROTO_MEMBER_ATTR_RE = /\[ProtoMember\s*\(\s*\d*\s*\)\s*\]\s*/g
 
 export function processCsharpProtoRemoveSource(input: string): string {
   return input
