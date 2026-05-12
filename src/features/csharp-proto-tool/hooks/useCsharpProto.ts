@@ -1,6 +1,7 @@
 import { useCallback, useState } from 'react'
 
 const PROTO_MEMBER_ATTR_RE = /\[ProtoMember\s*\(\s*\d*\s*\)\s*\]\s*/g
+const PROTO_CONTRACT_ATTR_RE = /\[ProtoContract\s*(?:\([^)]*\))?\s*\]/
 const CLASS_DECL_RE = /^\s*(?:public|private|protected|internal|abstract|sealed|static|partial|\s)*\bclass\b/
 const NAMESPACE_DECL_RE = /^\s*(?:namespace)\b/
 const PROTOBUF_USING_RE = /^\s*(?:global\s+)?using\s+ProtoBuf\s*;/
@@ -55,18 +56,44 @@ function isPropertyLine(line: string): boolean {
   return /\{\s*get\s*;\s*(?:(?:private|protected|internal|public)\s+)?(?:set|init)\s*;\s*\}/.test(t)
 }
 
+function hasProtoContractAttribute(line: string): boolean {
+  return PROTO_CONTRACT_ATTR_RE.test(line)
+}
+
 export function processCsharpProtoSource(input: string, startNumber: number): string {
   const lines = ensureProtoBufUsing(input.split(/\r?\n/))
   let current = startNumber
   const out: string[] = []
+  let i = 0
 
-  for (const line of lines) {
+  while (i < lines.length) {
+    const line = lines[i]
+
     if (isClassDeclarationLine(line)) {
       current = startNumber
+
+      // Check if previous non-blank/non-comment line has [ProtoContract]
+      let hasContract = false
+      for (let j = i - 1; j >= 0; j--) {
+        const prevLine = lines[j]
+        if (isBlankLine(prevLine) || isCommentLine(prevLine)) continue
+        if (hasProtoContractAttribute(prevLine)) {
+          hasContract = true
+        }
+        break
+      }
+
+      // If no [ProtoContract], add it before the class
+      if (!hasContract) {
+        const indentMatch = line.match(/^(\s*)/)
+        const indent = indentMatch?.[1] ?? ''
+        out.push(`${indent}[ProtoContract]`)
+      }
     }
 
     if (isBlankLine(line) || isCommentLine(line)) {
       out.push(line)
+      i++
       continue
     }
 
@@ -81,6 +108,8 @@ export function processCsharpProtoSource(input: string, startNumber: number): st
     } else {
       out.push(cleaned)
     }
+
+    i++
   }
 
   return out.join('\n')
