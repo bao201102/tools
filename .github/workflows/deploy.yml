@@ -12,10 +12,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
       
       - name: Upload workspace
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: workspace
           path: .
@@ -85,31 +85,37 @@ jobs:
     runs-on: ubuntu-latest
     if: always()
     steps:
-      - name: Debug Topic ID
+      - name: Send Telegram notification to topic
         run: |
-          echo "Topic ID length: ${{ secrets.TELEGRAM_TOPIC_ID != '' && 'has value' || 'empty' }}"
-      
-      - name: Send Telegram notification
-        uses: appleboy/telegram-action@master
-        with:
-          to: ${{ secrets.TELEGRAM_CHAT_ID }}
-          token: ${{ secrets.TELEGRAM_BOT_TOKEN }}
-          message_thread_id: ${{ secrets.TELEGRAM_TOPIC_ID }}
-          format: markdown
-          message: |
-            🚀 *Deployment Status*
-            
-            Repository: `${{ github.repository }}`
-            Branch: `${{ github.ref_name }}`
-            Commit: `${{ github.sha }}`
-            Author: ${{ github.actor }}
-            
-            📋 *Job Results:*
-            • Checkout: ${{ needs.checkout.result }}
-            • Setup Docker: ${{ needs.setup-docker.result }}
-            • Build & Push: ${{ needs.build-and-push.result }}
-            • Deploy: ${{ needs.deploy.result }}
-            
-            ✅ *Overall Status:* ${{ job.status }}
-            
-            [View Workflow Run](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})
+          STATUS_EMOJI="✅"
+          if [ "${{ needs.deploy.result }}" != "success" ]; then
+            STATUS_EMOJI="❌"
+          fi
+          
+          STATUS_UPPER=$(echo "${{ job.status }}" | tr '[:lower:]' '[:upper:]')
+          TIMESTAMP=$(TZ='Asia/Ho_Chi_Minh' date +"%Y-%m-%d %H:%M:%S")
+          
+          # Calculate duration
+          START_TIME=$(date -d "${{ github.event.head_commit.timestamp }}" +%s)
+          END_TIME=$(date +%s)
+          DURATION=$((END_TIME - START_TIME))
+          MINUTES=$((DURATION / 60))
+          SECONDS=$((DURATION % 60))
+          
+          MESSAGE="${STATUS_EMOJI} *${STATUS_UPPER}* ${TIMESTAMP}
+          
+          Repository: \`${{ github.repository }}\`
+          Build: #${{ github.run_number }}
+          Duration: ${MINUTES}m ${SECONDS}s
+
+          [View Workflow Run](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})"
+          
+          curl -X POST "https://api.telegram.org/bot${{ secrets.TELEGRAM_BOT_TOKEN }}/sendMessage" \
+            -H "Content-Type: application/json" \
+            -d "{
+              \"chat_id\": \"${{ secrets.TELEGRAM_CHAT_ID }}\",
+              \"message_thread_id\": ${{ secrets.TELEGRAM_TOPIC_ID }},
+              \"text\": \"${MESSAGE}\",
+              \"parse_mode\": \"Markdown\",
+              \"disable_web_page_preview\": true
+            }"
