@@ -87,15 +87,16 @@ export function JsonEditor() {
   const { t } = useLocale()
   const editorTheme = useMonacoEditorTheme()
   const [input, setInput] = useState('')
+  const [output, setOutput] = useState('')
   const [error, setError] = useState<string | null>(null)
   const [stats, setStats] = useState<JsonStats>({ size: 0, keys: 0, depth: 0, objects: 0, arrays: 0 })
   const [copyState, setCopyState] = useState<'idle' | 'copied'>('idle')
-  const [isCompressed, setIsCompressed] = useState(false)
 
   // Auto-validate and format
   useEffect(() => {
     if (!input.trim()) {
       setError(null)
+      setOutput('')
       setStats({ size: 0, keys: 0, depth: 0, objects: 0, arrays: 0 })
       return
     }
@@ -104,54 +105,47 @@ export function JsonEditor() {
       const parsed = JSON.parse(input)
       setError(null)
       
-      // Check if compressed (single line)
-      const hasNewlines = input.includes('\n')
-      setIsCompressed(!hasNewlines)
-      
       const formatted = JSON.stringify(parsed, null, 2)
+      setOutput(formatted)
       setStats(calculateJsonStats(formatted))
-      
-      // Auto-format only if not compressed and different
-      if (!isCompressed && input !== formatted) {
-        setInput(formatted)
-      }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Invalid JSON')
+      setOutput('')
       setStats({ size: new Blob([input]).size, keys: 0, depth: 0, objects: 0, arrays: 0 })
     }
-  }, [input, isCompressed])
+  }, [input])
 
   const handleClear = useCallback(() => {
     setInput('')
+    setOutput('')
     setError(null)
     setStats({ size: 0, keys: 0, depth: 0, objects: 0, arrays: 0 })
-    setIsCompressed(false)
   }, [])
 
   const handleCompress = useCallback(() => {
-    if (!input.trim()) return
+    if (!input) return
     try {
       const parsed = JSON.parse(input)
-      setInput(JSON.stringify(parsed))
-      setIsCompressed(true)
+      const compressed = JSON.stringify(parsed)
+      setOutput(compressed)
     } catch {
       // Already has error
     }
   }, [input])
 
   const handlePrettify = useCallback(() => {
-    if (!input.trim()) return
+    if (!input) return
     try {
       const parsed = JSON.parse(input)
-      setInput(JSON.stringify(parsed, null, 2))
-      setIsCompressed(false)
+      const prettified = JSON.stringify(parsed, null, 2)
+      setOutput(prettified)
     } catch {
       // Already has error
     }
   }, [input])
 
   const handleSortKeys = useCallback(() => {
-    if (!input.trim()) return
+    if (!input) return
     try {
       const parsed = JSON.parse(input)
       const sortObject = (obj: any): any => {
@@ -169,22 +163,35 @@ export function JsonEditor() {
         return obj
       }
       const sorted = sortObject(parsed)
-      setInput(JSON.stringify(sorted, null, 2))
+      setOutput(JSON.stringify(sorted, null, 2))
+    } catch {
+      // Already has error
+    }
+  }, [input])
+
+  const handleStringify = useCallback(() => {
+    if (!input) return
+    try {
+      const parsed = JSON.parse(input)
+      // Stringify to compact JSON, then stringify again to escape it as a string
+      const compactJson = JSON.stringify(parsed)
+      const escapedString = JSON.stringify(compactJson)
+      setOutput(escapedString)
     } catch {
       // Already has error
     }
   }, [input])
 
   const handleCopy = useCallback(async () => {
-    if (!input) return
+    if (!output) return
     try {
-      await navigator.clipboard.writeText(input)
+      await navigator.clipboard.writeText(output)
       setCopyState('copied')
       setTimeout(() => setCopyState('idle'), 2000)
     } catch {
       // Ignore
     }
-  }, [input])
+  }, [output])
 
   const handleLoadSample = useCallback(() => {
     const sample = {
@@ -212,30 +219,76 @@ export function JsonEditor() {
     <div className="mx-auto flex min-h-0 w-full max-w-[1300px] flex-1 flex-col gap-4 p-6 lg:p-8">
       <div className="shrink-0">
         <p className="text-sm text-ink-muted">
-          To format and validate your JSON, just copy + paste it below:
+          Paste your JSON in the left editor to format and validate it:
         </p>
       </div>
 
-      {/* Editor */}
-      <div className="relative h-[400px] w-[70%] overflow-hidden rounded-lg border border-hairline shadow-sm">
-        <Editor
-          height="400px"
-          width="100%"
-          language="json"
-          theme={editorTheme}
-          value={input}
-          options={editorOptions}
-          onChange={(v) => setInput(v ?? '')}
-          loading={
-            <div className="flex h-full items-center justify-center bg-surface-2 text-sm text-ink-subtle">
-              {t('common.loadingEditor')}
-            </div>
-          }
-        />
+      {/* Two Editors Side by Side */}
+      <div className="grid min-h-0 h-[400px] grid-cols-1 gap-4 w-full lg:grid-cols-2 lg:gap-6">
+        {/* Left Editor - Input (Original) */}
+        <div className="flex min-h-0 flex-col gap-2">
+          <div className="flex items-center justify-between">
+            <h3 className="text-sm font-medium text-ink">Original JSON</h3>
+            <button
+              type="button"
+              onClick={handleLoadSample}
+              className="rounded-md border border-hairline bg-surface-1 px-3 py-1 text-xs font-medium text-primary shadow-sm transition-colors hover:bg-surface-2 hover:border-hairline-strong"
+            >
+              Load Sample
+            </button>
+          </div>
+          <div className="relative h-full overflow-hidden rounded-lg border border-hairline shadow-sm">
+            <Editor
+              height="100%"
+              width="100%"
+              language="json"
+              theme={editorTheme}
+              value={input}
+              options={editorOptions}
+              onChange={(v) => setInput(v ?? '')}
+              loading={
+                <div className="flex h-full items-center justify-center bg-surface-2 text-sm text-ink-subtle">
+                  {t('common.loadingEditor')}
+                </div>
+              }
+            />
+          </div>
+        </div>
+
+        {/* Right Editor - Output (Formatted) */}
+        <div className="flex min-h-0 flex-col gap-2">
+          <div className="flex items-center justify-between">
+            <h3 className="text-sm font-medium text-ink">Formatted JSON</h3>
+            <button
+              type="button"
+              onClick={handleCopy}
+              disabled={!output}
+              className="rounded-md border border-hairline bg-surface-1 px-3 py-1 text-xs font-medium text-ink shadow-sm transition-colors hover:bg-surface-2 hover:border-hairline-strong disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {copyState === 'copied' ? 'Copied!' : 'Copy'}
+            </button>
+          </div>
+          <div className="relative h-full overflow-hidden rounded-lg border border-hairline shadow-sm">
+            <Editor
+              height="100%"
+              width="100%"
+              language="json"
+              theme={editorTheme}
+              value={output}
+              options={{ ...editorOptions, readOnly: false }}
+              onChange={(v) => setOutput(v ?? '')}
+              loading={
+                <div className="flex h-full items-center justify-center bg-surface-2 text-sm text-ink-subtle">
+                  {t('common.loadingEditor')}
+                </div>
+              }
+            />
+          </div>
+        </div>
       </div>
 
       {/* Action Buttons */}
-      <div className="flex shrink-0 flex-wrap gap-2 w-[70%]">
+      <div className="flex shrink-0 flex-wrap gap-2">
         <button
           type="button"
           onClick={handleClear}
@@ -243,25 +296,22 @@ export function JsonEditor() {
         >
           Clear
         </button>
-        {isCompressed ? (
-          <button
-            type="button"
-            onClick={handlePrettify}
-            disabled={!!error || !input}
-            className="rounded-md border border-hairline bg-surface-1 px-4 py-2 text-sm font-medium text-ink shadow-sm transition-colors hover:bg-surface-2 hover:border-hairline-strong disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            Prettify
-          </button>
-        ) : (
-          <button
-            type="button"
-            onClick={handleCompress}
-            disabled={!!error || !input}
-            className="rounded-md border border-hairline bg-surface-1 px-4 py-2 text-sm font-medium text-ink shadow-sm transition-colors hover:bg-surface-2 hover:border-hairline-strong disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            Compress
-          </button>
-        )}
+        <button
+          type="button"
+          onClick={handlePrettify}
+          disabled={!!error || !input}
+          className="rounded-md border border-hairline bg-surface-1 px-4 py-2 text-sm font-medium text-ink shadow-sm transition-colors hover:bg-surface-2 hover:border-hairline-strong disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          Prettify
+        </button>
+        <button
+          type="button"
+          onClick={handleCompress}
+          disabled={!!error || !input}
+          className="rounded-md border border-hairline bg-surface-1 px-4 py-2 text-sm font-medium text-ink shadow-sm transition-colors hover:bg-surface-2 hover:border-hairline-strong disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          Compress
+        </button>
         <button
           type="button"
           onClick={handleSortKeys}
@@ -272,24 +322,17 @@ export function JsonEditor() {
         </button>
         <button
           type="button"
-          onClick={handleCopy}
-          disabled={!input}
+          onClick={handleStringify}
+          disabled={!!error || !input}
           className="rounded-md border border-hairline bg-surface-1 px-4 py-2 text-sm font-medium text-ink shadow-sm transition-colors hover:bg-surface-2 hover:border-hairline-strong disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          {copyState === 'copied' ? 'Copied!' : 'Copy'}
-        </button>
-        <button
-          type="button"
-          onClick={handleLoadSample}
-          className="rounded-md border border-hairline bg-surface-1 px-4 py-2 text-sm font-medium text-primary shadow-sm transition-colors hover:bg-surface-2 hover:border-hairline-strong"
-        >
-          Load Sample
+          Stringify
         </button>
       </div>
 
       {/* Status Bar */}
       <div
-        className={`shrink-0 rounded-md px-4 py-3 text-sm font-medium w-[70%] ${
+        className={`shrink-0 rounded-md px-4 py-3 text-sm font-medium ${
           error
             ? 'bg-error-surface text-error-fg border border-error-border'
             : 'bg-primary/10 text-primary border border-primary/20'
@@ -302,7 +345,7 @@ export function JsonEditor() {
             </svg>
             <span>Error: {error}</span>
           </div>
-        ) : (
+        ) : output ? (
           <div className="flex items-center gap-2">
             <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -310,6 +353,13 @@ export function JsonEditor() {
             <span>
               Valid JSON • {formatBytes(stats.size)} • {stats.keys} keys • depth {stats.depth} • {stats.objects} objects • {stats.arrays} arrays
             </span>
+          </div>
+        ) : (
+          <div className="flex items-center gap-2">
+            <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <span>Paste JSON to get started</span>
           </div>
         )}
       </div>

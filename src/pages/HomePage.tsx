@@ -32,14 +32,14 @@ const sections: readonly Section[] = [
       { kind: 'internal', titleKey: 'home.tool.yaml.title', descKey: 'home.tool.yaml.desc', route: '/yaml' },
       { kind: 'internal', titleKey: 'home.tool.diff.title', descKey: 'home.tool.diff.desc', route: '/diff-checker' },
       { kind: 'internal', titleKey: 'home.tool.jwt.title', descKey: 'home.tool.jwt.desc', route: '/jwt-decoder' },
+      { kind: 'internal', titleKey: 'home.tool.jsonEscape.title', descKey: 'home.tool.jsonEscape.desc', route: '/json-escape' },
+      { kind: 'internal', titleKey: 'home.tool.jsonUnescape.title', descKey: 'home.tool.jsonUnescape.desc', route: '/json-unescape' },
     ],
   },
   {
     id: 'convert',
     titleKey: 'home.section.convert',
     items: [
-      { kind: 'internal', titleKey: 'home.tool.jsonEscape.title', descKey: 'home.tool.jsonEscape.desc', route: '/json-escape' },
-      { kind: 'internal', titleKey: 'home.tool.jsonUnescape.title', descKey: 'home.tool.jsonUnescape.desc', route: '/json-unescape' },
       { kind: 'internal', titleKey: 'home.tool.encoder.title', descKey: 'home.tool.encoder.desc', route: '/encoder' },
       { kind: 'internal', titleKey: 'home.tool.poco.title', descKey: 'home.tool.poco.desc', route: '/json-to-csharp' },
       { kind: 'internal', titleKey: 'home.tool.sqlPoco.title', descKey: 'home.tool.sqlPoco.desc', route: '/sql-to-csharp' },

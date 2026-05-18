@@ -24,14 +24,14 @@ const navGroups: NavGroup[] = [
       { kind: 'internal', to: '/yaml', labelKey: 'nav.item.yamlFormatter' },
       { kind: 'internal', to: '/diff-checker', labelKey: 'nav.item.diffChecker' },
       { kind: 'internal', to: '/jwt-decoder', labelKey: 'nav.item.jwtDecoder' },
+      { kind: 'internal', to: '/json-escape', labelKey: 'nav.item.jsonEscape' },
+      { kind: 'internal', to: '/json-unescape', labelKey: 'nav.item.jsonUnescape' },
     ],
   },
   {
     id: 'convert',
     labelKey: 'nav.group.convert',
     items: [
-      { kind: 'internal', to: '/json-escape', labelKey: 'nav.item.jsonEscape' },
-      { kind: 'internal', to: '/json-unescape', labelKey: 'nav.item.jsonUnescape' },
       { kind: 'internal', to: '/encoder', labelKey: 'nav.item.encoder' },
       { kind: 'internal', to: '/json-to-csharp', labelKey: 'nav.item.jsonToCsharp' },
       { kind: 'internal', to: '/sql-to-csharp', labelKey: 'nav.item.sqlToCsharp' },
