@@ -1,6 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
 import { NavLink, Outlet, useLocation } from 'react-router-dom'
-import { ChevronDown, ChevronRight } from 'lucide-react'
 import { cn } from '../lib/cn'
 import { useLocale, type Locale, type TranslationKey } from '../lib/i18n'
 import {
@@ -8,6 +7,7 @@ import {
   reloadForUpdate,
   subscribeToUpdates,
 } from '../lib/versionCheck'
+import { ThemeSwitcher } from '../components/ThemeSwitcher'
 
 type NavInternalItem = { kind: 'internal'; to: string; labelKey: TranslationKey; end?: boolean }
 type NavExternalItem = { kind: 'external'; href: string; labelKey: TranslationKey }
@@ -17,28 +17,31 @@ type NavGroup = { id: string; labelKey?: TranslationKey; items: NavItem[] }
 
 const navGroups: NavGroup[] = [
   {
-    id: 'home',
-    items: [{ kind: 'internal', to: '/', labelKey: 'nav.item.home', end: true }],
-  },
-  {
     id: 'tools',
-    labelKey: 'nav.group.devTools',
+    labelKey: 'nav.group.tools',
     items: [
       { kind: 'internal', to: '/json', labelKey: 'nav.item.jsonFormatter' },
-      { kind: 'internal', to: '/json-escape', labelKey: 'nav.item.jsonEscape' },
       { kind: 'internal', to: '/yaml', labelKey: 'nav.item.yamlFormatter' },
-      { kind: 'internal', to: '/csharp-proto', labelKey: 'nav.item.csharpProto' },
-      { kind: 'internal', to: '/csharp-proto-remove', labelKey: 'nav.item.csharpProtoRemove' },
-      { kind: 'internal', to: '/encoder', labelKey: 'nav.item.encoder' },
       { kind: 'internal', to: '/diff-checker', labelKey: 'nav.item.diffChecker' },
-      { kind: 'internal', to: '/json-to-csharp', labelKey: 'nav.item.jsonToCsharp' },
-      { kind: 'internal', to: '/sql-to-csharp', labelKey: 'nav.item.sqlToCsharp' },
       { kind: 'internal', to: '/jwt-decoder', labelKey: 'nav.item.jwtDecoder' },
     ],
   },
   {
-    id: 'dashboards',
-    labelKey: 'nav.group.dashboards',
+    id: 'convert',
+    labelKey: 'nav.group.convert',
+    items: [
+      { kind: 'internal', to: '/json-escape', labelKey: 'nav.item.jsonEscape' },
+      { kind: 'internal', to: '/json-unescape', labelKey: 'nav.item.jsonUnescape' },
+      { kind: 'internal', to: '/encoder', labelKey: 'nav.item.encoder' },
+      { kind: 'internal', to: '/json-to-csharp', labelKey: 'nav.item.jsonToCsharp' },
+      { kind: 'internal', to: '/sql-to-csharp', labelKey: 'nav.item.sqlToCsharp' },
+      { kind: 'internal', to: '/csharp-proto', labelKey: 'nav.item.csharpProto' },
+      { kind: 'internal', to: '/csharp-proto-remove', labelKey: 'nav.item.csharpProtoRemove' },
+    ],
+  },
+  {
+    id: 'utility',
+    labelKey: 'nav.group.utility',
     items: [
       { kind: 'external', href: 'https://gold.nub.io.vn/', labelKey: 'nav.item.goldPrice' },
       { kind: 'external', href: 'https://n8n.nub.io.vn/', labelKey: 'nav.item.n8n' },
@@ -49,7 +52,7 @@ const navGroups: NavGroup[] = [
 function LogoMark() {
   return (
     <div
-      className="flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-md border border-hairline bg-surface-2 shadow-[inset_0_1px_0_0_rgba(255,255,255,0.06)]"
+      className="flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-md border border-hairline bg-surface-1 shadow-sm"
       aria-hidden
     >
       <img
@@ -83,25 +86,6 @@ function MenuIcon({ open }: { open: boolean }) {
   )
 }
 
-function ExternalLinkIcon() {
-  return (
-    <svg
-      className="h-4 w-4 text-ink-tertiary"
-      fill="none"
-      viewBox="0 0 24 24"
-      stroke="currentColor"
-      strokeWidth={2}
-      aria-hidden
-    >
-      <path
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
-      />
-    </svg>
-  )
-}
-
 function GithubIcon() {
   return (
     <svg
@@ -129,10 +113,7 @@ function LanguageSwitcher() {
     <div
       role="group"
       aria-label={t('lang.label')}
-      className={cn(
-        'fixed z-[60] flex items-center gap-0.5 rounded-md border border-hairline bg-surface-3/95 p-0.5 shadow-md backdrop-blur',
-        'right-3 top-[max(0.5rem,env(safe-area-inset-top))] md:right-4 md:top-3'
-      )}
+      className="flex items-center gap-0.5 rounded-md border border-hairline bg-surface-1 p-0.5 shadow-lg backdrop-blur"
     >
       {options.map((opt) => {
         const active = locale === opt.value
@@ -147,8 +128,8 @@ function LanguageSwitcher() {
               'rounded px-2 py-1 text-caption font-medium transition-colors',
               'outline-none focus-visible:ds-focus-ring',
               active
-                ? 'bg-surface-1 text-ink shadow-[inset_0_1px_0_0_rgba(255,255,255,0.06)]'
-                : 'text-ink-subtle hover:text-ink'
+                ? 'bg-primary text-on-primary shadow-sm'
+                : 'text-ink-subtle hover:text-ink hover:bg-surface-2'
             )}
           >
             {opt.short}
@@ -175,18 +156,17 @@ function CloseIcon() {
 }
 
 export default function MainLayout() {
-  const { t } = useLocale()
+  const { t, locale, setLocale } = useLocale()
   const [navOpen, setNavOpen] = useState(false)
+  const [openDropdown, setOpenDropdown] = useState<string | null>(null)
   const location = useLocation()
-  const [expandedGroups, setExpandedGroups] = useState<Record<string, boolean>>(() =>
-    Object.fromEntries(navGroups.filter((g) => g.labelKey).map((g) => [g.id, true]))
-  )
   const [updateAvailable, setUpdateAvailable] = useState(isUpdateAvailable)
   const [bannerDismissed, setBannerDismissed] = useState(false)
   const lastPathRef = useRef(location.pathname)
 
   useEffect(() => {
     setNavOpen(false)
+    setOpenDropdown(null)
   }, [location.pathname])
 
   useEffect(() => {
@@ -197,6 +177,21 @@ export default function MainLayout() {
       document.body.style.overflow = prev
     }
   }, [navOpen])
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      const target = event.target as HTMLElement
+      if (!target.closest('[data-dropdown]')) {
+        setOpenDropdown(null)
+      }
+    }
+
+    if (openDropdown) {
+      document.addEventListener('click', handleClickOutside)
+      return () => document.removeEventListener('click', handleClickOutside)
+    }
+  }, [openDropdown])
 
   useEffect(() => {
     return subscribeToUpdates(() => {
@@ -218,18 +213,159 @@ export default function MainLayout() {
   const showBanner = updateAvailable && !bannerDismissed
 
   return (
-    <div className="flex h-screen w-full flex-col overflow-hidden bg-canvas text-ink md:flex-row">
-      {/* Mobile top bar — canvas + hairline (DESIGN top-nav density) */}
-      <header className="sticky top-0 z-30 flex h-14 shrink-0 items-center gap-3 border-b border-hairline bg-canvas/95 px-[var(--ds-spacing-md)] pt-[env(safe-area-inset-top)] backdrop-blur-md md:hidden">
+    <div className="flex h-screen w-full flex-col overflow-hidden bg-canvas text-ink">
+      {/* Top navigation bar - JSONLint style */}
+      <header className="sticky top-0 z-30 grid h-16 shrink-0 grid-cols-[1fr_auto_1fr] items-center border-b border-hairline bg-surface-1 px-4 shadow-sm lg:px-6">
+        {/* Logo */}
+        <div className="flex items-center gap-3 justify-self-start">
+          <NavLink to="/" className="flex items-center gap-3 outline-none focus-visible:ds-focus-ring rounded-md">
+            <LogoMark />
+            <span className="hidden font-display text-lg font-semibold tracking-tight text-ink sm:inline">
+              NUB Portal
+            </span>
+          </NavLink>
+        </div>
+
+        {/* Desktop Navigation - centered */}
+        <nav className="hidden items-center justify-center gap-1 justify-self-center lg:flex" aria-label="Main">
+          {navGroups.map((group) => (
+              <div
+                key={group.id}
+                className="relative"
+                data-dropdown
+              >
+                <button
+                  type="button"
+                  onClick={() => setOpenDropdown(openDropdown === group.id ? null : group.id)}
+                  className={cn(
+                    'flex items-center gap-1 rounded-md px-3 py-2 text-sm font-medium transition-colors whitespace-nowrap',
+                    openDropdown === group.id
+                      ? 'bg-surface-2 text-ink'
+                      : 'text-ink-subtle hover:bg-surface-2 hover:text-ink',
+                    'outline-none focus-visible:ds-focus-ring'
+                  )}
+                >
+                  {t(group.labelKey!)}
+                  <svg
+                    className={cn(
+                      'h-4 w-4 transition-transform',
+                      openDropdown === group.id && 'rotate-180'
+                    )}
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                    strokeWidth={2}
+                  >
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+                  </svg>
+                </button>
+
+                {/* Dropdown menu */}
+                {openDropdown === group.id && (
+                  <div className="absolute left-1/2 top-full z-50 mt-1 max-h-[min(70vh,24rem)] w-56 -translate-x-1/2 overflow-y-auto rounded-md border border-hairline bg-surface-1 shadow-lg">
+                    <div className="py-1">
+                      {group.items.map((item) => {
+                        if (item.kind === 'external') {
+                          return (
+                            <a
+                              key={item.href}
+                              href={item.href}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="block px-4 py-2 text-sm text-ink-subtle hover:bg-surface-2 hover:text-ink"
+                              onClick={() => setOpenDropdown(null)}
+                            >
+                              {t(item.labelKey)}
+                            </a>
+                          )
+                        }
+
+                        return (
+                          <NavLink
+                            key={item.to}
+                            to={item.to}
+                            end={item.end}
+                            className={({ isActive }) =>
+                              cn(
+                                'block px-4 py-2 text-sm',
+                                isActive
+                                  ? 'bg-primary/10 text-primary font-medium'
+                                  : 'text-ink-subtle hover:bg-surface-2 hover:text-ink'
+                              )
+                            }
+                            onClick={() => setOpenDropdown(null)}
+                          >
+                            {t(item.labelKey)}
+                          </NavLink>
+                        )
+                      })}
+                    </div>
+                  </div>
+                )}
+            </div>
+          ))}
+        </nav>
+
+        {/* Right side - Theme, language, GitHub & mobile menu */}
+        <div className="flex items-center justify-self-end gap-2">
+        <div className="hidden items-center gap-2 lg:flex">
+          <ThemeSwitcher />
+          {/* Language Switcher inline */}
+          <div
+            role="group"
+            aria-label={t('lang.label')}
+            className="flex items-center gap-0.5 rounded-md border border-hairline bg-surface-2 p-0.5"
+          >
+            {[
+              { value: 'en' as Locale, short: 'EN' },
+              { value: 'vi' as Locale, short: 'VI' },
+            ].map((opt) => {
+              const active = locale === opt.value
+              return (
+                <button
+                  key={opt.value}
+                  type="button"
+                  onClick={() => setLocale(opt.value)}
+                  aria-pressed={active}
+                  aria-label={opt.value === 'en' ? t('lang.english') : t('lang.vietnamese')}
+                  className={cn(
+                    'rounded px-2 py-1 text-caption font-medium transition-colors',
+                    'outline-none focus-visible:ds-focus-ring',
+                    active
+                      ? 'bg-primary text-on-primary shadow-sm'
+                      : 'text-ink-subtle hover:text-ink hover:bg-surface-1'
+                  )}
+                >
+                  {opt.short}
+                </button>
+              )
+            })}
+          </div>
+
+          <a
+            href="https://github.com/bao201102/tools"
+            target="_blank"
+            rel="noopener noreferrer"
+            className={cn(
+              'flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium transition-colors',
+              'text-ink-subtle hover:bg-surface-2 hover:text-ink',
+              'outline-none focus-visible:ds-focus-ring'
+            )}
+          >
+            <GithubIcon />
+            <span className="hidden xl:inline">{t('nav.openSource')}</span>
+          </a>
+        </div>
+
         <button
           type="button"
           className={cn(
-            'flex h-11 w-11 shrink-0 items-center justify-center rounded-md border border-hairline bg-surface-1',
-            'text-ink transition-colors hover:border-hairline-strong hover:bg-surface-2 active:bg-surface-2',
+            'flex h-10 w-10 shrink-0 items-center justify-center rounded-md border border-hairline bg-surface-1 lg:hidden',
+            'text-ink transition-colors hover:border-hairline-strong hover:bg-surface-2',
             'outline-none focus-visible:ds-focus-ring'
           )}
           aria-expanded={navOpen}
-          aria-controls="site-nav"
+          aria-controls="mobile-nav"
           onClick={() => setNavOpen((o) => !o)}
         >
           <span className="sr-only">
@@ -237,177 +373,96 @@ export default function MainLayout() {
           </span>
           <MenuIcon open={navOpen} />
         </button>
-        <div className="flex min-w-0 flex-1 items-center gap-3 pr-20">
-          <LogoMark />
-          <div className="min-w-0">
-            <p className="truncate font-display text-sm font-semibold tracking-tight text-ink">NUB Portal</p>
-            <p className="truncate text-caption text-ink-subtle">{t('nav.workspaceHub')}</p>
-          </div>
         </div>
       </header>
 
-      <div className="relative flex min-h-0 flex-1 flex-col md:flex-row">
-        {navOpen ? (
-          <button
-            type="button"
-            className="fixed inset-0 z-40 bg-semantic-overlay backdrop-blur-[1px] md:hidden"
-            aria-label={t('nav.closeNavigation')}
+      {/* Mobile Navigation Overlay */}
+      {navOpen && (
+        <>
+          <div
+            className="fixed inset-0 z-40 bg-semantic-overlay backdrop-blur-[1px] lg:hidden"
             onClick={() => setNavOpen(false)}
           />
-        ) : null}
-
-        <aside
-          id="site-nav"
-          className={cn(
-            'fixed bottom-0 left-0 top-0 z-50 flex h-full w-[min(19rem,92vw)] max-w-[100vw] flex-shrink-0 flex-col overflow-y-auto border-r border-hairline bg-surface-3',
-            'shadow-[inset_1px_0_0_0_rgba(255,255,255,0.04)]',
-            'transition-transform duration-200 ease-out will-change-transform',
-            'md:static md:z-auto md:h-full md:min-h-0 md:w-64 md:max-w-none md:translate-x-0 md:shadow-none md:transition-none',
-            navOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'
-          )}
-        >
-          <div className="flex items-center justify-between border-b border-hairline px-[var(--ds-spacing-md)] py-[var(--ds-spacing-md)] pt-[max(0.75rem,env(safe-area-inset-top))] md:hidden">
-            <span className="font-display text-sm font-semibold text-ink">{t('nav.menu')}</span>
-            <button
-              type="button"
-              className="flex h-10 w-10 items-center justify-center rounded-md text-ink-subtle transition-colors hover:bg-surface-4 hover:text-ink outline-none focus-visible:ds-focus-ring"
-              onClick={() => setNavOpen(false)}
-              aria-label={t('nav.closeNavigation')}
-            >
-              <MenuIcon open />
-            </button>
-          </div>
-
-          <div className="hidden border-b border-hairline px-[var(--ds-spacing-lg)] pb-[var(--ds-spacing-md)] pt-[var(--ds-spacing-xl)] md:block">
-            <div className="flex items-center gap-3">
-              <LogoMark />
-              <div className="min-w-0">
-                <p className="font-display text-sm font-semibold tracking-tight text-ink">NUB Portal</p>
-                <p className="text-caption text-ink-subtle">{t('nav.workspaceHub')}</p>
-              </div>
-            </div>
-          </div>
-
-          <nav
-            className="flex flex-col gap-1 px-[var(--ds-spacing-sm)] py-[var(--ds-spacing-md)]"
-            aria-label="Main"
+          <div
+            id="mobile-nav"
+            className="fixed right-0 top-16 z-50 h-[calc(100vh-4rem)] w-64 overflow-y-auto border-l border-hairline bg-surface-1 shadow-xl lg:hidden"
           >
-            {navGroups.map((group) => (
-              <div key={group.id} className="flex flex-col gap-1">
-                {group.labelKey ? (
-                  <button
-                    type="button"
-                    className={cn(
-                      'mt-2 flex w-full items-center gap-2 rounded-md px-3 py-2 text-left font-display text-eyebrow font-medium text-ink-tertiary transition-colors',
-                      'hover:bg-surface-2/60 hover:text-ink',
-                      'outline-none focus-visible:ds-focus-ring'
-                    )}
-                    aria-expanded={expandedGroups[group.id] ?? true}
-                    aria-controls={`nav-group-${group.id}`}
-                    onClick={() =>
-                      setExpandedGroups((prev) => ({
-                        ...prev,
-                        [group.id]: !(prev[group.id] ?? true),
-                      }))
-                    }
-                  >
-                    {expandedGroups[group.id] ?? true ? (
-                      <ChevronDown className="h-4 w-4 shrink-0" aria-hidden />
-                    ) : (
-                      <ChevronRight className="h-4 w-4 shrink-0" aria-hidden />
-                    )}
-                    <span className="min-w-0 truncate">{t(group.labelKey)}</span>
-                  </button>
-                ) : null}
-
-                <div
-                  id={`nav-group-${group.id}`}
-                  className={cn(
-                    'overflow-hidden transition-[max-height] duration-200 ease-out',
-                    group.labelKey && !(expandedGroups[group.id] ?? true) ? 'max-h-0' : 'max-h-[1000px]'
+            <nav className="flex flex-col gap-1 p-4" aria-label="Mobile">
+              {navGroups.map((group) => (
+                <div key={group.id} className="flex flex-col gap-1">
+                  {group.labelKey && (
+                    <div className="mt-2 px-3 py-2 text-xs font-semibold uppercase tracking-wide text-ink-tertiary">
+                      {t(group.labelKey)}
+                    </div>
                   )}
-                >
-                  <div className="flex flex-col gap-1">
-                    {group.items.map((item) => {
-                      const itemClassName = cn(
-                        'rounded-md px-3 py-2.5 text-body-sm font-medium transition-colors md:py-2',
-                        'outline-none focus-visible:ds-focus-ring',
-                        'text-ink-subtle hover:bg-surface-2/90 hover:text-ink'
-                      )
-
-                      if (item.kind === 'external') {
-                        return (
-                          <a
-                            key={item.href}
-                            href={item.href}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className={itemClassName}
-                          >
-                            <span className="inline-flex items-center gap-2">
-                              {t(item.labelKey)}
-                              <ExternalLinkIcon />
-                            </span>
-                          </a>
-                        )
-                      }
-
+                  {group.items.map((item) => {
+                    if (item.kind === 'external') {
                       return (
-                        <NavLink
-                          key={item.to}
-                          to={item.to}
-                          end={item.end}
-                          className={({ isActive }) =>
-                            cn(
-                              itemClassName,
-                              isActive
-                                ? 'bg-surface-2 text-ink shadow-[inset_0_1px_0_0_rgba(255,255,255,0.06)]'
-                                : undefined
-                            )
-                          }
+                        <a
+                          key={item.href}
+                          href={item.href}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="rounded-md px-3 py-2 text-sm font-medium text-ink-subtle hover:bg-surface-2 hover:text-ink"
+                          onClick={() => setNavOpen(false)}
                         >
                           {t(item.labelKey)}
-                        </NavLink>
+                        </a>
                       )
-                    })}
-                  </div>
+                    }
+
+                    return (
+                      <NavLink
+                        key={item.to}
+                        to={item.to}
+                        end={item.end}
+                        className={({ isActive }) =>
+                          cn(
+                            'rounded-md px-3 py-2 text-sm font-medium',
+                            isActive
+                              ? 'bg-primary text-on-primary'
+                              : 'text-ink-subtle hover:bg-surface-2 hover:text-ink'
+                          )
+                        }
+                        onClick={() => setNavOpen(false)}
+                      >
+                        {t(item.labelKey)}
+                      </NavLink>
+                    )
+                  })}
                 </div>
-              </div>
-            ))}
-          </nav>
-
-          <div className="mt-auto border-t border-surface-3 px-[var(--ds-spacing-sm)] py-3 pb-[max(var(--ds-spacing-md),env(safe-area-inset-bottom))]">
-            <a
-              href="https://github.com/bao201102/tools"
-              target="_blank"
-              rel="noopener noreferrer"
-              className={cn(
-                'flex items-center gap-2 rounded-md px-3 py-3 text-body-sm font-medium transition-colors',
-                'text-ink-subtle hover:bg-surface-2/90 hover:text-ink',
-                'outline-none focus-visible:ds-focus-ring'
-              )}
-            >
-              <GithubIcon />
-              <span>{t('nav.openSource')}</span>
-            </a>
+              ))}
+            </nav>
           </div>
-        </aside>
+        </>
+      )}
 
+      {/* Main content area */}
+      <div className="relative flex min-h-0 flex-1 flex-col">
         <main className="flex min-h-0 min-w-0 flex-1 flex-col pb-[env(safe-area-inset-bottom)]">
-          <div className="flex min-h-0 h-full flex-1 flex-col overflow-y-auto bg-canvas">
+          <div className="flex min-h-0 h-full flex-1 flex-col overflow-y-auto bg-surface-1">
             <Outlet />
           </div>
         </main>
       </div>
 
-      <LanguageSwitcher />
+      {/* Mobile theme & language - floating */}
+      <div
+        className={cn(
+          'fixed z-[60] flex items-center gap-2 lg:hidden',
+          'right-3 top-[max(0.5rem,env(safe-area-inset-top))] md:right-4 md:top-3'
+        )}
+      >
+        <ThemeSwitcher />
+        <LanguageSwitcher />
+      </div>
 
       {showBanner ? (
         <div
           role="status"
           aria-live="polite"
           className={cn(
-            'fixed z-50 flex items-center gap-3 rounded-md border border-hairline bg-surface-3 px-4 py-3 shadow-xl',
+            'fixed z-50 flex items-center gap-3 rounded-md border border-hairline bg-surface-1 px-4 py-3 shadow-xl',
             'right-4 bottom-[max(1rem,env(safe-area-inset-bottom))]'
           )}
         >
@@ -416,8 +471,8 @@ export default function MainLayout() {
             type="button"
             onClick={() => reloadForUpdate()}
             className={cn(
-              'rounded-md border border-hairline bg-surface-1 px-3 py-1 text-body-sm font-medium text-ink',
-              'transition-colors hover:border-hairline-strong hover:bg-surface-2',
+              'rounded-md border border-hairline bg-primary text-on-primary px-3 py-1 text-body-sm font-medium',
+              'transition-colors hover:bg-primary-hover',
               'outline-none focus-visible:ds-focus-ring'
             )}
           >

@@ -10,13 +10,13 @@ export type ButtonVariant =
 
 const variantClasses: Record<ButtonVariant, string> = {
   primary:
-    'border border-transparent bg-primary text-on-primary hover:bg-primary-hover active:bg-primary-focus',
+    'border border-transparent bg-primary text-on-primary hover:bg-primary-hover active:bg-primary-focus shadow-sm hover:shadow-md',
   secondary:
-    'border border-hairline bg-surface-1 text-ink hover:border-hairline-strong hover:bg-surface-2 active:bg-surface-2',
+    'border border-hairline bg-surface-1 text-ink hover:border-hairline-strong hover:bg-surface-2 active:bg-surface-3 shadow-sm',
   tertiary:
-    'border border-transparent bg-canvas text-ink hover:bg-surface-1 active:bg-surface-2',
+    'border border-transparent bg-canvas text-ink hover:bg-surface-2 active:bg-surface-3',
   inverse:
-    'border border-transparent bg-inverse-canvas text-inverse-ink hover:bg-inverse-surface-1 active:bg-inverse-surface-2',
+    'border border-transparent bg-inverse-canvas text-inverse-ink hover:bg-inverse-surface-1 active:bg-inverse-surface-2 shadow-sm',
   danger:
     'border border-error-border bg-error-surface text-error-fg hover:bg-error-surface-strong active:bg-error-surface-strong',
 }

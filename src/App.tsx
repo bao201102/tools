@@ -7,6 +7,7 @@ import EncoderPage from './pages/EncoderPage'
 import HomePage from './pages/HomePage'
 import JwtDecoderPage from './pages/JwtDecoderPage'
 import JsonEscapePage from './pages/JsonEscapePage'
+import JsonUnescapePage from './pages/JsonUnescapePage'
 import JsonPage from './pages/JsonPage'
 import PocoGeneratorPage from './pages/PocoGeneratorPage'
 import SqlToPocoPage from './pages/SqlToPocoPage'
@@ -19,6 +20,7 @@ export default function App() {
         <Route index element={<HomePage />} />
         <Route path="json" element={<JsonPage />} />
         <Route path="json-escape" element={<JsonEscapePage />} />
+        <Route path="json-unescape" element={<JsonUnescapePage />} />
         <Route path="yaml" element={<YamlPage />} />
         <Route path="csharp-proto" element={<CsharpProtoPage />} />
         <Route path="csharp-proto-remove" element={<CsharpProtoRemovePage />} />

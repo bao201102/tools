@@ -8,59 +8,59 @@
 
 :root {
   /* -------------------------------------------------------------------------
-   * Brand & accent
+   * Brand & accent (JSONLint-inspired green/blue palette)
    * ------------------------------------------------------------------------- */
-  --ds-color-primary: #5e6ad2;
-  --ds-color-primary-hover: #828fff;
-  --ds-color-primary-focus: #5e69d1;
-  --ds-color-brand-secure: #7a7fad;
-  --ds-color-on-primary: #fbfbfc;
+  --ds-color-primary: #4CAF50;
+  --ds-color-primary-hover: #45a049;
+  --ds-color-primary-focus: #3d8b40;
+  --ds-color-brand-secure: #2196F3;
+  --ds-color-on-primary: #ffffff;
 
   /* -------------------------------------------------------------------------
-   * Surfaces (four-step ladder on canvas — approximate Linear bg-level scale)
+   * Surfaces (light theme - white/gray scale)
    * ------------------------------------------------------------------------- */
-  --ds-color-canvas: #010102;
-  --ds-color-surface-1: #111114;
-  --ds-color-surface-2: #1a1b22;
-  --ds-color-surface-3: #23252e;
-  --ds-color-surface-4: #2e313a;
+  --ds-color-canvas: #f5f5f5;
+  --ds-color-surface-1: #ffffff;
+  --ds-color-surface-2: #fafafa;
+  --ds-color-surface-3: #f0f0f0;
+  --ds-color-surface-4: #e8e8e8;
 
   /* -------------------------------------------------------------------------
-   * Hairlines
+   * Hairlines (light borders)
    * ------------------------------------------------------------------------- */
-  --ds-color-hairline: #23252a;
-  --ds-color-hairline-strong: #3f434c;
-  --ds-color-hairline-tertiary: #1d1f24;
+  --ds-color-hairline: #e0e0e0;
+  --ds-color-hairline-strong: #bdbdbd;
+  --ds-color-hairline-tertiary: #eeeeee;
 
   /* -------------------------------------------------------------------------
-   * Text
+   * Text (dark text on light background)
    * ------------------------------------------------------------------------- */
-  --ds-color-ink: #f7f8f8;
-  --ds-color-ink-muted: #d0d6e0;
-  --ds-color-ink-subtle: #8a8f98;
-  --ds-color-ink-tertiary: #62666d;
+  --ds-color-ink: #212121;
+  --ds-color-ink-muted: #616161;
+  --ds-color-ink-subtle: #757575;
+  --ds-color-ink-tertiary: #9e9e9e;
 
   /* -------------------------------------------------------------------------
-   * Inverse (button-inverse, light surfaces)
+   * Inverse (dark surfaces for special cases)
    * ------------------------------------------------------------------------- */
-  --ds-color-inverse-canvas: #ffffff;
-  --ds-color-inverse-surface-1: #f7f8f8;
-  --ds-color-inverse-surface-2: #eef0f3;
-  --ds-color-inverse-ink: #0e0e11;
+  --ds-color-inverse-canvas: #212121;
+  --ds-color-inverse-surface-1: #303030;
+  --ds-color-inverse-surface-2: #424242;
+  --ds-color-inverse-ink: #ffffff;
 
   /* -------------------------------------------------------------------------
    * Semantic
    * ------------------------------------------------------------------------- */
-  --ds-color-semantic-success: #27a644;
-  --ds-color-semantic-overlay: rgb(0 0 0 / 0.6);
+  --ds-color-semantic-success: #4CAF50;
+  --ds-color-semantic-overlay: rgb(0 0 0 / 0.3);
 
   /* -------------------------------------------------------------------------
-   * Dev-tool errors (locked): muted red — hairline + wash, not saturated red
+   * Dev-tool errors (light theme red)
    * ------------------------------------------------------------------------- */
-  --ds-color-error-fg: #e8c4c6;
-  --ds-color-error-border: #5c3338;
-  --ds-color-error-surface: rgb(42 20 24 / 0.55);
-  --ds-color-error-surface-strong: rgb(52 24 28 / 0.72);
+  --ds-color-error-fg: #d32f2f;
+  --ds-color-error-border: #ef5350;
+  --ds-color-error-surface: #ffebee;
+  --ds-color-error-surface-strong: #ffcdd2;
 
   /* -------------------------------------------------------------------------
    * Focus ring helper (DESIGN.md: 2px primary-focus @ 50% opacity)
@@ -70,13 +70,11 @@
   --ds-focus-ring-offset: 2px;
 
   /* -------------------------------------------------------------------------
-   * Typography — Inter + system (DESIGN.md font substitutes); mono for code
+   * Typography — System fonts for clean, readable look (JSONLint style)
    * ------------------------------------------------------------------------- */
-  --ds-font-sans: 'Inter', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica,
-    Arial, sans-serif;
-  --ds-font-display: 'Inter', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica,
-    Arial, sans-serif;
-  --ds-font-mono: ui-monospace, 'JetBrains Mono', 'SF Mono', 'Menlo', Monaco, Consolas, monospace;
+  --ds-font-sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  --ds-font-display: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  --ds-font-mono: 'Courier New', Courier, monospace, 'SF Mono', Monaco, Consolas;
 
   /* -------------------------------------------------------------------------
    * Spacing scale (base 4px)
@@ -105,6 +103,36 @@
    * Layout
    * ------------------------------------------------------------------------- */
   --ds-max-width-content: 1280px;
+}
+
+/* Dark mode overrides */
+.dark {
+  --ds-color-canvas: #010102;
+  --ds-color-surface-1: #111114;
+  --ds-color-surface-2: #1a1b22;
+  --ds-color-surface-3: #23252e;
+  --ds-color-surface-4: #2e313a;
+
+  --ds-color-hairline: #23252a;
+  --ds-color-hairline-strong: #3f434c;
+  --ds-color-hairline-tertiary: #1d1f24;
+
+  --ds-color-ink: #f7f8f8;
+  --ds-color-ink-muted: #d0d6e0;
+  --ds-color-ink-subtle: #8a8f98;
+  --ds-color-ink-tertiary: #62666d;
+
+  --ds-color-inverse-canvas: #ffffff;
+  --ds-color-inverse-surface-1: #f7f8f8;
+  --ds-color-inverse-surface-2: #eef0f3;
+  --ds-color-inverse-ink: #0e0e11;
+
+  --ds-color-error-fg: #e8c4c6;
+  --ds-color-error-border: #5c3338;
+  --ds-color-error-surface: rgb(42 20 24 / 0.55);
+  --ds-color-error-surface-strong: rgb(52 24 28 / 0.72);
+
+  --ds-color-semantic-overlay: rgb(0 0 0 / 0.6);
 }
 
 /* ---------------------------------------------------------------------------
@@ -268,26 +296,26 @@ body {
  * --------------------------------------------------------------------------- */
 * {
   scrollbar-width: thin;
-  scrollbar-color: rgba(255, 255, 255, 0.12) transparent;
+  scrollbar-color: rgba(255, 255, 255, 0.2) transparent;
 }
 
 *::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
+  width: 10px;
+  height: 10px;
 }
 
 *::-webkit-scrollbar-track {
-  background: transparent;
+  background: var(--ds-color-surface-1);
 }
 
 *::-webkit-scrollbar-thumb {
-  border-radius: 9999px;
-  background: rgba(255, 255, 255, 0.12);
-  border: 2px solid transparent; /* creates padding so the thumb looks inset */
+  border-radius: 5px;
+  background: rgba(255, 255, 255, 0.2);
+  border: 2px solid var(--ds-color-surface-1);
   background-clip: content-box;
 }
 
 *::-webkit-scrollbar-thumb:hover {
-  background: rgba(255, 255, 255, 0.18);
+  background: rgba(255, 255, 255, 0.3);
   background-clip: content-box;
 }

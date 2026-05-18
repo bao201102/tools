@@ -14,11 +14,11 @@ function ToolbarButton({
   variant?: 'default' | 'danger'
 }) {
   const base =
-    'rounded-md px-3 py-2 text-sm font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-50'
+    'rounded-md px-3 py-2 text-sm font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-50 shadow-sm'
   const styles =
     variant === 'danger'
-      ? 'border border-red-900/60 bg-red-950/40 text-red-200 hover:bg-red-950/70'
-      : 'border border-slate-700 bg-slate-800 text-slate-100 hover:bg-slate-700'
+      ? 'border border-error-border bg-error-surface text-error-fg hover:bg-error-surface-strong'
+      : 'border border-hairline bg-surface-1 text-ink hover:bg-surface-2 hover:border-hairline-strong'
 
   return (
     <button type="button" className={`${base} ${styles}`} onClick={onClick} disabled={disabled}>
@@ -40,7 +40,7 @@ function OutputPane({ id, label, value, copyLabel, onCopy }: OutputPaneProps) {
   return (
     <div className="flex min-h-0 flex-1 flex-col gap-2">
       <div className="flex items-center justify-between gap-2">
-        <label htmlFor={id} className="text-sm font-medium text-slate-300">
+        <label htmlFor={id} className="text-sm font-medium text-ink">
           {label}
         </label>
         <ToolbarButton onClick={onCopy} disabled={!value}>
@@ -52,7 +52,7 @@ function OutputPane({ id, label, value, copyLabel, onCopy }: OutputPaneProps) {
         readOnly
         value={value}
         spellCheck={false}
-        className="min-h-[240px] w-full flex-1 resize-y rounded-lg border border-slate-700 bg-slate-950/80 p-4 font-mono text-sm leading-relaxed text-slate-200 focus:outline-none"
+        className="min-h-[240px] w-full flex-1 resize-y rounded-lg border border-hairline bg-surface-2 p-4 font-mono text-sm leading-relaxed text-ink focus:outline-none shadow-sm"
         placeholder={t('tool.jwt.placeholder', { label })}
       />
     </div>
@@ -104,29 +104,22 @@ export function JwtDecoderEditor() {
         : t('tool.jwt.copyPayload')
 
   return (
-    <div className="flex min-h-0 flex-1 flex-col gap-3 p-3 sm:gap-4 sm:p-6 lg:p-8">
+    <div className="mx-auto flex min-h-0 w-full max-w-[1300px] flex-1 flex-col gap-4 p-6 lg:p-8">
       <div className="shrink-0">
-        <h1 className="text-xl font-semibold tracking-tight text-slate-100 sm:text-2xl">{t('tool.jwt.title')}</h1>
-        <p className="mt-1 text-sm text-slate-400">{t('tool.jwt.desc')}</p>
+        <p className="text-sm text-ink-muted">{t('tool.jwt.desc')}</p>
       </div>
 
       {error ? (
         <p
-          className="shrink-0 rounded-md border border-red-900/50 bg-red-950/40 px-3 py-2 text-sm text-red-300"
+          className="shrink-0 rounded-md border border-error-border bg-error-surface px-3 py-2 text-sm text-error-fg"
           role="alert"
         >
           {error}
         </p>
       ) : null}
 
-      <div className="flex shrink-0 flex-wrap gap-2">
-        <ToolbarButton onClick={clear} variant="danger">
-          {t('common.clear')}
-        </ToolbarButton>
-      </div>
-
-      <div className="flex min-h-0 flex-1 flex-col gap-2">
-        <label htmlFor="jwt-input" className="text-sm font-medium text-slate-300">
+      <div className="flex min-h-0 flex-col gap-2">
+        <label htmlFor="jwt-input" className="text-sm font-medium text-ink">
           {t('tool.jwt.input')}
         </label>
         <textarea
@@ -134,13 +127,13 @@ export function JwtDecoderEditor() {
           value={input}
           onChange={(event) => setInput(event.target.value)}
           spellCheck={false}
-          className="min-h-[140px] w-full resize-y rounded-lg border border-slate-700 bg-slate-900/80 p-3 font-mono text-sm leading-relaxed text-slate-100 placeholder:text-slate-600 focus:border-violet-500 focus:outline-none focus:ring-1 focus:ring-violet-500 sm:min-h-[180px] sm:p-4"
+          className="min-h-[140px] w-full resize-y rounded-lg border border-hairline bg-surface-1 p-3 font-mono text-sm leading-relaxed text-ink placeholder:text-ink-subtle focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 sm:min-h-[180px] sm:p-4 shadow-sm"
           placeholder={t('tool.jwt.inputPlaceholder')}
           aria-invalid={error ? true : undefined}
         />
       </div>
 
-      <div className="grid min-h-0 flex-1 grid-cols-1 gap-4 lg:grid-cols-2 lg:gap-6">
+      <div className="grid min-h-0 h-[400px] grid-cols-1 gap-4 w-full lg:grid-cols-2 lg:gap-6">
         <OutputPane
           id="jwt-header-output"
           label={t('tool.jwt.header')}
@@ -155,6 +148,12 @@ export function JwtDecoderEditor() {
           copyLabel={copyPayloadLabel}
           onCopy={handleCopyPayload}
         />
+      </div>
+
+      <div className="flex shrink-0 flex-wrap gap-2">
+        <ToolbarButton onClick={clear} variant="danger">
+          {t('common.clear')}
+        </ToolbarButton>
       </div>
     </div>
   )

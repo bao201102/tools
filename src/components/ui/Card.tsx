@@ -12,10 +12,10 @@ export function Card({ children, className = '', interactive = false, ...rest }:
   return (
     <div
       className={cn(
-        'rounded-lg border border-hairline bg-surface-1 p-[var(--ds-spacing-lg)] text-ink',
-        'transition-[background-color,border-color] duration-200 ease-out',
+        'rounded-lg border border-hairline bg-surface-1 p-[var(--ds-spacing-lg)] text-ink shadow-sm',
+        'transition-[background-color,border-color,box-shadow] duration-200 ease-out',
         interactive &&
-          'group-hover:border-hairline-strong group-hover:bg-surface-2 group-hover:shadow-[inset_0_1px_0_0_rgba(255,255,255,0.05)]',
+          'group-hover:border-hairline-strong group-hover:bg-surface-2 group-hover:shadow-md',
         className
       )}
       {...rest}

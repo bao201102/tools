@@ -1,232 +1,317 @@
 import Editor from '@monaco-editor/react'
-import { useCallback, useState, type ReactNode } from 'react'
-import { Button } from '../../../components/ui/Button'
+import { useCallback, useEffect, useState } from 'react'
 import { useLocale } from '../../../lib/i18n'
-import { useJson } from '../hooks/useJson'
-
-const EDITOR_THEME = 'vs-dark'
+import { useMonacoEditorTheme } from '../../../lib/useMonacoEditorTheme'
 
 const editorOptions = {
   minimap: { enabled: false },
   fontSize: 14,
   scrollBeyondLastLine: false,
   wordWrap: 'on' as const,
-  padding: { top: 8, bottom: 8 },
+  padding: { top: 12, bottom: 12 },
   automaticLayout: true,
   tabSize: 2,
+  lineNumbers: 'on' as const,
 }
 
-function ToolbarButton({
-  children,
-  onClick,
-  disabled,
-  variant = 'default',
-}: {
-  children: ReactNode
-  onClick: () => void
-  disabled?: boolean
-  variant?: 'default' | 'danger'
-}) {
-  const base =
-    'rounded-md px-3 py-2 text-sm font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-50'
-  const styles =
-    variant === 'danger'
-      ? 'border border-red-900/60 bg-red-950/40 text-red-200 hover:bg-red-950/70'
-      : 'border border-slate-700 bg-slate-800 text-slate-100 hover:bg-slate-700'
-
-  return (
-    <button type="button" className={`${base} ${styles}`} onClick={onClick} disabled={disabled}>
-      {children}
-    </button>
-  )
+type JsonStats = {
+  size: number
+  keys: number
+  depth: number
+  objects: number
+  arrays: number
 }
 
-function JsonMonacoPane({
-  labelId,
-  value,
-  readOnly,
-  onChange,
-  'aria-invalid': ariaInvalid,
-}: {
-  labelId: string
-  value: string
-  readOnly: boolean
-  onChange?: (value: string) => void
-  'aria-invalid'?: boolean
-}) {
-  const { t } = useLocale()
-  return (
-    <div
-      className="absolute inset-0 min-h-0"
-      aria-labelledby={labelId}
-      aria-invalid={ariaInvalid}
-    >
-      <Editor
-        height="100%"
-        width="100%"
-        language="json"
-        theme={EDITOR_THEME}
-        value={value}
-        options={{
-          ...editorOptions,
-          readOnly,
-          ...(readOnly
-            ? {
-                readOnly: true,
-                fixedOverflowWidgets: true,
-                wordWrap: 'on' as const,
-              }
-            : {}),
-        }}
-        onChange={readOnly ? undefined : (v) => onChange?.(v ?? '')}
-        loading={
-          <div className="flex h-full items-center justify-center bg-slate-900 text-sm text-slate-400">
-            {t('common.loadingEditor')}
-          </div>
-        }
-      />
-    </div>
-  )
+function calculateJsonStats(json: string): JsonStats {
+  try {
+    const parsed = JSON.parse(json)
+    
+    const countKeys = (obj: any): number => {
+      if (typeof obj !== 'object' || obj === null) return 0
+      let count = 0
+      for (const key in obj) {
+        count++
+        count += countKeys(obj[key])
+      }
+      return count
+    }
+
+    const countDepth = (obj: any, current = 1): number => {
+      if (typeof obj !== 'object' || obj === null) return current
+      let maxDepth = current
+      for (const key in obj) {
+        const depth = countDepth(obj[key], current + 1)
+        maxDepth = Math.max(maxDepth, depth)
+      }
+      return maxDepth
+    }
+
+    const countTypes = (obj: any): { objects: number; arrays: number } => {
+      let objects = 0
+      let arrays = 0
+      
+      if (Array.isArray(obj)) {
+        arrays++
+        obj.forEach(item => {
+          const counts = countTypes(item)
+          objects += counts.objects
+          arrays += counts.arrays
+        })
+      } else if (typeof obj === 'object' && obj !== null) {
+        objects++
+        Object.values(obj).forEach(value => {
+          const counts = countTypes(value)
+          objects += counts.objects
+          arrays += counts.arrays
+        })
+      }
+      
+      return { objects, arrays }
+    }
+
+    const types = countTypes(parsed)
+    
+    return {
+      size: new Blob([json]).size,
+      keys: countKeys(parsed),
+      depth: countDepth(parsed) - 1,
+      objects: types.objects,
+      arrays: types.arrays,
+    }
+  } catch {
+    return { size: 0, keys: 0, depth: 0, objects: 0, arrays: 0 }
+  }
 }
 
 export function JsonEditor() {
   const { t } = useLocale()
-  const {
-    input,
-    output,
-    error,
-    arrayInspection,
-    sortKey,
-    setSortKey,
-    sortDirection,
-    setSortDirection,
-    applySort,
-    onInputChange,
-    minify,
-    clear,
-  } = useJson()
-  const [copyState, setCopyState] = useState<'idle' | 'copied' | 'failed'>('idle')
+  const editorTheme = useMonacoEditorTheme()
+  const [input, setInput] = useState('')
+  const [error, setError] = useState<string | null>(null)
+  const [stats, setStats] = useState<JsonStats>({ size: 0, keys: 0, depth: 0, objects: 0, arrays: 0 })
+  const [copyState, setCopyState] = useState<'idle' | 'copied'>('idle')
+  const [isCompressed, setIsCompressed] = useState(false)
+
+  // Auto-validate and format
+  useEffect(() => {
+    if (!input.trim()) {
+      setError(null)
+      setStats({ size: 0, keys: 0, depth: 0, objects: 0, arrays: 0 })
+      return
+    }
+
+    try {
+      const parsed = JSON.parse(input)
+      setError(null)
+      
+      // Check if compressed (single line)
+      const hasNewlines = input.includes('\n')
+      setIsCompressed(!hasNewlines)
+      
+      const formatted = JSON.stringify(parsed, null, 2)
+      setStats(calculateJsonStats(formatted))
+      
+      // Auto-format only if not compressed and different
+      if (!isCompressed && input !== formatted) {
+        setInput(formatted)
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Invalid JSON')
+      setStats({ size: new Blob([input]).size, keys: 0, depth: 0, objects: 0, arrays: 0 })
+    }
+  }, [input, isCompressed])
+
+  const handleClear = useCallback(() => {
+    setInput('')
+    setError(null)
+    setStats({ size: 0, keys: 0, depth: 0, objects: 0, arrays: 0 })
+    setIsCompressed(false)
+  }, [])
+
+  const handleCompress = useCallback(() => {
+    if (!input.trim()) return
+    try {
+      const parsed = JSON.parse(input)
+      setInput(JSON.stringify(parsed))
+      setIsCompressed(true)
+    } catch {
+      // Already has error
+    }
+  }, [input])
+
+  const handlePrettify = useCallback(() => {
+    if (!input.trim()) return
+    try {
+      const parsed = JSON.parse(input)
+      setInput(JSON.stringify(parsed, null, 2))
+      setIsCompressed(false)
+    } catch {
+      // Already has error
+    }
+  }, [input])
+
+  const handleSortKeys = useCallback(() => {
+    if (!input.trim()) return
+    try {
+      const parsed = JSON.parse(input)
+      const sortObject = (obj: any): any => {
+        if (Array.isArray(obj)) {
+          return obj.map(sortObject)
+        }
+        if (typeof obj === 'object' && obj !== null) {
+          return Object.keys(obj)
+            .sort()
+            .reduce((result: any, key) => {
+              result[key] = sortObject(obj[key])
+              return result
+            }, {})
+        }
+        return obj
+      }
+      const sorted = sortObject(parsed)
+      setInput(JSON.stringify(sorted, null, 2))
+    } catch {
+      // Already has error
+    }
+  }, [input])
 
   const handleCopy = useCallback(async () => {
-    if (!output) return
+    if (!input) return
     try {
-      await navigator.clipboard.writeText(output)
+      await navigator.clipboard.writeText(input)
       setCopyState('copied')
+      setTimeout(() => setCopyState('idle'), 2000)
     } catch {
-      setCopyState('failed')
+      // Ignore
     }
-    window.setTimeout(() => setCopyState('idle'), 2000)
-  }, [output])
+  }, [input])
 
-  const copyLabel =
-    copyState === 'copied' ? t('common.copied') : copyState === 'failed' ? t('common.failed') : t('common.copy')
+  const handleLoadSample = useCallback(() => {
+    const sample = {
+      name: "John Doe",
+      age: 30,
+      email: "john@example.com",
+      address: {
+        street: "123 Main St",
+        city: "New York",
+        country: "USA"
+      },
+      hobbies: ["reading", "coding", "traveling"]
+    }
+    setInput(JSON.stringify(sample, null, 2))
+  }, [])
+
+  const formatBytes = (bytes: number) => {
+    if (bytes === 0) return '0 B'
+    if (bytes < 1024) return `${bytes} B`
+    if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`
+    return `${(bytes / (1024 * 1024)).toFixed(1)} MB`
+  }
 
   return (
-    <div className="flex min-h-0 flex-1 flex-col gap-3 p-3 sm:gap-4 sm:p-6 lg:p-8">
+    <div className="mx-auto flex min-h-0 w-full max-w-[1300px] flex-1 flex-col gap-4 p-6 lg:p-8">
       <div className="shrink-0">
-        <h1 className="text-xl font-semibold tracking-tight text-slate-100 sm:text-2xl">{t('tool.json.title')}</h1>
-        <p className="mt-1 text-sm text-slate-400">
-          {t('tool.json.desc')}
+        <p className="text-sm text-ink-muted">
+          To format and validate your JSON, just copy + paste it below:
         </p>
       </div>
 
-      {error ? (
-        <p
-          className="shrink-0 rounded-md border border-red-900/50 bg-red-950/40 px-3 py-2 text-sm text-red-300"
-          role="alert"
+      {/* Editor */}
+      <div className="relative h-[400px] w-[70%] overflow-hidden rounded-lg border border-hairline shadow-sm">
+        <Editor
+          height="400px"
+          width="100%"
+          language="json"
+          theme={editorTheme}
+          value={input}
+          options={editorOptions}
+          onChange={(v) => setInput(v ?? '')}
+          loading={
+            <div className="flex h-full items-center justify-center bg-surface-2 text-sm text-ink-subtle">
+              {t('common.loadingEditor')}
+            </div>
+          }
+        />
+      </div>
+
+      {/* Action Buttons */}
+      <div className="flex shrink-0 flex-wrap gap-2 w-[70%]">
+        <button
+          type="button"
+          onClick={handleClear}
+          className="rounded-md border border-hairline bg-surface-1 px-4 py-2 text-sm font-medium text-ink shadow-sm transition-colors hover:bg-surface-2 hover:border-hairline-strong"
         >
-          {error}
-        </p>
-      ) : null}
-
-      <div className="flex shrink-0 flex-wrap gap-2">
-        <ToolbarButton onClick={minify}>{t('tool.json.minify')}</ToolbarButton>
-        <ToolbarButton onClick={clear} variant="danger">
-          {t('common.clear')}
-        </ToolbarButton>
-        <ToolbarButton onClick={handleCopy} disabled={!output}>
-          {copyLabel}
-        </ToolbarButton>
+          Clear
+        </button>
+        {isCompressed ? (
+          <button
+            type="button"
+            onClick={handlePrettify}
+            disabled={!!error || !input}
+            className="rounded-md border border-hairline bg-surface-1 px-4 py-2 text-sm font-medium text-ink shadow-sm transition-colors hover:bg-surface-2 hover:border-hairline-strong disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            Prettify
+          </button>
+        ) : (
+          <button
+            type="button"
+            onClick={handleCompress}
+            disabled={!!error || !input}
+            className="rounded-md border border-hairline bg-surface-1 px-4 py-2 text-sm font-medium text-ink shadow-sm transition-colors hover:bg-surface-2 hover:border-hairline-strong disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            Compress
+          </button>
+        )}
+        <button
+          type="button"
+          onClick={handleSortKeys}
+          disabled={!!error || !input}
+          className="rounded-md border border-hairline bg-surface-1 px-4 py-2 text-sm font-medium text-ink shadow-sm transition-colors hover:bg-surface-2 hover:border-hairline-strong disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          Sort Keys
+        </button>
+        <button
+          type="button"
+          onClick={handleCopy}
+          disabled={!input}
+          className="rounded-md border border-hairline bg-surface-1 px-4 py-2 text-sm font-medium text-ink shadow-sm transition-colors hover:bg-surface-2 hover:border-hairline-strong disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          {copyState === 'copied' ? 'Copied!' : 'Copy'}
+        </button>
+        <button
+          type="button"
+          onClick={handleLoadSample}
+          className="rounded-md border border-hairline bg-surface-1 px-4 py-2 text-sm font-medium text-primary shadow-sm transition-colors hover:bg-surface-2 hover:border-hairline-strong"
+        >
+          Load Sample
+        </button>
       </div>
 
-      <div className="grid min-h-0 flex-1 grid-cols-1 gap-4 lg:grid-cols-2 lg:gap-6">
-        <div className="flex min-h-0 flex-1 flex-col gap-2">
-          <div className="flex min-h-10 shrink-0 items-center">
-            <span id="json-input-label" className="text-sm font-medium text-slate-300">
-              {t('common.input')}
+      {/* Status Bar */}
+      <div
+        className={`shrink-0 rounded-md px-4 py-3 text-sm font-medium w-[70%] ${
+          error
+            ? 'bg-error-surface text-error-fg border border-error-border'
+            : 'bg-primary/10 text-primary border border-primary/20'
+        }`}
+      >
+        {error ? (
+          <div className="flex items-center gap-2">
+            <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <span>Error: {error}</span>
+          </div>
+        ) : (
+          <div className="flex items-center gap-2">
+            <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <span>
+              Valid JSON • {formatBytes(stats.size)} • {stats.keys} keys • depth {stats.depth} • {stats.objects} objects • {stats.arrays} arrays
             </span>
           </div>
-          <div className="relative min-h-[min(36vh,220px)] flex-1 overflow-hidden rounded-lg border border-slate-700 sm:min-h-[min(40vh,280px)]">
-            <JsonMonacoPane
-              labelId="json-input-label"
-              value={input}
-              readOnly={false}
-              onChange={onInputChange}
-              aria-invalid={error ? true : undefined}
-            />
-          </div>
-        </div>
-        <div className="flex min-h-0 flex-1 flex-col gap-2">
-          <div
-            className="flex min-h-10 shrink-0 flex-wrap items-center justify-between gap-x-[var(--ds-spacing-md)] gap-y-[var(--ds-spacing-xs)] lg:flex-nowrap lg:gap-y-0"
-            aria-label={arrayInspection ? t('tool.json.outputAndSort') : undefined}
-          >
-            <div className="flex min-h-10 shrink-0 items-center">
-              <span id="json-output-label" className="text-sm font-medium text-slate-300">
-                {t('common.output')}
-              </span>
-            </div>
-            {arrayInspection ? (
-              <div className="flex min-h-10 min-w-0 flex-1 flex-wrap items-center justify-end gap-[var(--ds-spacing-xs)] lg:flex-nowrap">
-                <span className="shrink-0 text-caption text-ink-muted" aria-live="polite">
-                  {t('tool.json.itemsDetected', { count: arrayInspection.itemCount })}
-                </span>
-                <label className="sr-only" htmlFor="json-array-sort-field">
-                  {t('tool.json.sortByField')}
-                </label>
-                <select
-                  id="json-array-sort-field"
-                  value={sortKey}
-                  onChange={(e) => setSortKey(e.target.value)}
-                  className={[
-                    'min-h-10 min-w-[6.5rem] max-w-[12rem] shrink cursor-pointer rounded-md border border-hairline',
-                    'bg-surface-1 px-3 py-2 text-body text-ink outline-none transition-colors',
-                    'hover:border-hairline-strong focus-visible:border-hairline-strong focus-visible:ds-focus-ring',
-                  ].join(' ')}
-                >
-                  <option value="">{t('tool.json.selectField')}</option>
-                  {arrayInspection.keys.map((k) => (
-                    <option key={k} value={k}>
-                      {k}
-                    </option>
-                  ))}
-                </select>
-                <label className="sr-only" htmlFor="json-array-sort-direction">
-                  {t('tool.json.sortDirection')}
-                </label>
-                <select
-                  id="json-array-sort-direction"
-                  value={sortDirection}
-                  onChange={(e) => setSortDirection(e.target.value as 'asc' | 'desc')}
-                  className={[
-                    'min-h-10 w-[5.75rem] shrink-0 cursor-pointer rounded-md border border-hairline',
-                    'bg-surface-1 px-3 py-2 text-body text-ink outline-none transition-colors',
-                    'hover:border-hairline-strong focus-visible:border-hairline-strong focus-visible:ds-focus-ring',
-                  ].join(' ')}
-                >
-                  <option value="asc">ASC</option>
-                  <option value="desc">DESC</option>
-                </select>
-                <Button type="button" variant="primary" disabled={!sortKey} onClick={applySort}>
-                  {t('tool.json.sort')}
-                </Button>
-              </div>
-            ) : null}
-          </div>
-          <div className="relative min-h-[min(36vh,220px)] flex-1 overflow-hidden rounded-lg border border-slate-700 sm:min-h-[min(40vh,280px)]">
-            <JsonMonacoPane labelId="json-output-label" value={output} readOnly />
-          </div>
-        </div>
+        )}
       </div>
     </div>
   )

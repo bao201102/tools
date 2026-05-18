@@ -29,20 +29,27 @@ const sections: readonly Section[] = [
     titleKey: 'home.section.tools',
     items: [
       { kind: 'internal', titleKey: 'home.tool.json.title', descKey: 'home.tool.json.desc', route: '/json' },
-      { kind: 'internal', titleKey: 'home.tool.jsonEscape.title', descKey: 'home.tool.jsonEscape.desc', route: '/json-escape' },
       { kind: 'internal', titleKey: 'home.tool.yaml.title', descKey: 'home.tool.yaml.desc', route: '/yaml' },
-      { kind: 'internal', titleKey: 'home.tool.csharpProto.title', descKey: 'home.tool.csharpProto.desc', route: '/csharp-proto' },
-      { kind: 'internal', titleKey: 'home.tool.csharpProtoRemove.title', descKey: 'home.tool.csharpProtoRemove.desc', route: '/csharp-proto-remove' },
-      { kind: 'internal', titleKey: 'home.tool.encoder.title', descKey: 'home.tool.encoder.desc', route: '/encoder' },
       { kind: 'internal', titleKey: 'home.tool.diff.title', descKey: 'home.tool.diff.desc', route: '/diff-checker' },
-      { kind: 'internal', titleKey: 'home.tool.poco.title', descKey: 'home.tool.poco.desc', route: '/json-to-csharp' },
-      { kind: 'internal', titleKey: 'home.tool.sqlPoco.title', descKey: 'home.tool.sqlPoco.desc', route: '/sql-to-csharp' },
       { kind: 'internal', titleKey: 'home.tool.jwt.title', descKey: 'home.tool.jwt.desc', route: '/jwt-decoder' },
     ],
   },
   {
-    id: 'dashboards',
-    titleKey: 'home.section.dashboards',
+    id: 'convert',
+    titleKey: 'home.section.convert',
+    items: [
+      { kind: 'internal', titleKey: 'home.tool.jsonEscape.title', descKey: 'home.tool.jsonEscape.desc', route: '/json-escape' },
+      { kind: 'internal', titleKey: 'home.tool.jsonUnescape.title', descKey: 'home.tool.jsonUnescape.desc', route: '/json-unescape' },
+      { kind: 'internal', titleKey: 'home.tool.encoder.title', descKey: 'home.tool.encoder.desc', route: '/encoder' },
+      { kind: 'internal', titleKey: 'home.tool.poco.title', descKey: 'home.tool.poco.desc', route: '/json-to-csharp' },
+      { kind: 'internal', titleKey: 'home.tool.sqlPoco.title', descKey: 'home.tool.sqlPoco.desc', route: '/sql-to-csharp' },
+      { kind: 'internal', titleKey: 'home.tool.csharpProto.title', descKey: 'home.tool.csharpProto.desc', route: '/csharp-proto' },
+      { kind: 'internal', titleKey: 'home.tool.csharpProtoRemove.title', descKey: 'home.tool.csharpProtoRemove.desc', route: '/csharp-proto-remove' },
+    ],
+  },
+  {
+    id: 'utility',
+    titleKey: 'nav.group.utility',
     items: [
       { kind: 'external', titleKey: 'home.dash.gold.title', descKey: 'home.dash.gold.desc', href: 'https://gold.nub.io.vn/' },
       { kind: 'external', titleKey: 'home.dash.n8n.title', descKey: 'home.dash.n8n.desc', href: 'https://n8n.nub.io.vn/' },
@@ -101,9 +108,6 @@ export default function HomePage() {
                         </h3>
                         <p className="mt-[var(--ds-spacing-sm)] text-body-sm leading-relaxed text-ink-muted">
                           {t(tool.descKey)}
-                        </p>
-                        <p className="mt-[var(--ds-spacing-lg)] text-button font-medium text-primary">
-                          {t('home.openTool')}
                         </p>
                       </Card>
                     </Link>

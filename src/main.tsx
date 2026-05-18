@@ -4,6 +4,7 @@ import { BrowserRouter } from 'react-router-dom'
 import App from './App'
 import './index.css'
 import { LocaleProvider } from './lib/LocaleProvider'
+import { ThemeProvider } from './lib/ThemeProvider'
 import { startVersionCheck } from './lib/versionCheck'
 
 if (import.meta.env.PROD) {
@@ -12,10 +13,12 @@ if (import.meta.env.PROD) {
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <LocaleProvider>
-      <BrowserRouter>
-        <App />
-      </BrowserRouter>
-    </LocaleProvider>
+    <ThemeProvider>
+      <LocaleProvider>
+        <BrowserRouter>
+          <App />
+        </BrowserRouter>
+      </LocaleProvider>
+    </ThemeProvider>
   </StrictMode>,
 )

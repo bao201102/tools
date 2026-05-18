@@ -1,9 +1,8 @@
 import Editor from '@monaco-editor/react'
 import { useCallback, useState, type ReactNode } from 'react'
 import { useLocale } from '../../../lib/i18n'
+import { useMonacoEditorTheme } from '../../../lib/useMonacoEditorTheme'
 import { useSqlToPoco } from '../hooks/useSqlToPoco'
-
-const EDITOR_THEME = 'vs-dark'
 
 const editorOptions = {
   minimap: { enabled: false },
@@ -27,11 +26,11 @@ function ToolbarButton({
   variant?: 'default' | 'danger'
 }) {
   const base =
-    'rounded-md px-3 py-2 text-sm font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-50'
+    'rounded-md px-3 py-2 text-sm font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-50 shadow-sm'
   const styles =
     variant === 'danger'
-      ? 'border border-red-900/60 bg-red-950/40 text-red-200 hover:bg-red-950/70'
-      : 'border border-slate-700 bg-slate-800 text-slate-100 hover:bg-slate-700'
+      ? 'border border-error-border bg-error-surface text-error-fg hover:bg-error-surface-strong'
+      : 'border border-hairline bg-surface-1 text-ink hover:bg-surface-2 hover:border-hairline-strong'
 
   return (
     <button type="button" className={`${base} ${styles}`} onClick={onClick} disabled={disabled}>
@@ -56,13 +55,14 @@ function EditorPane({
   'aria-invalid'?: boolean
 }) {
   const { t } = useLocale()
+  const editorTheme = useMonacoEditorTheme()
   return (
     <div className="absolute inset-0 min-h-0" aria-labelledby={labelId} aria-invalid={ariaInvalid}>
       <Editor
         height="100%"
         width="100%"
         language={language}
-        theme={EDITOR_THEME}
+        theme={editorTheme}
         value={value}
         options={{
           ...editorOptions,
@@ -77,7 +77,7 @@ function EditorPane({
         }}
         onChange={readOnly ? undefined : (v) => onChange?.(v ?? '')}
         loading={
-          <div className="flex h-full items-center justify-center bg-slate-900 text-sm text-slate-400">
+          <div className="flex h-full items-center justify-center bg-surface-2 text-sm text-ink-subtle">
             {t('common.loadingEditor')}
           </div>
         }
@@ -110,17 +110,14 @@ export function SqlToPocoEditor() {
         : t('tool.sqlPoco.copyCsharp')
 
   return (
-    <div className="flex min-h-0 flex-1 flex-col gap-3 p-3 sm:gap-4 sm:p-6 lg:p-8">
+    <div className="mx-auto flex min-h-0 w-full max-w-[1300px] flex-1 flex-col gap-4 p-6 lg:p-8">
       <div className="shrink-0">
-        <h1 className="text-xl font-semibold tracking-tight text-slate-100 sm:text-2xl">
-          {t('tool.sqlPoco.title')}
-        </h1>
-        <p className="mt-1 text-sm text-slate-400">{t('tool.sqlPoco.desc')}</p>
+        <p className="text-sm text-ink-muted">{t('tool.sqlPoco.desc')}</p>
       </div>
 
       {error ? (
         <p
-          className="shrink-0 rounded-md border border-red-900/50 bg-red-950/40 px-3 py-2 text-sm text-red-300"
+          className="shrink-0 rounded-md border border-error-border bg-error-surface px-3 py-2 text-sm text-error-fg"
           role="alert"
         >
           {error}
@@ -129,7 +126,7 @@ export function SqlToPocoEditor() {
 
       <div className="flex shrink-0 flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-end">
         <div className="flex flex-col gap-1">
-          <label htmlFor="sql-poco-class-name" className="text-xs font-medium text-slate-400">
+          <label htmlFor="sql-poco-class-name" className="text-xs font-medium text-ink-muted">
             {t('tool.sqlPoco.classOverride')}
           </label>
           <input
@@ -137,27 +134,18 @@ export function SqlToPocoEditor() {
             type="text"
             value={className}
             onChange={(event) => setClassName(event.target.value)}
-            className="w-full max-w-xs rounded-md border border-slate-700 bg-slate-900 px-3 py-2 text-sm text-slate-100 focus:border-violet-500 focus:outline-none focus:ring-1 focus:ring-violet-500 sm:w-56 sm:max-w-none"
+            className="w-full max-w-xs rounded-md border border-hairline bg-surface-1 px-3 py-2 text-sm text-ink focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 sm:w-56 sm:max-w-none shadow-sm"
             placeholder={t('tool.sqlPoco.classPlaceholder')}
           />
         </div>
-
-        <div className="flex flex-wrap gap-2 sm:ml-auto">
-          <ToolbarButton onClick={clear} variant="danger">
-            {t('common.clear')}
-          </ToolbarButton>
-          <ToolbarButton onClick={handleCopy} disabled={!output}>
-            {copyLabel}
-          </ToolbarButton>
-        </div>
       </div>
 
-      <div className="grid min-h-0 flex-1 grid-cols-1 gap-4 lg:grid-cols-2 lg:gap-6">
+      <div className="grid min-h-0 h-[400px] grid-cols-1 gap-4 w-full lg:grid-cols-2 lg:gap-6">
         <div className="flex min-h-0 flex-1 flex-col gap-2">
-          <span id="sql-input-label" className="shrink-0 text-sm font-medium text-slate-300">
+          <span id="sql-input-label" className="shrink-0 text-sm font-medium text-ink">
             {t('tool.sqlPoco.inputSql')}
           </span>
-          <div className="relative min-h-[min(36vh,220px)] flex-1 overflow-hidden rounded-lg border border-slate-700 sm:min-h-[min(40vh,280px)]">
+          <div className="relative h-full overflow-hidden rounded-lg border border-hairline shadow-sm">
             <EditorPane
               labelId="sql-input-label"
               language="sql"
@@ -170,13 +158,22 @@ export function SqlToPocoEditor() {
         </div>
 
         <div className="flex min-h-0 flex-1 flex-col gap-2">
-          <span id="sql-output-label" className="shrink-0 text-sm font-medium text-slate-300">
+          <span id="sql-output-label" className="shrink-0 text-sm font-medium text-ink">
             {t('tool.sqlPoco.generatedCsharp')}
           </span>
-          <div className="relative min-h-[min(36vh,220px)] flex-1 overflow-hidden rounded-lg border border-slate-700 sm:min-h-[min(40vh,280px)]">
+          <div className="relative h-full overflow-hidden rounded-lg border border-hairline shadow-sm">
             <EditorPane labelId="sql-output-label" language="csharp" value={output} readOnly />
           </div>
         </div>
+      </div>
+
+      <div className="flex shrink-0 flex-wrap gap-2">
+        <ToolbarButton onClick={clear} variant="danger">
+          {t('common.clear')}
+        </ToolbarButton>
+        <ToolbarButton onClick={handleCopy} disabled={!output}>
+          {copyLabel}
+        </ToolbarButton>
       </div>
     </div>
   )

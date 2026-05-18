@@ -21,10 +21,10 @@ function ToggleButton({ children, active, onClick }: ToggleButtonProps) {
       type="button"
       onClick={onClick}
       className={[
-        'rounded-md border px-3 py-2 text-sm font-medium transition-colors',
+        'rounded-md border px-3 py-2 text-sm font-medium transition-colors shadow-sm',
         active
-          ? 'border-violet-600/50 bg-violet-600/20 text-violet-300'
-          : 'border-slate-700 bg-slate-800 text-slate-200 hover:bg-slate-700',
+          ? 'border-primary bg-primary text-on-primary'
+          : 'border-hairline bg-surface-1 text-ink hover:bg-surface-2 hover:border-hairline-strong',
       ].join(' ')}
     >
       {children}
@@ -34,11 +34,11 @@ function ToggleButton({ children, active, onClick }: ToggleButtonProps) {
 
 function ToolbarButton({ children, onClick, disabled, variant = 'default' }: ToolbarButtonProps) {
   const base =
-    'rounded-md px-3 py-2 text-sm font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-50'
+    'rounded-md px-3 py-2 text-sm font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-50 shadow-sm'
   const styles =
     variant === 'danger'
-      ? 'border border-red-900/60 bg-red-950/40 text-red-200 hover:bg-red-950/70'
-      : 'border border-slate-700 bg-slate-800 text-slate-100 hover:bg-slate-700'
+      ? 'border border-error-border bg-error-surface text-error-fg hover:bg-error-surface-strong'
+      : 'border border-hairline bg-surface-1 text-ink hover:bg-surface-2 hover:border-hairline-strong'
 
   return (
     <button type="button" className={`${base} ${styles}`} onClick={onClick} disabled={disabled}>
@@ -57,17 +57,14 @@ export function EncoderEditor() {
   }, [output])
 
   return (
-    <div className="flex min-h-0 flex-1 flex-col gap-4 p-3 sm:p-6 lg:p-8">
+    <div className="mx-auto flex min-h-0 w-full max-w-[1300px] flex-1 flex-col gap-4 p-6 lg:p-8">
       <div className="shrink-0">
-        <h1 className="text-xl font-semibold tracking-tight text-slate-100 sm:text-2xl">
-          {t('tool.encoder.title')}
-        </h1>
-        <p className="mt-1 text-sm text-slate-400">{t('tool.encoder.desc')}</p>
+        <p className="text-sm text-ink-muted">{t('tool.encoder.desc')}</p>
       </div>
 
       {error ? (
         <p
-          className="shrink-0 rounded-md border border-red-900/50 bg-red-950/40 px-3 py-2 text-sm text-red-300"
+          className="shrink-0 rounded-md border border-error-border bg-error-surface px-3 py-2 text-sm text-error-fg"
           role="alert"
         >
           {error}
@@ -76,7 +73,7 @@ export function EncoderEditor() {
 
       <div className="flex shrink-0 flex-col gap-3">
         <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center">
-          <span className="shrink-0 text-xs font-semibold uppercase tracking-wide text-slate-500">
+          <span className="shrink-0 text-xs font-semibold uppercase tracking-wide text-ink-subtle">
             {t('tool.encoder.mode')}
           </span>
           <div className="flex flex-wrap gap-2">
@@ -89,7 +86,7 @@ export function EncoderEditor() {
           </div>
         </div>
         <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center sm:gap-2">
-          <span className="shrink-0 text-xs font-semibold uppercase tracking-wide text-slate-500">
+          <span className="shrink-0 text-xs font-semibold uppercase tracking-wide text-ink-subtle">
             {t('tool.encoder.direction')}
           </span>
           <div className="flex flex-wrap gap-2">
@@ -100,23 +97,12 @@ export function EncoderEditor() {
               {t('tool.encoder.direction.decode')}
             </ToggleButton>
           </div>
-          <div className="flex flex-wrap gap-2 border-t border-slate-800/80 pt-3 sm:ml-auto sm:border-t-0 sm:pt-0">
-            <ToolbarButton onClick={swap} disabled={!output}>
-              {t('common.swap')}
-            </ToolbarButton>
-            <ToolbarButton onClick={clear} variant="danger">
-              {t('common.clear')}
-            </ToolbarButton>
-            <ToolbarButton onClick={handleCopy} disabled={!output}>
-              {t('common.copy')}
-            </ToolbarButton>
-          </div>
         </div>
       </div>
 
-      <div className="grid min-h-0 flex-1 grid-cols-1 gap-4 lg:grid-cols-2 lg:gap-6">
+      <div className="grid min-h-0 h-[400px] grid-cols-1 gap-4 w-full lg:grid-cols-2 lg:gap-6">
         <div className="flex min-h-0 flex-1 flex-col gap-2">
-          <label htmlFor="encoder-input" className="shrink-0 text-sm font-medium text-slate-300">
+          <label htmlFor="encoder-input" className="shrink-0 text-sm font-medium text-ink">
             {t('common.input')}
           </label>
           <textarea
@@ -124,13 +110,13 @@ export function EncoderEditor() {
             value={input}
             onChange={(event) => setInput(event.target.value)}
             spellCheck={false}
-            className="min-h-[200px] w-full flex-1 resize-y rounded-lg border border-slate-700 bg-slate-900/80 p-3 font-mono text-sm leading-relaxed text-slate-100 placeholder:text-slate-600 focus:border-violet-500 focus:outline-none focus:ring-1 focus:ring-violet-500 sm:min-h-[280px] sm:p-4"
+            className="h-full w-full resize-none rounded-lg border border-hairline bg-surface-1 p-3 font-mono text-sm leading-relaxed text-ink placeholder:text-ink-subtle focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 sm:p-4 shadow-sm"
             placeholder={t('tool.encoder.input.placeholder')}
             aria-invalid={error ? true : undefined}
           />
         </div>
         <div className="flex min-h-0 flex-1 flex-col gap-2">
-          <label htmlFor="encoder-output" className="shrink-0 text-sm font-medium text-slate-300">
+          <label htmlFor="encoder-output" className="shrink-0 text-sm font-medium text-ink">
             {t('common.output')}
           </label>
           <textarea
@@ -138,10 +124,22 @@ export function EncoderEditor() {
             readOnly
             value={output}
             spellCheck={false}
-            className="min-h-[200px] w-full flex-1 resize-y rounded-lg border border-slate-700 bg-slate-950/80 p-3 font-mono text-sm leading-relaxed text-slate-200 focus:outline-none sm:min-h-[280px] sm:p-4"
+            className="h-full w-full resize-none rounded-lg border border-hairline bg-surface-2 p-3 font-mono text-sm leading-relaxed text-ink focus:outline-none sm:p-4 shadow-sm"
             placeholder={t('tool.encoder.output.placeholder')}
           />
         </div>
+      </div>
+
+      <div className="flex shrink-0 flex-wrap gap-2">
+        <ToolbarButton onClick={swap} disabled={!output}>
+          {t('common.swap')}
+        </ToolbarButton>
+        <ToolbarButton onClick={clear} variant="danger">
+          {t('common.clear')}
+        </ToolbarButton>
+        <ToolbarButton onClick={handleCopy} disabled={!output}>
+          {t('common.copy')}
+        </ToolbarButton>
       </div>
     </div>
   )

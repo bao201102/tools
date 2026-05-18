@@ -1,9 +1,8 @@
 import { DiffEditor } from '@monaco-editor/react'
 import { useCallback, useRef, useState, type ReactNode } from 'react'
 import { useLocale } from '../../../lib/i18n'
+import { useMonacoEditorTheme } from '../../../lib/useMonacoEditorTheme'
 import { useDiffChecker } from '../hooks/useDiffChecker'
-
-const EDITOR_THEME = 'vs-dark'
 type DiffLanguage =
   | 'json'
   | 'plaintext'
@@ -56,11 +55,11 @@ function ToolbarButton({
   onClick: () => void
   variant?: 'default' | 'danger'
 }) {
-  const base = 'rounded-md px-3 py-2 text-sm font-medium transition-colors'
+  const base = 'rounded-md px-3 py-2 text-sm font-medium transition-colors shadow-sm'
   const styles =
     variant === 'danger'
-      ? 'border border-red-900/60 bg-red-950/40 text-red-200 hover:bg-red-950/70'
-      : 'border border-slate-700 bg-slate-800 text-slate-100 hover:bg-slate-700'
+      ? 'border border-error-border bg-error-surface text-error-fg hover:bg-error-surface-strong'
+      : 'border border-hairline bg-surface-1 text-ink hover:bg-surface-2 hover:border-hairline-strong'
 
   return (
     <button type="button" className={`${base} ${styles}`} onClick={onClick}>
@@ -71,6 +70,7 @@ function ToolbarButton({
 
 export function DiffCheckerEditor() {
   const { t } = useLocale()
+  const editorTheme = useMonacoEditorTheme()
   const { renderSideBySide, toggleView } = useDiffChecker()
   const originalEditorRef = useRef<{
     getValue: () => string
@@ -146,24 +146,9 @@ export function DiffCheckerEditor() {
   }, [])
 
   return (
-    <div className="flex min-h-0 flex-1 flex-col gap-3 p-3 sm:gap-4 sm:p-6 lg:p-8">
-      <header className="shrink-0 space-y-1">
-        <h1 className="text-xl font-semibold tracking-tight text-slate-100 sm:text-2xl">
-          {t('tool.diff.title')}
-        </h1>
-        <p className="text-sm text-slate-400">{t('tool.diff.desc')}</p>
-      </header>
-
-      <div className="flex shrink-0 flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
-        <div className="flex flex-wrap gap-2">
-          <ToolbarButton onClick={handleToggleView}>
-            {renderSideBySide ? t('tool.diff.inlineView') : t('tool.diff.sideBySideView')}
-          </ToolbarButton>
-          <ToolbarButton onClick={handleSwap}>{t('common.swap')}</ToolbarButton>
-          <ToolbarButton onClick={handleClearAll} variant="danger">
-            {t('tool.diff.clearAll')}
-          </ToolbarButton>
-        </div>
+    <div className="mx-auto flex min-h-0 w-full max-w-[1300px] flex-1 flex-col gap-4 p-6 lg:p-8">
+      <div className="shrink-0">
+        <p className="text-sm text-ink-muted">{t('tool.diff.desc')}</p>
       </div>
 
       <div
@@ -174,21 +159,21 @@ export function DiffCheckerEditor() {
       >
         <input
           type="text"
-          className="rounded-md border border-slate-700 bg-slate-900 px-3 py-2 text-sm text-slate-100 placeholder:text-slate-500 focus:border-violet-500 focus:outline-none focus:ring-1 focus:ring-violet-500"
+          className="rounded-md border border-hairline bg-surface-1 px-3 py-2 text-sm text-ink placeholder:text-ink-subtle focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
           value={originalLabel}
           onChange={(e) => setOriginalLabel(e.target.value)}
           placeholder={t('tool.diff.original')}
         />
         <input
           type="text"
-          className="rounded-md border border-slate-700 bg-slate-900 px-3 py-2 text-sm text-slate-100 placeholder:text-slate-500 focus:border-violet-500 focus:outline-none focus:ring-1 focus:ring-violet-500"
+          className="rounded-md border border-hairline bg-surface-1 px-3 py-2 text-sm text-ink placeholder:text-ink-subtle focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
           value={modifiedLabel}
           onChange={(e) => setModifiedLabel(e.target.value)}
           placeholder={t('tool.diff.modified')}
         />
       </div>
 
-      <div className="relative min-h-[min(70vh,680px)] flex-1 overflow-hidden rounded-lg border border-slate-700">
+      <div className="relative h-[400px] overflow-hidden rounded-lg border border-hairline shadow-sm">
         <DiffEditor
           height="100%"
           width="100%"
@@ -224,13 +209,23 @@ export function DiffCheckerEditor() {
             ...editorOptions,
             renderSideBySide,
           }}
-          theme={EDITOR_THEME}
+          theme={editorTheme}
           loading={
-            <div className="flex h-full items-center justify-center bg-slate-900 text-sm text-slate-400">
+            <div className="flex h-full items-center justify-center bg-surface-2 text-sm text-ink-subtle">
               {t('tool.diff.loading')}
             </div>
           }
         />
+      </div>
+
+      <div className="flex shrink-0 flex-wrap gap-2">
+        <ToolbarButton onClick={handleToggleView}>
+          {renderSideBySide ? t('tool.diff.inlineView') : t('tool.diff.sideBySideView')}
+        </ToolbarButton>
+        <ToolbarButton onClick={handleSwap}>{t('common.swap')}</ToolbarButton>
+        <ToolbarButton onClick={handleClearAll} variant="danger">
+          {t('tool.diff.clearAll')}
+        </ToolbarButton>
       </div>
     </div>
   )

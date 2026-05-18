@@ -18,37 +18,34 @@ Dự án phù hợp dùng trực tiếp trong trình duyệt khi phát triển, 
 
 ## ✨ Tính năng
 
-### JSON Tools
-| Công cụ                            | Route | Mô tả ngắn                                                                                                                                                                                                                                  |
-| ---------------------------------- | ----- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **JSON Formatter & Minifier**      | `/json` | Pretty-print JSON theo thời gian thực khi gõ, hỗ trợ **minify theo nút bấm**, hiển thị trong Monaco Editor và báo lỗi parse rõ ràng.                                                                                                       |
-| **JSON Escaper & Unescaper**       | `/json-escape` | Chuyển đổi hai chiều giữa chuỗi JSON escaped và JSON đã format; hỗ trợ unwrap chuỗi lồng nhiều lớp (thường gặp trong log C#/payload), kiểm tra root phải là object/array, và hiển thị lỗi ngay trong ô kết quả.                           |
-| **JSON to C# POCO Generator**      | `/json-to-csharp` | Sinh class C# từ JSON với naming theo chuẩn C# (PascalCase), tự thêm `[JsonPropertyName("...")]` khi cần ánh xạ tên gốc, hỗ trợ nested objects và arrays, giữ output dễ đọc để dùng trực tiếp trong API/client models.                                                                |
+Các công cụ được nhóm trên **menu** và **trang chủ** thành ba mục: **Tools**, **Convert**, **Utility**. Giao diện dark mặc định, hỗ trợ **EN / VI**.
 
-### YAML Tools
-| Công cụ                            | Route | Mô tả ngắn                                                                                                                                                                                                                                  |
-| ---------------------------------- | ----- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **YAML Formatter & Validator**     | `/yaml` | Parse YAML bằng `js-yaml`, normalize theo thời gian thực và báo lỗi cú pháp trực quan.                                                                                                                                                     |
+### Tools
+| Công cụ | Route | Mô tả ngắn |
+| --- | --- | --- |
+| **JSON Formatter** | `/json` | Pretty-print và validate JSON khi gõ; compress, sort keys, thống kê kích thước/cấu trúc. |
+| **YAML Formatter** | `/yaml` | Parse YAML bằng `js-yaml`, normalize theo thời gian thực và báo lỗi cú pháp. |
+| **Text & Code Diff Checker** | `/diff-checker` | So sánh Original vs Modified (Monaco Diff); side-by-side / inline, swap, auto-detect ngôn ngữ. |
+| **JWT Decoder** | `/jwt-decoder` | Decode header và payload JWT cục bộ, hiển thị JSON đã format. |
 
-### C# Tools
-| Công cụ                            | Route | Mô tả ngắn                                                                                                                                                                                                                                  |
-| ---------------------------------- | ----- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **C# ProtoMember Reindex Tool**    | `/csharp-proto` | Đọc mã C# **theo từng dòng**, dùng **Regex** để gỡ `[ProtoMember(n)]` cũ và gán lại số thứ tự từ một **số bắt đầu** bạn chọn; hỗ trợ các property dạng `{ get; set; }`, `init`, `private set`, v.v.; giữ nguyên comment `//` và dòng trống. |
-| **C# Remove ProtoMember Tool**     | `/csharp-proto-remove` | Xóa tất cả `[ProtoMember(n)]` attributes, hỗ trợ optional digit matching, giữ nguyên cấu trúc code.                                                                                                                                        |
-| **SQL Table to C# POCO Generator** | `/sql-to-csharp` | Parse câu lệnh `CREATE TABLE` (SQL Server/PostgreSQL), map kiểu dữ liệu SQL sang C#, áp dụng nullable `?` cho value type khi cột cho phép `NULL` (riêng `string` luôn giữ nguyên), và chuyển tên cột sang PascalCase.                     |
+### Convert
+| Công cụ | Route | Mô tả ngắn |
+| --- | --- | --- |
+| **JSON Escape** | `/json-escape` | Escape văn bản/JSON (`\"`, `\n`, `\t`, `\\`…); tùy chọn wrap in quotes, escape Unicode, thống kê ký tự. |
+| **JSON Unescape** | `/json-unescape` | Chuyển chuỗi JSON escaped về JSON dễ đọc; unwrap nhiều lớp, format pretty-print. |
+| **Base64 / URL Encoder & Decoder** | `/encoder` | Encode/decode Base64 và URL trên client; swap input/output. |
+| **JSON → C# POCO** | `/json-to-csharp` | Sinh class C# từ JSON, `[JsonPropertyName]`, nested objects/arrays. |
+| **SQL Table → C# POCO** | `/sql-to-csharp` | Parse `CREATE TABLE`, map kiểu SQL → C#, nullable an toàn. |
+| **C# ProtoMember Reindex** | `/csharp-proto` | Gỡ và đánh lại `[ProtoMember(n)]` tuần tự từ số bắt đầu bạn chọn. |
+| **C# Remove ProtoMember** | `/csharp-proto-remove` | Xóa toàn bộ `[ProtoMember(n)]`, giữ nguyên cấu trúc code. |
 
-### Encoding Tools
-| Công cụ                            | Route | Mô tả ngắn                                                                                                                                                                                                                                  |
-| ---------------------------------- | ----- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Base64 / URL Encoder & Decoder** | `/encoder` | Mã hóa/giải mã nhanh giữa văn bản thường, Base64 và URL encoding ngay trên client; hỗ trợ Unicode và hiển thị lỗi khi input decode không hợp lệ.                                                                                          |
-| **JWT Decoder**                    | `/jwt-decoder` | Decode JWT header/payload cục bộ trong trình duyệt, parse thành JSON đã format và báo lỗi khi token không hợp lệ.                                                                                                                          |
+### Utility (liên kết ngoài)
+| Dịch vụ | URL |
+| --- | --- |
+| **Gold Price Tracker** | https://gold.nub.io.vn/ |
+| **n8n Automation** | https://n8n.nub.io.vn/ |
 
-### Diff & Comparison Tools
-| Công cụ                            | Route | Mô tả ngắn                                                                                                                                                                                                                                  |
-| ---------------------------------- | ----- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Text & Code Diff Checker**       | `/diff-checker` | So sánh **Original vs Modified** bằng Monaco Diff Editor; có chế độ **Side-by-side/Inline**, chỉnh được cả hai bên, chọn ngôn ngữ highlight, kèm nút **Swap** và **Clear All**, auto-detect diff mode, customizable labels, dynamic split widths.                               |
-
-Điều hướng giữa các công cụ qua **React Router** (sidebar + thẻ trên trang chủ).
+Điều hướng qua **React Router**: thanh menu (dropdown Tools / Convert / Utility) và thẻ trên trang chủ.
 
 ---
 
@@ -71,9 +68,10 @@ Dự án phù hợp dùng trực tiếp trong trình duyệt khi phát triển, 
 - **Multi-architecture support** — AMD64 + ARM64
 
 ### SEO & Utilities
-- **Sitemap generation** — Auto-generate sitemap.xml
+- **Sitemap generation** — `scripts/generate-sitemap.js` đọc routes từ `src/App.tsx` → `public/sitemap.xml` (tự động khi thêm `<Route path="...">`)
 - **Version checking** — Client-side version detection với auto-refresh notification
 - **robots.txt** — SEO configuration
+- **i18n** — Tiếng Anh / Tiếng Việt (`src/lib/i18n.ts`)
 
 ---
 
@@ -230,7 +228,7 @@ tools/
 ├── src/
 │   ├── features/              # Feature-based structure
 │   │   ├── json-tool/
-│   │   ├── json-escape-tool/
+│   │   ├── json-escape-tool/    # Escape + Unescape (pages /json-escape, /json-unescape)
 │   │   ├── yaml-tool/
 │   │   ├── csharp-proto-tool/
 │   │   ├── csharp-proto-remove-tool/
@@ -268,5 +266,5 @@ Nếu dự án mở nguồn, hãy bổ sung file `LICENSE` và hướng dẫn đ
 ---
 
 **Phiên bản:** 0.0.0  
-**Cập nhật lần cuối:** 2026-05-12
+**Cập nhật lần cuối:** 2026-05-18
 

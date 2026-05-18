@@ -12,19 +12,22 @@ export const translations = {
     'nav.openNavigation': 'Open navigation',
     'nav.closeNavigation': 'Close navigation',
     'nav.openSource': 'Open Source',
-    'nav.group.devTools': 'Developer Tools',
-    'nav.group.dashboards': 'Dashboards & Services',
+    'nav.group.tools': 'Tools',
+    'nav.group.convert': 'Convert',
+    'nav.group.utility': 'Utility',
     'nav.item.home': 'Home',
     'nav.item.jsonFormatter': 'JSON Formatter',
-    'nav.item.jsonEscape': 'JSON Escape / Unescape',
+    'nav.item.jsonEscape': 'JSON Escape',
+    'nav.item.jsonUnescape': 'JSON Unescape',
     'nav.item.yamlFormatter': 'YAML Formatter',
     'nav.item.csharpProto': 'C# ProtoMember',
     'nav.item.csharpProtoRemove': 'C# Remove ProtoMember',
     'nav.item.encoder': 'Encoder / Decoder',
     'nav.item.diffChecker': 'Text & Code Diff',
+    'nav.item.jwtDecoder': 'JWT Decoder',
     'nav.item.jsonToCsharp': 'JSON → C# POCO',
     'nav.item.sqlToCsharp': 'SQL Table → C# POCO',
-    'nav.item.jwtDecoder': 'JWT Decoder',
+    'nav.item.allTools': 'All Tools',
     'nav.item.goldPrice': 'Gold Price Tracker',
     'nav.item.n8n': 'n8n Automation',
 
@@ -37,6 +40,12 @@ export const translations = {
     'lang.label': 'Language',
     'lang.english': 'English',
     'lang.vietnamese': 'Tiếng Việt',
+
+    // Theme switcher
+    'theme.label': 'Theme',
+    'theme.light': 'Light',
+    'theme.dark': 'Dark',
+    'theme.system': 'System',
 
     // Shared
     'common.copy': 'Copy',
@@ -53,14 +62,16 @@ export const translations = {
     'home.subtitle':
       'Fast, keyboard-friendly utilities for JSON, YAML, encoding, diffs, and codegen. Everything runs locally in your tab.',
     'home.openInNewTab': 'Open in new tab',
-    'home.openTool': 'Open tool →',
-    'home.section.tools': 'Developer Tools',
-    'home.section.dashboards': 'Dashboards & Services',
+    'home.section.tools': 'Tools',
+    'home.section.convert': 'Convert',
     'home.tool.json.title': 'JSON Formatter',
     'home.tool.json.desc': 'Pretty-print as you type; minify to one line on demand',
-    'home.tool.jsonEscape.title': 'JSON Escaper & Unescaper',
+    'home.tool.jsonEscape.title': 'JSON Escape',
     'home.tool.jsonEscape.desc':
-      'Convert escaped string payloads ↔ pretty JSON — bidirectional realtime with smart unwrap.',
+      'Escape quotes, newlines, tabs, and backslashes in text or JSON strings.',
+    'home.tool.jsonUnescape.title': 'JSON Unescape',
+    'home.tool.jsonUnescape.desc':
+      'Convert an escaped JSON string back to readable, formatted JSON.',
     'home.tool.yaml.title': 'YAML Formatter',
     'home.tool.yaml.desc': 'Normalize and validate YAML as you type',
     'home.tool.csharpProto.title': 'C# ProtoMember Reindex',
@@ -95,16 +106,32 @@ export const translations = {
     'tool.json.sort': 'Sort',
     'tool.json.error.invalid': 'Invalid JSON',
 
-    // JSON Escaper
-    'tool.jsonEscape.title': 'JSON Escaper & Unescaper',
+    // JSON Escape
     'tool.jsonEscape.desc':
-      "Bidirectional realtime sync: edits in the escaped string update formatted JSON — and vice versa — based on the editor you're typing in (focus/active pane).",
-    'tool.jsonEscape.copyEscaped': 'Copy escaped',
-    'tool.jsonEscape.copyJson': 'Copy JSON',
-    'tool.jsonEscape.escaped': 'Escaped string',
-    'tool.jsonEscape.formatted': 'Formatted JSON',
-    'tool.jsonEscape.swapAria': 'Swap escaped string and formatted JSON',
-    'tool.jsonEscape.errorPrefix': 'Error:\n',
+      'Paste text below, choose options, then click Escape Text to get an escaped string.',
+    'tool.jsonEscape.input': 'Input Text',
+    'tool.jsonEscape.output': 'Escaped Output',
+    'tool.jsonEscape.charCount': '{count} chars',
+    'tool.jsonEscape.wrapInQuotes': 'Wrap in quotes',
+    'tool.jsonEscape.escapeUnicode': 'Escape Unicode (\\uXXXX)',
+    'tool.jsonEscape.escapeButton': 'Escape Text',
+    'tool.jsonEscape.copyOutput': 'Copy',
+    'tool.jsonEscape.stats':
+      'Characters escaped: {quotes} quotes, {newlines} newlines, {tabs} tabs, {backslashes} backslashes',
+    'tool.jsonEscape.referenceTitle': 'Escape Reference',
+    'tool.jsonEscape.ref.quote': 'Quote',
+    'tool.jsonEscape.ref.backslash': 'Backslash',
+    'tool.jsonEscape.ref.newline': 'Newline',
+    'tool.jsonEscape.ref.tab': 'Tab',
+    'tool.jsonEscape.ref.cr': 'CR',
+    'tool.jsonEscape.ref.backspace': 'Backspace',
+    // JSON Unescape
+    'tool.jsonUnescape.desc':
+      'Paste your escaped JSON string below to convert it back to readable JSON.',
+    'tool.jsonUnescape.input': 'Escaped JSON string',
+    'tool.jsonUnescape.output': 'Unescaped JSON',
+    'tool.jsonUnescape.outputPlaceholder': 'Output will appear here…',
+    'tool.jsonUnescape.copyOutput': 'Copy JSON',
 
     // YAML Formatter
     'tool.yaml.title': 'YAML Formatter',
@@ -187,19 +214,22 @@ export const translations = {
     'nav.openNavigation': 'Mở menu',
     'nav.closeNavigation': 'Đóng menu',
     'nav.openSource': 'Mã nguồn mở',
-    'nav.group.devTools': 'Công cụ Developer',
-    'nav.group.dashboards': 'Dashboards & Dịch vụ',
+    'nav.group.tools': 'Công cụ',
+    'nav.group.convert': 'Chuyển đổi',
+    'nav.group.utility': 'Tiện ích',
     'nav.item.home': 'Trang chủ',
     'nav.item.jsonFormatter': 'Định dạng JSON',
-    'nav.item.jsonEscape': 'Escape / Unescape JSON',
+    'nav.item.jsonEscape': 'Escape JSON',
+    'nav.item.jsonUnescape': 'Unescape JSON',
     'nav.item.yamlFormatter': 'Định dạng YAML',
     'nav.item.csharpProto': 'C# ProtoMember',
     'nav.item.csharpProtoRemove': 'C# Xoá ProtoMember',
     'nav.item.encoder': 'Mã hoá / Giải mã',
     'nav.item.diffChecker': 'So sánh văn bản & code',
+    'nav.item.jwtDecoder': 'Giải mã JWT',
     'nav.item.jsonToCsharp': 'JSON → C# POCO',
     'nav.item.sqlToCsharp': 'SQL Table → C# POCO',
-    'nav.item.jwtDecoder': 'Giải mã JWT',
+    'nav.item.allTools': 'Tất cả công cụ',
     'nav.item.goldPrice': 'Theo dõi giá vàng',
     'nav.item.n8n': 'Tự động hoá n8n',
 
@@ -212,6 +242,12 @@ export const translations = {
     'lang.label': 'Ngôn ngữ',
     'lang.english': 'English',
     'lang.vietnamese': 'Tiếng Việt',
+
+    // Theme switcher
+    'theme.label': 'Giao diện',
+    'theme.light': 'Sáng',
+    'theme.dark': 'Tối',
+    'theme.system': 'Hệ thống',
 
     // Shared
     'common.copy': 'Sao chép',
@@ -228,14 +264,16 @@ export const translations = {
     'home.subtitle':
       'Bộ công cụ nhanh, thân thiện bàn phím cho JSON, YAML, mã hoá, so sánh và sinh code. Mọi thứ chạy cục bộ trong tab của bạn.',
     'home.openInNewTab': 'Mở trong tab mới',
-    'home.openTool': 'Mở công cụ →',
-    'home.section.tools': 'Công cụ Developer',
-    'home.section.dashboards': 'Dashboards & Dịch vụ',
+    'home.section.tools': 'Công cụ',
+    'home.section.convert': 'Chuyển đổi',
     'home.tool.json.title': 'Định dạng JSON',
     'home.tool.json.desc': 'Tự định dạng khi gõ; nén về 1 dòng khi cần',
-    'home.tool.jsonEscape.title': 'Escape & Unescape JSON',
+    'home.tool.jsonEscape.title': 'Escape JSON',
     'home.tool.jsonEscape.desc':
-      'Chuyển đổi chuỗi escape ↔ JSON định dạng — đồng bộ 2 chiều theo thời gian thực, tự nhận escape.',
+      'Escape dấu ngoặc kép, xuống dòng, tab và backslash trong văn bản hoặc chuỗi JSON.',
+    'home.tool.jsonUnescape.title': 'Unescape JSON',
+    'home.tool.jsonUnescape.desc':
+      'Chuyển chuỗi JSON đã escape về JSON dễ đọc, có định dạng.',
     'home.tool.yaml.title': 'Định dạng YAML',
     'home.tool.yaml.desc': 'Chuẩn hoá và kiểm tra YAML khi bạn gõ',
     'home.tool.csharpProto.title': 'Đánh lại số [ProtoMember]',
@@ -271,16 +309,32 @@ export const translations = {
     'tool.json.sort': 'Sắp xếp',
     'tool.json.error.invalid': 'JSON không hợp lệ',
 
-    // JSON Escaper
-    'tool.jsonEscape.title': 'Escape & Unescape JSON',
+    // JSON Escape
     'tool.jsonEscape.desc':
-      'Đồng bộ 2 chiều theo thời gian thực: sửa ở chuỗi escape sẽ cập nhật JSON định dạng — và ngược lại — dựa vào ô soạn thảo bạn đang gõ (focus).',
-    'tool.jsonEscape.copyEscaped': 'Sao chép chuỗi escape',
-    'tool.jsonEscape.copyJson': 'Sao chép JSON',
-    'tool.jsonEscape.escaped': 'Chuỗi escape',
-    'tool.jsonEscape.formatted': 'JSON định dạng',
-    'tool.jsonEscape.swapAria': 'Hoán đổi chuỗi escape và JSON định dạng',
-    'tool.jsonEscape.errorPrefix': 'Lỗi:\n',
+      'Dán văn bản bên dưới, chọn tuỳ chọn, rồi bấm Escape Text để nhận chuỗi escape.',
+    'tool.jsonEscape.input': 'Văn bản đầu vào',
+    'tool.jsonEscape.output': 'Kết quả escape',
+    'tool.jsonEscape.charCount': '{count} ký tự',
+    'tool.jsonEscape.wrapInQuotes': 'Bọc trong dấu ngoặc kép',
+    'tool.jsonEscape.escapeUnicode': 'Escape Unicode (\\uXXXX)',
+    'tool.jsonEscape.escapeButton': 'Escape Text',
+    'tool.jsonEscape.copyOutput': 'Sao chép',
+    'tool.jsonEscape.stats':
+      'Đã escape: {quotes} dấu ngoặc, {newlines} xuống dòng, {tabs} tab, {backslashes} backslash',
+    'tool.jsonEscape.referenceTitle': 'Bảng tham chiếu escape',
+    'tool.jsonEscape.ref.quote': 'Dấu ngoặc',
+    'tool.jsonEscape.ref.backslash': 'Backslash',
+    'tool.jsonEscape.ref.newline': 'Xuống dòng',
+    'tool.jsonEscape.ref.tab': 'Tab',
+    'tool.jsonEscape.ref.cr': 'CR',
+    'tool.jsonEscape.ref.backspace': 'Backspace',
+    // JSON Unescape
+    'tool.jsonUnescape.desc':
+      'Dán chuỗi JSON đã escape bên dưới để chuyển về JSON dễ đọc.',
+    'tool.jsonUnescape.input': 'Chuỗi JSON escape',
+    'tool.jsonUnescape.output': 'JSON đã unescape',
+    'tool.jsonUnescape.outputPlaceholder': 'Kết quả sẽ hiển thị tại đây…',
+    'tool.jsonUnescape.copyOutput': 'Sao chép JSON',
 
     // YAML Formatter
     'tool.yaml.title': 'Định dạng YAML',
