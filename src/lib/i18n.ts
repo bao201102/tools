@@ -19,7 +19,7 @@ export const translations = {
     'nav.item.jsonFormatter': 'JSON Formatter',
     'nav.item.jsonEscape': 'JSON Escape',
     'nav.item.jsonUnescape': 'JSON Unescape',
-    'nav.item.yamlFormatter': 'YAML Formatter',
+    'nav.item.yamlFormatter': 'JSON to YAML',
     'nav.item.csharpProto': 'C# ProtoMember',
     'nav.item.csharpProtoRemove': 'C# Remove ProtoMember',
     'nav.item.encoder': 'Encoder / Decoder',
@@ -72,8 +72,8 @@ export const translations = {
     'home.tool.jsonUnescape.title': 'JSON Unescape',
     'home.tool.jsonUnescape.desc':
       'Convert an escaped JSON string back to readable, formatted JSON.',
-    'home.tool.yaml.title': 'YAML Formatter',
-    'home.tool.yaml.desc': 'Normalize and validate YAML as you type',
+    'home.tool.yaml.title': 'JSON to YAML',
+    'home.tool.yaml.desc': 'Convert JSON to YAML format with syntax validation',
     'home.tool.csharpProto.title': 'C# ProtoMember Reindex',
     'home.tool.csharpProto.desc': 'Re-sequence [ProtoMember] attributes on C# properties',
     'home.tool.csharpProtoRemove.title': 'C# Remove ProtoMember',
@@ -134,8 +134,8 @@ export const translations = {
     'tool.jsonUnescape.copyOutput': 'Copy JSON',
 
     // YAML Formatter
-    'tool.yaml.title': 'YAML Formatter',
-    'tool.yaml.desc': 'Normalize and validate YAML as you type.',
+    'tool.yaml.title': 'JSON to YAML',
+    'tool.yaml.desc': 'Convert JSON to YAML format. Paste your JSON in the input editor.',
     'tool.yaml.error.invalid': 'Invalid YAML',
 
     // C# ProtoMember Reindex
@@ -221,7 +221,7 @@ export const translations = {
     'nav.item.jsonFormatter': 'Định dạng JSON',
     'nav.item.jsonEscape': 'Escape JSON',
     'nav.item.jsonUnescape': 'Unescape JSON',
-    'nav.item.yamlFormatter': 'Định dạng YAML',
+    'nav.item.yamlFormatter': 'JSON sang YAML',
     'nav.item.csharpProto': 'C# ProtoMember',
     'nav.item.csharpProtoRemove': 'C# Xoá ProtoMember',
     'nav.item.encoder': 'Mã hoá / Giải mã',
@@ -274,8 +274,8 @@ export const translations = {
     'home.tool.jsonUnescape.title': 'Unescape JSON',
     'home.tool.jsonUnescape.desc':
       'Chuyển chuỗi JSON đã escape về JSON dễ đọc, có định dạng.',
-    'home.tool.yaml.title': 'Định dạng YAML',
-    'home.tool.yaml.desc': 'Chuẩn hoá và kiểm tra YAML khi bạn gõ',
+    'home.tool.yaml.title': 'JSON sang YAML',
+    'home.tool.yaml.desc': 'Chuyển đổi JSON sang định dạng YAML với kiểm tra cú pháp',
     'home.tool.csharpProto.title': 'Đánh lại số [ProtoMember]',
     'home.tool.csharpProto.desc': 'Đánh lại thứ tự thuộc tính [ProtoMember] cho các property C#',
     'home.tool.csharpProtoRemove.title': 'C# Xoá ProtoMember',
@@ -337,8 +337,8 @@ export const translations = {
     'tool.jsonUnescape.copyOutput': 'Sao chép JSON',
 
     // YAML Formatter
-    'tool.yaml.title': 'Định dạng YAML',
-    'tool.yaml.desc': 'Chuẩn hoá và kiểm tra YAML khi bạn gõ.',
+    'tool.yaml.title': 'JSON sang YAML',
+    'tool.yaml.desc': 'Chuyển đổi JSON sang định dạng YAML. Dán JSON vào ô nhập liệu.',
     'tool.yaml.error.invalid': 'YAML không hợp lệ',
 
     // C# ProtoMember Reindex

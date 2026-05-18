@@ -2,7 +2,7 @@ import yaml from 'js-yaml'
 import { useCallback, useState } from 'react'
 
 function parseErrorMessage(error: unknown): string {
-  return error instanceof Error ? error.message : 'Invalid YAML'
+  return error instanceof Error ? error.message : 'Invalid JSON'
 }
 
 const dumpOptions: yaml.DumpOptions = {
@@ -11,7 +11,7 @@ const dumpOptions: yaml.DumpOptions = {
   noRefs: true,
 }
 
-export function useYaml() {
+export function useJsonToYaml() {
   const [input, setInput] = useState('')
   const [output, setOutput] = useState('')
   const [error, setError] = useState<string | null>(null)
@@ -24,7 +24,9 @@ export function useYaml() {
       return
     }
     try {
-      const data = yaml.load(value)
+      // Parse as JSON first
+      const data = JSON.parse(value)
+      // Convert to YAML
       setOutput(yaml.dump(data, dumpOptions))
       setError(null)
     } catch (e) {

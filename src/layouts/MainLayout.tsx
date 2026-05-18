@@ -21,7 +21,6 @@ const navGroups: NavGroup[] = [
     labelKey: 'nav.group.tools',
     items: [
       { kind: 'internal', to: '/json', labelKey: 'nav.item.jsonFormatter' },
-      { kind: 'internal', to: '/yaml', labelKey: 'nav.item.yamlFormatter' },
       { kind: 'internal', to: '/diff-checker', labelKey: 'nav.item.diffChecker' },
       { kind: 'internal', to: '/jwt-decoder', labelKey: 'nav.item.jwtDecoder' },
       { kind: 'internal', to: '/json-escape', labelKey: 'nav.item.jsonEscape' },
@@ -32,6 +31,7 @@ const navGroups: NavGroup[] = [
     id: 'convert',
     labelKey: 'nav.group.convert',
     items: [
+      { kind: 'internal', to: '/json-to-yaml', labelKey: 'nav.item.yamlFormatter' },
       { kind: 'internal', to: '/encoder', labelKey: 'nav.item.encoder' },
       { kind: 'internal', to: '/json-to-csharp', labelKey: 'nav.item.jsonToCsharp' },
       { kind: 'internal', to: '/sql-to-csharp', labelKey: 'nav.item.sqlToCsharp' },

@@ -2,7 +2,7 @@ import Editor from '@monaco-editor/react'
 import { useCallback, useState, type ReactNode } from 'react'
 import { useLocale } from '../../../lib/i18n'
 import { useMonacoEditorTheme } from '../../../lib/useMonacoEditorTheme'
-import { useYaml } from '../hooks/useYaml'
+import { useJsonToYaml } from '../hooks/useJsonToYaml'
 
 const editorOptions = {
   minimap: { enabled: false },
@@ -88,9 +88,9 @@ function YamlMonacoPane({
   )
 }
 
-export function YamlEditor() {
+export function JsonToYamlEditor() {
   const { t } = useLocale()
-  const { input, output, error, onInputChange, clear } = useYaml()
+  const { input, output, error, onInputChange, clear } = useJsonToYaml()
   const [copyState, setCopyState] = useState<'idle' | 'copied' | 'failed'>('idle')
 
   const handleCopy = useCallback(async () => {
@@ -103,6 +103,21 @@ export function YamlEditor() {
     }
     window.setTimeout(() => setCopyState('idle'), 2000)
   }, [output])
+
+  const handleLoadExample = useCallback(() => {
+    const exampleJson = {
+      name: "John Doe",
+      age: 30,
+      email: "john@example.com",
+      address: {
+        street: "123 Main St",
+        city: "New York",
+        country: "USA"
+      },
+      hobbies: ["reading", "coding", "traveling"]
+    }
+    onInputChange(JSON.stringify(exampleJson, null, 2))
+  }, [onInputChange])
 
   const copyLabel =
     copyState === 'copied' ? t('common.copied') : copyState === 'failed' ? t('common.failed') : t('common.copy')
@@ -124,9 +139,18 @@ export function YamlEditor() {
 
       <div className="grid min-h-0 h-[400px] grid-cols-1 gap-4 w-full lg:grid-cols-2 lg:gap-6">
         <div className="flex min-h-0 flex-1 flex-col gap-2">
-          <span id="yaml-input-label" className="shrink-0 text-sm font-medium text-ink">
-            {t('common.input')}
-          </span>
+          <div className="flex items-center justify-between">
+            <span id="yaml-input-label" className="shrink-0 text-sm font-medium text-ink">
+              {t('common.input')}
+            </span>
+            <button
+              type="button"
+              onClick={handleLoadExample}
+              className="rounded-md border border-hairline bg-surface-1 px-3 py-1 text-xs font-medium text-primary shadow-sm transition-colors hover:bg-surface-2 hover:border-hairline-strong"
+            >
+              Load Example
+            </button>
+          </div>
           <div className="relative h-full overflow-hidden rounded-lg border border-hairline shadow-sm">
             <YamlMonacoPane
               labelId="yaml-input-label"
@@ -138,9 +162,19 @@ export function YamlEditor() {
           </div>
         </div>
         <div className="flex min-h-0 flex-1 flex-col gap-2">
-          <span id="yaml-output-label" className="shrink-0 text-sm font-medium text-ink">
-            {t('common.output')}
-          </span>
+          <div className="flex items-center justify-between">
+            <span id="yaml-output-label" className="shrink-0 text-sm font-medium text-ink">
+              {t('common.output')}
+            </span>
+            <button
+              type="button"
+              onClick={handleCopy}
+              disabled={!output}
+              className="rounded-md border border-hairline bg-surface-1 px-3 py-1 text-xs font-medium text-ink shadow-sm transition-colors hover:bg-surface-2 hover:border-hairline-strong disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {copyLabel}
+            </button>
+          </div>
           <div className="relative h-full overflow-hidden rounded-lg border border-hairline shadow-sm">
             <YamlMonacoPane labelId="yaml-output-label" value={output} readOnly />
           </div>
@@ -150,9 +184,6 @@ export function YamlEditor() {
       <div className="flex shrink-0 flex-wrap gap-2">
         <ToolbarButton onClick={clear} variant="danger">
           {t('common.clear')}
-        </ToolbarButton>
-        <ToolbarButton onClick={handleCopy} disabled={!output}>
-          {copyLabel}
         </ToolbarButton>
       </div>
     </div>

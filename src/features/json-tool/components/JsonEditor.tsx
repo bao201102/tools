@@ -14,6 +14,8 @@ const editorOptions = {
   lineNumbers: 'on' as const,
 }
 
+type ViewMode = 'editor' | 'tree'
+
 type JsonStats = {
   size: number
   keys: number
@@ -83,6 +85,158 @@ function calculateJsonStats(json: string): JsonStats {
   }
 }
 
+function JsonTreeView({ data }: { data: any }) {
+  const [expandedPaths, setExpandedPaths] = useState<Set<string>>(new Set())
+  const [allExpanded, setAllExpanded] = useState(false)
+
+  const togglePath = (path: string) => {
+    setExpandedPaths(prev => {
+      const next = new Set(prev)
+      if (next.has(path)) {
+        next.delete(path)
+      } else {
+        next.add(path)
+      }
+      return next
+    })
+  }
+
+  const expandAll = () => {
+    const allPaths = new Set<string>()
+    const collectPaths = (obj: any, currentPath: string) => {
+      if (typeof obj === 'object' && obj !== null) {
+        allPaths.add(currentPath)
+        if (Array.isArray(obj)) {
+          obj.forEach((item, index) => {
+            collectPaths(item, `${currentPath}[${index}]`)
+          })
+        } else {
+          Object.keys(obj).forEach(key => {
+            collectPaths(obj[key], `${currentPath}.${key}`)
+          })
+        }
+      }
+    }
+    collectPaths(data, 'root')
+    setExpandedPaths(allPaths)
+    setAllExpanded(true)
+  }
+
+  const collapseAll = () => {
+    setExpandedPaths(new Set())
+    setAllExpanded(false)
+  }
+
+  const getValueType = (value: any): string => {
+    if (value === null) return 'null'
+    if (Array.isArray(value)) return 'array'
+    return typeof value
+  }
+
+  const getValueColor = (type: string): string => {
+    switch (type) {
+      case 'string': return 'text-green-600 dark:text-green-400'
+      case 'number': return 'text-blue-600 dark:text-blue-400'
+      case 'boolean': return 'text-purple-600 dark:text-purple-400'
+      case 'null': return 'text-purple-600 dark:text-purple-400'
+      default: return 'text-ink'
+    }
+  }
+
+  const renderValue = (value: any, path: string, key?: string, depth: number = 0): React.ReactElement => {
+    const type = getValueType(value)
+    const isExpanded = expandedPaths.has(path)
+    const indent = depth * 20
+
+    if (type === 'object' || type === 'array') {
+      const isEmpty = type === 'array' ? value.length === 0 : Object.keys(value).length === 0
+      const count = type === 'array' ? value.length : Object.keys(value).length
+      const preview = type === 'array' ? `Array(${count})` : `Object{${count}}`
+
+      return (
+        <div key={path} style={{ marginLeft: `${indent}px` }}>
+          <div className="flex items-center gap-1 py-0.5 hover:bg-surface-2 rounded px-1 -mx-1">
+            {!isEmpty && (
+              <button
+                onClick={() => togglePath(path)}
+                className="flex-shrink-0 w-4 h-4 flex items-center justify-center text-ink-muted hover:text-ink"
+              >
+                {isExpanded ? '▼' : '▶'}
+              </button>
+            )}
+            {isEmpty && <span className="w-4" />}
+            {key !== undefined && (
+              <span className="text-red-600 dark:text-red-400 font-medium">"{key}":</span>
+            )}
+            <span className="text-ink-muted">{type === 'array' ? '[' : '{'}</span>
+            {!isExpanded && (
+              <>
+                <span className="text-ink-subtle text-xs">{preview}</span>
+                <span className="text-ink-muted">{type === 'array' ? ']' : '}'}</span>
+              </>
+            )}
+          </div>
+          {isExpanded && (
+            <>
+              <div>
+                {type === 'array'
+                  ? value.map((item: any, index: number) =>
+                      renderValue(item, `${path}[${index}]`, undefined, depth + 1)
+                    )
+                  : Object.entries(value).map(([k, v]) =>
+                      renderValue(v, `${path}.${k}`, k, depth + 1)
+                    )}
+              </div>
+              <div style={{ marginLeft: `${indent}px` }} className="text-ink-muted py-0.5 px-1">
+                {type === 'array' ? ']' : '}'}
+              </div>
+            </>
+          )}
+        </div>
+      )
+    }
+
+    // Primitive values
+    return (
+      <div key={path} style={{ marginLeft: `${indent}px` }} className="flex items-center gap-1 py-0.5 hover:bg-surface-2 rounded px-1 -mx-1">
+        <span className="w-4" />
+        {key !== undefined && (
+          <span className="text-red-600 dark:text-red-400 font-medium">"{key}":</span>
+        )}
+        <span className={getValueColor(type)}>
+          {type === 'string' ? `"${value}"` : String(value)}
+        </span>
+      </div>
+    )
+  }
+
+  return (
+    <div className="h-full flex flex-col">
+      <div className="flex items-center justify-between mb-3 pb-3 border-b border-hairline">
+        <div className="flex gap-2">
+          <button
+            onClick={expandAll}
+            disabled={allExpanded}
+            className="rounded-md border border-hairline bg-surface-1 px-3 py-1.5 text-xs font-medium text-ink shadow-sm transition-colors hover:bg-surface-2 hover:border-hairline-strong disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            Expand All
+          </button>
+          <button
+            onClick={collapseAll}
+            disabled={expandedPaths.size === 0}
+            className="rounded-md border border-hairline bg-surface-1 px-3 py-1.5 text-xs font-medium text-ink shadow-sm transition-colors hover:bg-surface-2 hover:border-hairline-strong disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            Collapse All
+          </button>
+        </div>
+      </div>
+      <div className="flex-1 overflow-auto font-mono text-sm">
+        {renderValue(data, 'root')}
+      </div>
+    </div>
+  )
+}
+
 export function JsonEditor() {
   const { t } = useLocale()
   const editorTheme = useMonacoEditorTheme()
@@ -91,6 +245,11 @@ export function JsonEditor() {
   const [error, setError] = useState<string | null>(null)
   const [stats, setStats] = useState<JsonStats>({ size: 0, keys: 0, depth: 0, objects: 0, arrays: 0 })
   const [copyState, setCopyState] = useState<'idle' | 'copied'>('idle')
+  const [viewMode, setViewMode] = useState<ViewMode>('editor')
+  const [parsedData, setParsedData] = useState<any>(null)
+  const [detectedFields, setDetectedFields] = useState<string[]>([])
+  const [selectedFields, setSelectedFields] = useState<Set<string>>(new Set())
+  const [extractedOutput, setExtractedOutput] = useState('')
 
   // Auto-validate and format
   useEffect(() => {
@@ -98,12 +257,37 @@ export function JsonEditor() {
       setError(null)
       setOutput('')
       setStats({ size: 0, keys: 0, depth: 0, objects: 0, arrays: 0 })
+      setParsedData(null)
+      setDetectedFields([])
+      setSelectedFields(new Set())
       return
     }
 
     try {
       const parsed = JSON.parse(input)
       setError(null)
+      setParsedData(parsed)
+      
+      // Detect all fields (normalize array indices to generic pattern)
+      const fields = new Set<string>()
+      const detectFields = (obj: any, prefix = '') => {
+        if (typeof obj === 'object' && obj !== null) {
+          if (Array.isArray(obj)) {
+            // For arrays, analyze first item to get structure
+            if (obj.length > 0) {
+              detectFields(obj[0], prefix)
+            }
+          } else {
+            Object.keys(obj).forEach(key => {
+              const path = prefix ? `${prefix}.${key}` : key
+              fields.add(path)
+              detectFields(obj[key], path)
+            })
+          }
+        }
+      }
+      detectFields(parsed)
+      setDetectedFields(Array.from(fields).sort())
       
       const formatted = JSON.stringify(parsed, null, 2)
       setOutput(formatted)
@@ -111,6 +295,9 @@ export function JsonEditor() {
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Invalid JSON')
       setOutput('')
+      setParsedData(null)
+      setDetectedFields([])
+      setSelectedFields(new Set())
       setStats({ size: new Blob([input]).size, keys: 0, depth: 0, objects: 0, arrays: 0 })
     }
   }, [input])
@@ -120,6 +307,10 @@ export function JsonEditor() {
     setOutput('')
     setError(null)
     setStats({ size: 0, keys: 0, depth: 0, objects: 0, arrays: 0 })
+    setParsedData(null)
+    setDetectedFields([])
+    setSelectedFields(new Set())
+    setExtractedOutput('')
   }, [])
 
   const handleCompress = useCallback(() => {
@@ -208,6 +399,121 @@ export function JsonEditor() {
     setInput(JSON.stringify(sample, null, 2))
   }, [])
 
+  const toggleFieldSelection = (field: string) => {
+    setSelectedFields(prev => {
+      const next = new Set(prev)
+      
+      if (next.has(field)) {
+        // Deselecting: remove this field and all its children
+        next.delete(field)
+        detectedFields.forEach(f => {
+          if (f.startsWith(field + '.')) {
+            next.delete(f)
+          }
+        })
+        
+        // Also deselect all parent fields
+        const parts = field.split('.')
+        for (let i = parts.length - 1; i > 0; i--) {
+          const parentPath = parts.slice(0, i).join('.')
+          next.delete(parentPath)
+        }
+      } else {
+        // Selecting: add this field and all its children
+        next.add(field)
+        detectedFields.forEach(f => {
+          if (f.startsWith(field + '.')) {
+            next.add(f)
+          }
+        })
+        
+        // Check if all siblings are selected, then select parent
+        const parts = field.split('.')
+        for (let i = parts.length - 1; i > 0; i--) {
+          const parentPath = parts.slice(0, i).join('.')
+          const childrenFields = detectedFields.filter(f => {
+            const fParts = f.split('.')
+            return fParts.length === i + 1 && f.startsWith(parentPath + '.')
+          })
+          
+          // Check if all direct children are selected
+          const allChildrenSelected = childrenFields.every(child => next.has(child))
+          
+          if (allChildrenSelected && childrenFields.length > 0) {
+            next.add(parentPath)
+          }
+        }
+      }
+      
+      return next
+    })
+  }
+
+  const selectAllFields = () => {
+    setSelectedFields(new Set(detectedFields))
+  }
+
+  const deselectAllFields = () => {
+    setSelectedFields(new Set())
+  }
+
+  const handleExtractFields = useCallback(() => {
+    if (!parsedData || selectedFields.size === 0) return
+
+    const extractFieldsFromObject = (obj: any, selectedPaths: Set<string>): any => {
+      const result: any = {}
+      
+      // Get only top-level selected fields (not children if parent is selected)
+      const topLevelFields = Array.from(selectedPaths).filter(path => {
+        return !Array.from(selectedPaths).some(other => 
+          other !== path && path.startsWith(other + '.')
+        )
+      })
+      
+      topLevelFields.forEach(path => {
+        const parts = path.split('.')
+        let current = obj
+        let resultCurrent = result
+        
+        // Navigate through the path
+        for (let i = 0; i < parts.length; i++) {
+          const part = parts[i]
+          
+          if (i === parts.length - 1) {
+            // Last part - set the value (could be primitive or object)
+            if (current && current[part] !== undefined) {
+              resultCurrent[part] = current[part]
+            }
+          } else {
+            // Intermediate part - create structure
+            if (current && current[part] !== undefined) {
+              if (!resultCurrent[part]) {
+                resultCurrent[part] = Array.isArray(current[part]) ? [] : {}
+              }
+              current = current[part]
+              resultCurrent = resultCurrent[part]
+            } else {
+              break
+            }
+          }
+        }
+      })
+      
+      return result
+    }
+
+    let result: any
+    
+    // Check if root is an array
+    if (Array.isArray(parsedData)) {
+      result = parsedData.map(item => extractFieldsFromObject(item, selectedFields))
+    } else {
+      result = extractFieldsFromObject(parsedData, selectedFields)
+    }
+
+    setExtractedOutput(JSON.stringify(result, null, 2))
+  }, [parsedData, selectedFields])
+
   const formatBytes = (bytes: number) => {
     if (bytes === 0) return '0 B'
     if (bytes < 1024) return `${bytes} B`
@@ -216,7 +522,7 @@ export function JsonEditor() {
   }
 
   return (
-    <div className="mx-auto flex min-h-0 w-full max-w-[1300px] flex-1 flex-col gap-4 p-6 lg:p-8">
+    <div className="mx-auto flex w-full max-w-[1300px] flex-col gap-4 p-6 lg:p-8">
       <div className="shrink-0">
         <p className="text-sm text-ink-muted">
           Paste your JSON in the left editor to format and validate it:
@@ -224,9 +530,9 @@ export function JsonEditor() {
       </div>
 
       {/* Two Editors Side by Side */}
-      <div className="grid min-h-0 h-[400px] grid-cols-1 gap-4 w-full lg:grid-cols-2 lg:gap-6">
+      <div className="grid h-[500px] grid-cols-1 gap-4 w-full lg:grid-cols-2 lg:gap-6">
         {/* Left Editor - Input (Original) */}
-        <div className="flex min-h-0 flex-col gap-2">
+        <div className="flex flex-col gap-2">
           <div className="flex items-center justify-between">
             <h3 className="text-sm font-medium text-ink">Original JSON</h3>
             <button
@@ -255,34 +561,70 @@ export function JsonEditor() {
           </div>
         </div>
 
-        {/* Right Editor - Output (Formatted) */}
-        <div className="flex min-h-0 flex-col gap-2">
+        {/* Right Panel - Output (Formatted or Tree View) */}
+        <div className="flex flex-col gap-2">
           <div className="flex items-center justify-between">
-            <h3 className="text-sm font-medium text-ink">Formatted JSON</h3>
-            <button
-              type="button"
-              onClick={handleCopy}
-              disabled={!output}
-              className="rounded-md border border-hairline bg-surface-1 px-3 py-1 text-xs font-medium text-ink shadow-sm transition-colors hover:bg-surface-2 hover:border-hairline-strong disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {copyState === 'copied' ? 'Copied!' : 'Copy'}
-            </button>
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={() => setViewMode('editor')}
+                className={`rounded-md px-3 py-1 text-xs font-medium transition-colors ${
+                  viewMode === 'editor'
+                    ? 'bg-primary text-white'
+                    : 'bg-surface-1 text-ink border border-hairline hover:bg-surface-2'
+                }`}
+              >
+                Editor
+              </button>
+              <button
+                type="button"
+                onClick={() => setViewMode('tree')}
+                disabled={!parsedData}
+                className={`rounded-md px-3 py-1 text-xs font-medium transition-colors ${
+                  viewMode === 'tree'
+                    ? 'bg-primary text-white'
+                    : 'bg-surface-1 text-ink border border-hairline hover:bg-surface-2'
+                } disabled:opacity-50 disabled:cursor-not-allowed`}
+              >
+                Tree View
+              </button>
+            </div>
+            {viewMode === 'editor' && (
+              <button
+                type="button"
+                onClick={handleCopy}
+                disabled={!output}
+                className="rounded-md border border-hairline bg-surface-1 px-3 py-1 text-xs font-medium text-ink shadow-sm transition-colors hover:bg-surface-2 hover:border-hairline-strong disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {copyState === 'copied' ? 'Copied!' : 'Copy'}
+              </button>
+            )}
           </div>
-          <div className="relative h-full overflow-hidden rounded-lg border border-hairline shadow-sm">
-            <Editor
-              height="100%"
-              width="100%"
-              language="json"
-              theme={editorTheme}
-              value={output}
-              options={{ ...editorOptions, readOnly: false }}
-              onChange={(v) => setOutput(v ?? '')}
-              loading={
-                <div className="flex h-full items-center justify-center bg-surface-2 text-sm text-ink-subtle">
-                  {t('common.loadingEditor')}
-                </div>
-              }
-            />
+          <div className="relative h-full overflow-hidden rounded-lg border border-hairline shadow-sm bg-surface-1">
+            {viewMode === 'editor' ? (
+              <Editor
+                height="100%"
+                width="100%"
+                language="json"
+                theme={editorTheme}
+                value={output}
+                options={{ ...editorOptions, readOnly: false }}
+                onChange={(v) => setOutput(v ?? '')}
+                loading={
+                  <div className="flex h-full items-center justify-center bg-surface-2 text-sm text-ink-subtle">
+                    {t('common.loadingEditor')}
+                  </div>
+                }
+              />
+            ) : parsedData ? (
+              <div className="h-full overflow-auto p-4">
+                <JsonTreeView data={parsedData} />
+              </div>
+            ) : (
+              <div className="flex h-full items-center justify-center text-sm text-ink-subtle">
+                Enter valid JSON to view tree
+              </div>
+            )}
           </div>
         </div>
       </div>
@@ -363,6 +705,104 @@ export function JsonEditor() {
           </div>
         )}
       </div>
+
+      {/* Field Selector */}
+      {detectedFields.length > 0 && (
+        <div className="shrink-0 rounded-lg border border-hairline bg-surface-1 p-4">
+          <div className="flex items-center justify-between mb-3">
+            <h3 className="text-sm font-medium text-ink">Extract Specific Fields</h3>
+            <div className="flex gap-2">
+              <button
+                type="button"
+                onClick={selectAllFields}
+                className="rounded-md border border-hairline bg-surface-1 px-3 py-1 text-xs font-medium text-ink shadow-sm transition-colors hover:bg-surface-2 hover:border-hairline-strong"
+              >
+                Select All
+              </button>
+              <button
+                type="button"
+                onClick={deselectAllFields}
+                className="rounded-md border border-hairline bg-surface-1 px-3 py-1 text-xs font-medium text-ink shadow-sm transition-colors hover:bg-surface-2 hover:border-hairline-strong"
+              >
+                Deselect All
+              </button>
+              <button
+                type="button"
+                onClick={handleExtractFields}
+                disabled={selectedFields.size === 0}
+                className="rounded-md border border-hairline bg-primary px-3 py-1 text-xs font-medium text-white shadow-sm transition-colors hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                Extract Selected ({selectedFields.size})
+              </button>
+            </div>
+          </div>
+          <div className="max-h-48 overflow-y-auto rounded border border-hairline bg-surface-2 p-3">
+            <div className="flex flex-wrap gap-2">
+              {detectedFields.map(field => (
+                <button
+                  key={field}
+                  type="button"
+                  onClick={() => toggleFieldSelection(field)}
+                  className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium transition-all ${
+                    selectedFields.has(field)
+                      ? 'bg-primary text-white shadow-sm hover:bg-primary/90'
+                      : 'bg-surface-1 text-ink border border-hairline hover:bg-surface-2 hover:border-hairline-strong'
+                  }`}
+                  title={field}
+                >
+                  <span>{field}</span>
+                  {selectedFields.has(field) && (
+                    <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                    </svg>
+                  )}
+                </button>
+              ))}
+            </div>
+          </div>
+          <p className="mt-2 text-xs text-ink-muted">
+            Click on fields to select/deselect them, then click "Extract Selected" to generate a new JSON.
+          </p>
+        </div>
+      )}
+
+      {/* Extracted Output Editor */}
+      {extractedOutput && (
+        <div className="shrink-0">
+          <div className="flex items-center justify-between mb-2">
+            <h3 className="text-sm font-medium text-ink">Extracted JSON Output</h3>
+            <button
+              type="button"
+              onClick={async () => {
+                try {
+                  await navigator.clipboard.writeText(extractedOutput)
+                } catch {
+                  // Ignore
+                }
+              }}
+              className="rounded-md border border-hairline bg-surface-1 px-3 py-1 text-xs font-medium text-ink shadow-sm transition-colors hover:bg-surface-2 hover:border-hairline-strong"
+            >
+              Copy
+            </button>
+          </div>
+          <div className="relative h-[300px] overflow-hidden rounded-lg border border-hairline shadow-sm">
+            <Editor
+              height="100%"
+              width="100%"
+              language="json"
+              theme={editorTheme}
+              value={extractedOutput}
+              options={{ ...editorOptions, readOnly: false }}
+              onChange={(v) => setExtractedOutput(v ?? '')}
+              loading={
+                <div className="flex h-full items-center justify-center bg-surface-2 text-sm text-ink-subtle">
+                  {t('common.loadingEditor')}
+                </div>
+              }
+            />
+          </div>
+        </div>
+      )}
     </div>
   )
 }

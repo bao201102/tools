@@ -24,15 +24,15 @@ Các công cụ được nhóm trên **menu** và **trang chủ** thành ba mụ
 | Công cụ | Route | Mô tả ngắn |
 | --- | --- | --- |
 | **JSON Formatter** | `/json` | Pretty-print và validate JSON khi gõ; compress, sort keys, thống kê kích thước/cấu trúc. |
-| **YAML Formatter** | `/yaml` | Parse YAML bằng `js-yaml`, normalize theo thời gian thực và báo lỗi cú pháp. |
 | **Text & Code Diff Checker** | `/diff-checker` | So sánh Original vs Modified (Monaco Diff); side-by-side / inline, swap, auto-detect ngôn ngữ. |
 | **JWT Decoder** | `/jwt-decoder` | Decode header và payload JWT cục bộ, hiển thị JSON đã format. |
+| **JSON Escape** | `/json-escape` | Escape văn bản/JSON (`\"`, `\n`, `\t`, `\\`…); tùy chọn wrap in quotes, escape Unicode, thống kê ký tự. |
+| **JSON Unescape** | `/json-unescape` | Chuyển chuỗi JSON escaped về JSON dễ đọc; unwrap nhiều lớp, format pretty-print. |
 
 ### Convert
 | Công cụ | Route | Mô tả ngắn |
 | --- | --- | --- |
-| **JSON Escape** | `/json-escape` | Escape văn bản/JSON (`\"`, `\n`, `\t`, `\\`…); tùy chọn wrap in quotes, escape Unicode, thống kê ký tự. |
-| **JSON Unescape** | `/json-unescape` | Chuyển chuỗi JSON escaped về JSON dễ đọc; unwrap nhiều lớp, format pretty-print. |
+| **JSON to YAML** | `/json-to-yaml` | Chuyển đổi JSON sang YAML với `js-yaml`; load example, copy output, báo lỗi cú pháp JSON. |
 | **Base64 / URL Encoder & Decoder** | `/encoder` | Encode/decode Base64 và URL trên client; swap input/output. |
 | **JSON → C# POCO** | `/json-to-csharp` | Sinh class C# từ JSON, `[JsonPropertyName]`, nested objects/arrays. |
 | **SQL Table → C# POCO** | `/sql-to-csharp` | Parse `CREATE TABLE`, map kiểu SQL → C#, nullable an toàn. |
@@ -229,7 +229,7 @@ tools/
 │   ├── features/              # Feature-based structure
 │   │   ├── json-tool/
 │   │   ├── json-escape-tool/    # Escape + Unescape (pages /json-escape, /json-unescape)
-│   │   ├── yaml-tool/
+│   │   ├── json-to-yaml-tool/
 │   │   ├── csharp-proto-tool/
 │   │   ├── csharp-proto-remove-tool/
 │   │   ├── encoder-tool/
@@ -267,4 +267,12 @@ Nếu dự án mở nguồn, hãy bổ sung file `LICENSE` và hướng dẫn đ
 
 **Phiên bản:** 0.0.0  
 **Cập nhật lần cuối:** 2026-05-18
+
+## 📝 Changelog
+
+### 2026-05-18
+- Đổi route `/yaml` thành `/json-to-yaml` và di chuyển vào nhóm Convert
+- Đổi tên thư mục `yaml-tool` thành `json-to-yaml-tool`
+- Thêm nút "Load Example" và "Copy" vào JSON to YAML converter
+- Cập nhật logic: Parse JSON input và convert sang YAML output
 
