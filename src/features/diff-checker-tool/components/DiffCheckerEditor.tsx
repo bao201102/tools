@@ -173,7 +173,7 @@ export function DiffCheckerEditor() {
         />
       </div>
 
-      <div className="relative h-[400px] overflow-hidden rounded-lg border border-hairline shadow-sm">
+      <div className="relative h-[600px] overflow-hidden rounded-lg border border-hairline shadow-sm">
         <DiffEditor
           height="100%"
           width="100%"
@@ -191,15 +191,19 @@ export function DiffCheckerEditor() {
             syncSplitWidths()
 
             originalEditor.onDidChangeModelContent(() => {
-              originalValueRef.current = originalEditor.getValue()
-              updateDetectedLanguage(originalValueRef.current, modifiedValueRef.current)
+              const newValue = originalEditor.getValue()
+              originalValueRef.current = newValue
+              setOriginalSnapshot(newValue)
+              updateDetectedLanguage(newValue, modifiedValueRef.current)
             })
             originalEditor.onDidLayoutChange(() => {
               syncSplitWidths()
             })
             modifiedEditor.onDidChangeModelContent(() => {
-              modifiedValueRef.current = modifiedEditor.getValue()
-              updateDetectedLanguage(originalValueRef.current, modifiedValueRef.current)
+              const newValue = modifiedEditor.getValue()
+              modifiedValueRef.current = newValue
+              setModifiedSnapshot(newValue)
+              updateDetectedLanguage(originalValueRef.current, newValue)
             })
             modifiedEditor.onDidLayoutChange(() => {
               syncSplitWidths()
