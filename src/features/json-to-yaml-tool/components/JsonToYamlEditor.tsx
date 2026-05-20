@@ -1,6 +1,7 @@
 import Editor from '@monaco-editor/react'
 import { useCallback, useState, type ReactNode } from 'react'
 import { useLocale } from '../../../lib/i18n'
+import { useAdaptiveEditorHeight } from '../../../lib/useAdaptiveEditorHeight'
 import { useMonacoEditorTheme } from '../../../lib/useMonacoEditorTheme'
 import { useJsonToYaml } from '../hooks/useJsonToYaml'
 
@@ -91,6 +92,7 @@ function YamlMonacoPane({
 export function JsonToYamlEditor() {
   const { t } = useLocale()
   const { input, output, error, onInputChange, clear } = useJsonToYaml()
+  const editorHeight = useAdaptiveEditorHeight(input, output)
   const [copyState, setCopyState] = useState<'idle' | 'copied' | 'failed'>('idle')
 
   const handleCopy = useCallback(async () => {
@@ -137,7 +139,10 @@ export function JsonToYamlEditor() {
         </p>
       ) : null}
 
-      <div className="grid min-h-0 h-[400px] grid-cols-1 gap-4 w-full lg:grid-cols-2 lg:gap-6">
+      <div
+        className="grid min-h-0 grid-cols-1 gap-4 w-full lg:grid-cols-2 lg:gap-6"
+        style={{ height: editorHeight }}
+      >
         <div className="flex min-h-0 flex-1 flex-col gap-2">
           <div className="flex items-center justify-between">
             <span id="yaml-input-label" className="shrink-0 text-sm font-medium text-ink">

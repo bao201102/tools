@@ -1,6 +1,7 @@
 import { DiffEditor } from '@monaco-editor/react'
 import { useCallback, useRef, useState, type ReactNode } from 'react'
 import { useLocale } from '../../../lib/i18n'
+import { useAdaptiveEditorHeightWithOptions } from '../../../lib/useAdaptiveEditorHeight'
 import { useMonacoEditorTheme } from '../../../lib/useMonacoEditorTheme'
 import { useDiffChecker } from '../hooks/useDiffChecker'
 type DiffLanguage =
@@ -90,6 +91,10 @@ export function DiffCheckerEditor() {
   const [originalLabel, setOriginalLabel] = useState(() => t('tool.diff.original'))
   const [modifiedLabel, setModifiedLabel] = useState(() => t('tool.diff.modified'))
   const [splitWidths, setSplitWidths] = useState({ left: 1, right: 1 })
+  const editorHeight = useAdaptiveEditorHeightWithOptions(
+    [originalSnapshot, modifiedSnapshot],
+    { wordWrap: false, lineHeightPx: 18 },
+  )
 
   const updateDetectedLanguage = useCallback((original: string, modified: string) => {
     const source = modified.trim() ? modified : original
@@ -173,7 +178,10 @@ export function DiffCheckerEditor() {
         />
       </div>
 
-      <div className="relative h-[600px] overflow-hidden rounded-lg border border-hairline shadow-sm">
+      <div
+        className="relative overflow-hidden rounded-lg border border-hairline shadow-sm"
+        style={{ height: editorHeight }}
+      >
         <DiffEditor
           height="100%"
           width="100%"

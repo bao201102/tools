@@ -1,6 +1,10 @@
 import Editor from '@monaco-editor/react'
 import { useCallback, useEffect, useState } from 'react'
 import { useLocale } from '../../../lib/i18n'
+import {
+  getMonacoPaneHeight,
+  useAdaptiveEditorHeight,
+} from '../../../lib/useAdaptiveEditorHeight'
 import { useMonacoEditorTheme } from '../../../lib/useMonacoEditorTheme'
 
 const editorOptions = {
@@ -247,6 +251,8 @@ export function JsonEditor() {
   const [copyState, setCopyState] = useState<'idle' | 'copied'>('idle')
   const [viewMode, setViewMode] = useState<ViewMode>('editor')
   const [parsedData, setParsedData] = useState<any>(null)
+  const editorHeight = useAdaptiveEditorHeight(input, output)
+  const monacoPaneHeight = getMonacoPaneHeight(editorHeight)
   const [detectedFields, setDetectedFields] = useState<string[]>([])
   const [selectedFields, setSelectedFields] = useState<Set<string>>(new Set())
   const [extractedOutput, setExtractedOutput] = useState('')
@@ -522,7 +528,7 @@ export function JsonEditor() {
   }
 
   return (
-    <div className="mx-auto flex w-full max-w-[1300px] flex-col gap-4 p-6 lg:p-8">
+    <div className="mx-auto flex min-h-0 w-full max-w-[1300px] flex-1 flex-col gap-4 p-6 lg:p-8">
       <div className="shrink-0">
         <p className="text-sm text-ink-muted">
           Paste your JSON in the left editor to format and validate it:
@@ -530,10 +536,13 @@ export function JsonEditor() {
       </div>
 
       {/* Two Editors Side by Side */}
-      <div className="grid h-[500px] grid-cols-1 gap-4 w-full lg:grid-cols-2 lg:gap-6">
+      <div
+        className="grid min-h-0 shrink-0 grid-cols-1 gap-4 w-full lg:grid-cols-2 lg:gap-6"
+        style={{ height: editorHeight }}
+      >
         {/* Left Editor - Input (Original) */}
-        <div className="flex flex-col gap-2">
-          <div className="flex items-center justify-between">
+        <div className="flex min-h-0 flex-col gap-2">
+          <div className="flex shrink-0 items-center justify-between">
             <h3 className="text-sm font-medium text-ink">Original JSON</h3>
             <button
               type="button"
@@ -543,9 +552,12 @@ export function JsonEditor() {
               Load Sample
             </button>
           </div>
-          <div className="relative h-full overflow-hidden rounded-lg border border-hairline shadow-sm">
+          <div
+            className="relative overflow-hidden rounded-lg border border-hairline shadow-sm"
+            style={{ height: monacoPaneHeight }}
+          >
             <Editor
-              height="100%"
+              height={monacoPaneHeight}
               width="100%"
               language="json"
               theme={editorTheme}
@@ -562,8 +574,8 @@ export function JsonEditor() {
         </div>
 
         {/* Right Panel - Output (Formatted or Tree View) */}
-        <div className="flex flex-col gap-2">
-          <div className="flex items-center justify-between">
+        <div className="flex min-h-0 flex-col gap-2">
+          <div className="flex shrink-0 items-center justify-between">
             <div className="flex items-center gap-2">
               <button
                 type="button"
@@ -600,10 +612,13 @@ export function JsonEditor() {
               </button>
             )}
           </div>
-          <div className="relative h-full overflow-hidden rounded-lg border border-hairline shadow-sm bg-surface-1">
+          <div
+            className="relative overflow-hidden rounded-lg border border-hairline shadow-sm bg-surface-1"
+            style={{ height: monacoPaneHeight }}
+          >
             {viewMode === 'editor' ? (
               <Editor
-                height="100%"
+                height={monacoPaneHeight}
                 width="100%"
                 language="json"
                 theme={editorTheme}
@@ -617,11 +632,14 @@ export function JsonEditor() {
                 }
               />
             ) : parsedData ? (
-              <div className="h-full overflow-auto p-4">
+              <div className="overflow-auto p-4" style={{ height: monacoPaneHeight }}>
                 <JsonTreeView data={parsedData} />
               </div>
             ) : (
-              <div className="flex h-full items-center justify-center text-sm text-ink-subtle">
+              <div
+                className="flex items-center justify-center text-sm text-ink-subtle"
+                style={{ height: monacoPaneHeight }}
+              >
                 Enter valid JSON to view tree
               </div>
             )}

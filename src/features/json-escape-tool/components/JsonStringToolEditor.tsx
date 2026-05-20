@@ -1,6 +1,7 @@
 import Editor from '@monaco-editor/react'
 import { useCallback, useMemo, useState, type ReactNode } from 'react'
 import { useLocale, type TranslationKey } from '../../../lib/i18n'
+import { useAdaptiveEditorHeight } from '../../../lib/useAdaptiveEditorHeight'
 import { useMonacoEditorTheme } from '../../../lib/useMonacoEditorTheme'
 import { ERROR_PANEL_PREFIX } from '../constants'
 
@@ -105,6 +106,7 @@ export function JsonStringToolEditor({
 }: JsonStringToolEditorProps) {
   const { t } = useLocale()
   const [copyState, setCopyState] = useState<'idle' | 'copied' | 'failed'>('idle')
+  const editorHeight = useAdaptiveEditorHeight(input, output)
 
   const resolvedOutputLanguage: MonacoLang = useMemo(() => {
     if (output.startsWith(ERROR_PANEL_PREFIX)) return 'plaintext'
@@ -138,7 +140,10 @@ export function JsonStringToolEditor({
         <p className="text-sm text-ink-muted">{t(descKey)}</p>
       </div>
 
-      <div className="grid min-h-0 h-[400px] grid-cols-1 gap-4 w-full lg:grid-cols-2 lg:gap-6">
+      <div
+        className="grid min-h-0 grid-cols-1 gap-4 w-full lg:grid-cols-2 lg:gap-6"
+        style={{ height: editorHeight }}
+      >
         <section className="flex min-h-0 flex-col gap-2">
           <span id="json-tool-input-label" className="text-sm font-medium text-ink">
             {t(inputLabelKey)}

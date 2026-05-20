@@ -1,4 +1,5 @@
 import { useCallback, type ReactNode } from 'react'
+import { useAdaptiveEditorHeight } from '../../../lib/useAdaptiveEditorHeight'
 import { useLocale } from '../../../lib/i18n'
 import { useEncoder } from '../hooks/useEncoder'
 
@@ -50,6 +51,7 @@ function ToolbarButton({ children, onClick, disabled, variant = 'default' }: Too
 export function EncoderEditor() {
   const { t } = useLocale()
   const { input, output, error, mode, direction, setInput, setMode, setDirection, clear, swap } = useEncoder()
+  const editorHeight = useAdaptiveEditorHeight(input, output)
 
   const handleCopy = useCallback(async () => {
     if (!output) return
@@ -100,7 +102,10 @@ export function EncoderEditor() {
         </div>
       </div>
 
-      <div className="grid min-h-0 h-[400px] grid-cols-1 gap-4 w-full lg:grid-cols-2 lg:gap-6">
+      <div
+        className="grid min-h-0 grid-cols-1 gap-4 w-full lg:grid-cols-2 lg:gap-6"
+        style={{ height: editorHeight }}
+      >
         <div className="flex min-h-0 flex-1 flex-col gap-2">
           <label htmlFor="encoder-input" className="shrink-0 text-sm font-medium text-ink">
             {t('common.input')}

@@ -1,4 +1,5 @@
 import { useCallback, useState, type ReactNode } from 'react'
+import { useAdaptiveEditorHeight } from '../../../lib/useAdaptiveEditorHeight'
 import { useLocale } from '../../../lib/i18n'
 import { useJwtDecoder } from '../hooks/useJwtDecoder'
 
@@ -64,6 +65,7 @@ type CopyState = 'idle' | 'copied' | 'failed'
 export function JwtDecoderEditor() {
   const { t } = useLocale()
   const { input, setInput, headerOutput, payloadOutput, error, clear } = useJwtDecoder()
+  const editorHeight = useAdaptiveEditorHeight(headerOutput, payloadOutput)
   const [copyHeaderState, setCopyHeaderState] = useState<CopyState>('idle')
   const [copyPayloadState, setCopyPayloadState] = useState<CopyState>('idle')
 
@@ -133,7 +135,10 @@ export function JwtDecoderEditor() {
         />
       </div>
 
-      <div className="grid min-h-0 h-[400px] grid-cols-1 gap-4 w-full lg:grid-cols-2 lg:gap-6">
+      <div
+        className="grid min-h-0 grid-cols-1 gap-4 w-full lg:grid-cols-2 lg:gap-6"
+        style={{ height: editorHeight }}
+      >
         <OutputPane
           id="jwt-header-output"
           label={t('tool.jwt.header')}

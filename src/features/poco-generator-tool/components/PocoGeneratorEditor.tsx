@@ -1,6 +1,7 @@
 import Editor from '@monaco-editor/react'
 import { useCallback, useState, type ReactNode } from 'react'
 import { useLocale } from '../../../lib/i18n'
+import { useAdaptiveEditorHeight } from '../../../lib/useAdaptiveEditorHeight'
 import { useMonacoEditorTheme } from '../../../lib/useMonacoEditorTheme'
 import { usePocoGenerator } from '../hooks/usePocoGenerator'
 
@@ -93,6 +94,7 @@ function EditorPane({
 export function PocoGeneratorEditor() {
   const { t } = useLocale()
   const { input, setInput, output, error, rootClassName, setRootClassName, clear } = usePocoGenerator()
+  const editorHeight = useAdaptiveEditorHeight(input, output)
   const [copyState, setCopyState] = useState<'idle' | 'copied' | 'failed'>('idle')
 
   const handleCopy = useCallback(async () => {
@@ -148,7 +150,10 @@ export function PocoGeneratorEditor() {
         </div>
       </div>
 
-      <div className="grid min-h-0 h-[400px] grid-cols-1 gap-4 w-full lg:grid-cols-2 lg:gap-6">
+      <div
+        className="grid min-h-0 grid-cols-1 gap-4 w-full lg:grid-cols-2 lg:gap-6"
+        style={{ height: editorHeight }}
+      >
         <div className="flex min-h-0 flex-1 flex-col gap-2">
           <span id="poco-input-label" className="shrink-0 text-sm font-medium text-ink">
             {t('tool.poco.inputJson')}

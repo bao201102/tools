@@ -1,6 +1,7 @@
 import Editor from '@monaco-editor/react'
 import { useCallback, useState, type ReactNode } from 'react'
 import { useLocale } from '../../../lib/i18n'
+import { useAdaptiveEditorHeight } from '../../../lib/useAdaptiveEditorHeight'
 import { useMonacoEditorTheme } from '../../../lib/useMonacoEditorTheme'
 import { useTextEscape } from '../hooks/useTextEscape'
 
@@ -132,6 +133,7 @@ export function JsonEscapeEditor() {
     clear,
   } = useTextEscape()
 
+  const editorHeight = useAdaptiveEditorHeight(input, output)
   const [copyInputState, setCopyInputState] = useState<'idle' | 'copied' | 'failed'>('idle')
   const [copyOutputState, setCopyOutputState] = useState<'idle' | 'copied' | 'failed'>('idle')
 
@@ -177,7 +179,10 @@ export function JsonEscapeEditor() {
         <p className="text-sm text-ink-muted">{t('tool.jsonEscape.desc')}</p>
       </div>
 
-      <div className="grid min-h-0 h-[400px] grid-cols-1 gap-4 w-full lg:grid-cols-2 lg:gap-6">
+      <div
+        className="grid min-h-0 grid-cols-1 gap-4 w-full lg:grid-cols-2 lg:gap-6"
+        style={{ height: editorHeight }}
+      >
         <section className="flex min-h-0 flex-col gap-2">
           <div className="flex flex-wrap items-center justify-between gap-2">
             <div className="flex flex-wrap items-baseline gap-2">
