@@ -90,6 +90,7 @@ function calculateJsonStats(json: string): JsonStats {
 }
 
 function JsonTreeView({ data }: { data: any }) {
+  const { t } = useLocale()
   const [expandedPaths, setExpandedPaths] = useState<Set<string>>(new Set())
   const [allExpanded, setAllExpanded] = useState(false)
 
@@ -223,14 +224,14 @@ function JsonTreeView({ data }: { data: any }) {
             disabled={allExpanded}
             className="rounded-md border border-hairline bg-surface-1 px-3 py-1.5 text-xs font-medium text-ink shadow-sm transition-colors hover:bg-surface-2 hover:border-hairline-strong disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            Expand All
+            {t('tool.json.expandAll')}
           </button>
           <button
             onClick={collapseAll}
             disabled={expandedPaths.size === 0}
             className="rounded-md border border-hairline bg-surface-1 px-3 py-1.5 text-xs font-medium text-ink shadow-sm transition-colors hover:bg-surface-2 hover:border-hairline-strong disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            Collapse All
+            {t('tool.json.collapseAll')}
           </button>
         </div>
       </div>
@@ -531,7 +532,7 @@ export function JsonEditor() {
     <div className="mx-auto flex min-h-0 w-full max-w-[1300px] flex-1 flex-col gap-4 p-6 lg:p-8">
       <div className="shrink-0">
         <p className="text-sm text-ink-muted">
-          Paste your JSON in the left editor to format and validate it:
+          {t('tool.json.pastePrompt')}
         </p>
       </div>
 
@@ -543,13 +544,13 @@ export function JsonEditor() {
         {/* Left Editor - Input (Original) */}
         <div className="flex min-h-0 flex-col gap-2">
           <div className="flex shrink-0 items-center justify-between">
-            <h3 className="text-sm font-medium text-ink">Original JSON</h3>
+            <h3 className="text-sm font-medium text-ink">{t('tool.json.original')}</h3>
             <button
               type="button"
               onClick={handleLoadSample}
               className="rounded-md border border-hairline bg-surface-1 px-3 py-1 text-xs font-medium text-primary shadow-sm transition-colors hover:bg-surface-2 hover:border-hairline-strong"
             >
-              Load Sample
+              {t('tool.json.loadSample')}
             </button>
           </div>
           <div
@@ -586,7 +587,7 @@ export function JsonEditor() {
                     : 'bg-surface-1 text-ink border border-hairline hover:bg-surface-2'
                 }`}
               >
-                Editor
+                {t('tool.json.editor')}
               </button>
               <button
                 type="button"
@@ -598,7 +599,7 @@ export function JsonEditor() {
                     : 'bg-surface-1 text-ink border border-hairline hover:bg-surface-2'
                 } disabled:opacity-50 disabled:cursor-not-allowed`}
               >
-                Tree View
+                {t('tool.json.treeView')}
               </button>
             </div>
             {viewMode === 'editor' && (
@@ -608,7 +609,7 @@ export function JsonEditor() {
                 disabled={!output}
                 className="rounded-md border border-hairline bg-surface-1 px-3 py-1 text-xs font-medium text-ink shadow-sm transition-colors hover:bg-surface-2 hover:border-hairline-strong disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                {copyState === 'copied' ? 'Copied!' : 'Copy'}
+                {copyState === 'copied' ? t('common.copied') + '!' : t('common.copy')}
               </button>
             )}
           </div>
@@ -640,7 +641,7 @@ export function JsonEditor() {
                 className="flex items-center justify-center text-sm text-ink-subtle"
                 style={{ height: monacoPaneHeight }}
               >
-                Enter valid JSON to view tree
+                {t('tool.json.enterValid')}
               </div>
             )}
           </div>
@@ -654,7 +655,7 @@ export function JsonEditor() {
           onClick={handleClear}
           className="rounded-md border border-hairline bg-surface-1 px-4 py-2 text-sm font-medium text-ink shadow-sm transition-colors hover:bg-surface-2 hover:border-hairline-strong"
         >
-          Clear
+          {t('common.clear')}
         </button>
         <button
           type="button"
@@ -662,7 +663,7 @@ export function JsonEditor() {
           disabled={!!error || !input}
           className="rounded-md border border-hairline bg-surface-1 px-4 py-2 text-sm font-medium text-ink shadow-sm transition-colors hover:bg-surface-2 hover:border-hairline-strong disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          Prettify
+          {t('tool.json.prettify')}
         </button>
         <button
           type="button"
@@ -670,7 +671,7 @@ export function JsonEditor() {
           disabled={!!error || !input}
           className="rounded-md border border-hairline bg-surface-1 px-4 py-2 text-sm font-medium text-ink shadow-sm transition-colors hover:bg-surface-2 hover:border-hairline-strong disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          Compress
+          {t('tool.json.compress')}
         </button>
         <button
           type="button"
@@ -678,7 +679,7 @@ export function JsonEditor() {
           disabled={!!error || !input}
           className="rounded-md border border-hairline bg-surface-1 px-4 py-2 text-sm font-medium text-ink shadow-sm transition-colors hover:bg-surface-2 hover:border-hairline-strong disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          Sort Keys
+          {t('tool.json.sortKeys')}
         </button>
         <button
           type="button"
@@ -686,7 +687,7 @@ export function JsonEditor() {
           disabled={!!error || !input}
           className="rounded-md border border-hairline bg-surface-1 px-4 py-2 text-sm font-medium text-ink shadow-sm transition-colors hover:bg-surface-2 hover:border-hairline-strong disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          Stringify
+          {t('tool.json.stringify')}
         </button>
       </div>
 
@@ -711,7 +712,13 @@ export function JsonEditor() {
               <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
             <span>
-              Valid JSON • {formatBytes(stats.size)} • {stats.keys} keys • depth {stats.depth} • {stats.objects} objects • {stats.arrays} arrays
+              {t('tool.json.stats', {
+                size: formatBytes(stats.size),
+                keys: stats.keys,
+                depth: stats.depth,
+                objects: stats.objects,
+                arrays: stats.arrays,
+              })}
             </span>
           </div>
         ) : (
@@ -719,7 +726,7 @@ export function JsonEditor() {
             <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
-            <span>Paste JSON to get started</span>
+            <span>{t('tool.json.pasteToStart')}</span>
           </div>
         )}
       </div>
@@ -728,21 +735,21 @@ export function JsonEditor() {
       {detectedFields.length > 0 && (
         <div className="shrink-0 rounded-lg border border-hairline bg-surface-1 p-4">
           <div className="flex items-center justify-between mb-3">
-            <h3 className="text-sm font-medium text-ink">Extract Specific Fields</h3>
+            <h3 className="text-sm font-medium text-ink">{t('tool.json.extractFields')}</h3>
             <div className="flex gap-2">
               <button
                 type="button"
                 onClick={selectAllFields}
                 className="rounded-md border border-hairline bg-surface-1 px-3 py-1 text-xs font-medium text-ink shadow-sm transition-colors hover:bg-surface-2 hover:border-hairline-strong"
               >
-                Select All
+                {t('tool.json.selectAll')}
               </button>
               <button
                 type="button"
                 onClick={deselectAllFields}
                 className="rounded-md border border-hairline bg-surface-1 px-3 py-1 text-xs font-medium text-ink shadow-sm transition-colors hover:bg-surface-2 hover:border-hairline-strong"
               >
-                Deselect All
+                {t('tool.json.deselectAll')}
               </button>
               <button
                 type="button"
@@ -750,7 +757,7 @@ export function JsonEditor() {
                 disabled={selectedFields.size === 0}
                 className="rounded-md border border-hairline bg-primary px-3 py-1 text-xs font-medium text-white shadow-sm transition-colors hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                Extract Selected ({selectedFields.size})
+                {t('tool.json.extractSelected', { count: selectedFields.size })}
               </button>
             </div>
           </div>
@@ -779,7 +786,7 @@ export function JsonEditor() {
             </div>
           </div>
           <p className="mt-2 text-xs text-ink-muted">
-            Click on fields to select/deselect them, then click "Extract Selected" to generate a new JSON.
+            {t('tool.json.extractPrompt')}
           </p>
         </div>
       )}
@@ -788,7 +795,7 @@ export function JsonEditor() {
       {extractedOutput && (
         <div className="shrink-0">
           <div className="flex items-center justify-between mb-2">
-            <h3 className="text-sm font-medium text-ink">Extracted JSON Output</h3>
+            <h3 className="text-sm font-medium text-ink">{t('tool.json.extractedOutput')}</h3>
             <button
               type="button"
               onClick={async () => {
@@ -800,7 +807,7 @@ export function JsonEditor() {
               }}
               className="rounded-md border border-hairline bg-surface-1 px-3 py-1 text-xs font-medium text-ink shadow-sm transition-colors hover:bg-surface-2 hover:border-hairline-strong"
             >
-              Copy
+              {t('common.copy')}
             </button>
           </div>
           <div className="relative h-[300px] overflow-hidden rounded-lg border border-hairline shadow-sm">

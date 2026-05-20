@@ -432,6 +432,18 @@ export default function MainLayout() {
                   })}
                 </div>
               ))}
+
+              {/* Divider & Switchers */}
+              <div className="mt-6 border-t border-hairline pt-4 flex flex-col gap-3 px-3">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-semibold uppercase tracking-wide text-ink-tertiary">{t('theme.label')}</span>
+                  <ThemeSwitcher />
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-semibold uppercase tracking-wide text-ink-tertiary">{t('lang.label')}</span>
+                  <LanguageSwitcher />
+                </div>
+              </div>
             </nav>
           </div>
         </>
@@ -446,16 +458,7 @@ export default function MainLayout() {
         </main>
       </div>
 
-      {/* Mobile theme & language - floating */}
-      <div
-        className={cn(
-          'fixed z-[60] flex items-center gap-2 lg:hidden',
-          'right-3 top-[max(0.5rem,env(safe-area-inset-top))] md:right-4 md:top-3'
-        )}
-      >
-        <ThemeSwitcher />
-        <LanguageSwitcher />
-      </div>
+
 
       {showBanner ? (
         <div

@@ -10,10 +10,10 @@
   /* -------------------------------------------------------------------------
    * Brand & accent (JSONLint-inspired green/blue palette)
    * ------------------------------------------------------------------------- */
-  --ds-color-primary: #4CAF50;
-  --ds-color-primary-hover: #45a049;
-  --ds-color-primary-focus: #3d8b40;
-  --ds-color-brand-secure: #2196F3;
+  --ds-color-primary: #5e6ad2;
+  --ds-color-primary-hover: #7983df;
+  --ds-color-primary-focus: #4d59c2;
+  --ds-color-brand-secure: #7a7fad;
   --ds-color-on-primary: #ffffff;
 
   /* -------------------------------------------------------------------------
@@ -72,9 +72,9 @@
   /* -------------------------------------------------------------------------
    * Typography — System fonts for clean, readable look (JSONLint style)
    * ------------------------------------------------------------------------- */
-  --ds-font-sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-  --ds-font-display: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-  --ds-font-mono: 'Courier New', Courier, monospace, 'SF Mono', Monaco, Consolas;
+  --ds-font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  --ds-font-display: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  --ds-font-mono: 'JetBrains Mono', 'Courier New', Courier, monospace, 'SF Mono', Monaco, Consolas;
 
   /* -------------------------------------------------------------------------
    * Spacing scale (base 4px)
@@ -285,6 +285,23 @@ body {
   .ds-focus-ring-inset {
     outline: var(--ds-focus-ring-width) solid var(--ds-color-focus-ring);
     outline-offset: calc(var(--ds-focus-ring-offset) * -1);
+  }
+
+  .bg-grid-pattern {
+    background-size: 32px 32px;
+    background-image: 
+      linear-gradient(to right, color-mix(in srgb, var(--ds-color-hairline) 30%, transparent) 1px, transparent 1px),
+      linear-gradient(to bottom, color-mix(in srgb, var(--ds-color-hairline) 30%, transparent) 1px, transparent 1px);
+  }
+
+  .ambient-glow {
+    position: absolute;
+    width: 450px;
+    height: 450px;
+    background: radial-gradient(circle, color-mix(in srgb, var(--ds-color-primary) 12%, transparent) 0%, transparent 70%);
+    filter: blur(60px);
+    pointer-events: none;
+    z-index: 0;
   }
 }
 
