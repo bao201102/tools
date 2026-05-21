@@ -12,6 +12,7 @@ import JsonPage from './pages/JsonPage'
 import JsonToYamlPage from './pages/JsonToYamlPage'
 import PocoGeneratorPage from './pages/PocoGeneratorPage'
 import SqlToPocoPage from './pages/SqlToPocoPage'
+import MarkdownPreviewPage from './pages/MarkdownPreviewPage'
 
 export default function App() {
   return (
@@ -29,6 +30,7 @@ export default function App() {
         <Route path="json-to-csharp" element={<PocoGeneratorPage />} />
         <Route path="sql-to-csharp" element={<SqlToPocoPage />} />
         <Route path="jwt-decoder" element={<JwtDecoderPage />} />
+        <Route path="markdown-preview" element={<MarkdownPreviewPage />} />
       </Route>
     </Routes>
   )

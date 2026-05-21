@@ -25,6 +25,7 @@ const navGroups: NavGroup[] = [
       { kind: 'internal', to: '/jwt-decoder', labelKey: 'nav.item.jwtDecoder' },
       { kind: 'internal', to: '/json-escape', labelKey: 'nav.item.jsonEscape' },
       { kind: 'internal', to: '/json-unescape', labelKey: 'nav.item.jsonUnescape' },
+      { kind: 'internal', to: '/markdown-preview', labelKey: 'nav.item.markdownPreview' },
     ],
   },
   {

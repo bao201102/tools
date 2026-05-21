@@ -30,6 +30,7 @@ export const translations = {
     'nav.item.allTools': 'All Tools',
     'nav.item.goldPrice': 'Gold Price Tracker',
     'nav.item.n8n': 'n8n Automation',
+    'nav.item.markdownPreview': 'Markdown Preview',
 
     // Update banner
     'banner.newVersion': 'A new version is available',
@@ -93,6 +94,8 @@ export const translations = {
     'home.dash.gold.desc': 'Opens the external gold dashboard in a new tab.',
     'home.dash.n8n.title': 'n8n Automation',
     'home.dash.n8n.desc': 'Opens the external n8n automation tool in a new tab.',
+    'home.tool.markdownPreview.title': 'Markdown Preview',
+    'home.tool.markdownPreview.desc': 'Compile and preview markdown documents with custom styles.',
 
     // JSON Formatter tool
     'tool.json.title': 'JSON Formatter',
@@ -226,6 +229,21 @@ export const translations = {
     'tool.jwt.copyPayload': 'Copy Payload',
     'tool.jwt.placeholder': '{label} JSON appears here',
     'tool.jwt.error.invalid': 'Invalid JWT',
+
+    // Markdown Preview tool
+    'tool.markdown.title': 'Markdown Preview',
+    'tool.markdown.desc': 'Write or paste Markdown in the editor above and see the rendered HTML preview below.',
+    'tool.markdown.input': 'Markdown Source',
+    'tool.markdown.output': 'HTML Preview',
+    'tool.markdown.stats': 'Words: {words} • Chars: {chars} • Read time: {time} min',
+    'tool.markdown.copyHtml': 'Copy HTML',
+    'tool.markdown.clear': 'Clear',
+    'tool.markdown.loadSample': 'Load Sample',
+    'tool.markdown.edit': 'Edit Markdown',
+    'tool.markdown.collapsed': 'Editor is collapsed (click to expand)',
+    'tool.markdown.placeholder': 'Start typing Markdown above to see the preview...',
+    'tool.markdown.maximize': 'Full Page',
+    'tool.markdown.minimize': 'Normal View',
   },
   vi: {
     // Shell / navigation
@@ -252,6 +270,7 @@ export const translations = {
     'nav.item.allTools': 'Tất cả công cụ',
     'nav.item.goldPrice': 'Theo dõi giá vàng',
     'nav.item.n8n': 'Tự động hoá n8n',
+    'nav.item.markdownPreview': 'Xem trước Markdown',
 
     // Update banner
     'banner.newVersion': 'Có phiên bản mới sẵn có',
@@ -315,6 +334,8 @@ export const translations = {
     'home.dash.gold.desc': 'Theo dõi giá vàng trong nước và quốc tế trực quan thời gian thực ở tab mới.',
     'home.dash.n8n.title': 'Tự động hoá n8n',
     'home.dash.n8n.desc': 'Truy cập công cụ tự động hóa quy trình (workflow automation) n8n ở tab mới.',
+    'home.tool.markdownPreview.title': 'Xem trước Markdown',
+    'home.tool.markdownPreview.desc': 'Biên dịch và xem trước tài liệu Markdown với định dạng đẹp mắt.',
 
     // JSON Formatter tool
     'tool.json.title': 'Định dạng JSON',
@@ -450,6 +471,21 @@ export const translations = {
     'tool.jwt.copyPayload': 'Sao chép Payload',
     'tool.jwt.placeholder': 'Dữ liệu JSON của {label} sẽ hiển thị tại đây',
     'tool.jwt.error.invalid': 'Token JWT không hợp lệ hoặc bị lỗi định dạng',
+
+    // Markdown Preview tool
+    'tool.markdown.title': 'Xem trước Markdown',
+    'tool.markdown.desc': 'Soạn thảo hoặc dán mã Markdown vào editor phía trên để xem trước HTML hiển thị phía dưới.',
+    'tool.markdown.input': 'Mã nguồn Markdown',
+    'tool.markdown.output': 'Bản xem trước HTML',
+    'tool.markdown.stats': '{words} từ • {chars} ký tự • Đọc: {time} phút',
+    'tool.markdown.copyHtml': 'Sao chép HTML',
+    'tool.markdown.clear': 'Xóa',
+    'tool.markdown.loadSample': 'Tài liệu mẫu',
+    'tool.markdown.edit': 'Chỉnh sửa Markdown',
+    'tool.markdown.collapsed': 'Trình soạn thảo đang thu gọn (nhấp để mở rộng)',
+    'tool.markdown.placeholder': 'Bắt đầu nhập Markdown ở trên để xem bản xem trước...',
+    'tool.markdown.maximize': 'Toàn trang',
+    'tool.markdown.minimize': 'Thu nhỏ',
   },
 } as const satisfies Record<Locale, Record<string, string>>
 

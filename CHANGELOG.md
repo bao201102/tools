@@ -8,6 +8,19 @@ Tất cả các thay đổi quan trọng của dự án **NUB Portal** sẽ đư
 
 ## [Unreleased]
 
+### Thêm mới (Added)
+- **Markdown Preview** (`/markdown-preview`): Công cụ soạn thảo và xem trước Markdown theo thời gian thực.
+  - Monaco Editor tích hợp với syntax highlighting cho Markdown.
+  - Bố cục dọc (vertical stack): editor phía trên, preview phía dưới.
+  - **Auto-collapse**: Editor tự động thu gọn khi mất focus nếu đã có nội dung; nhấp vào thanh tiêu đề hoặc nút "Chỉnh sửa" để mở lại.
+  - **Ẩn preview khi chưa nhập**: Khu vực preview chỉ xuất hiện khi có nội dung Markdown; lúc trống hiển thị placeholder hướng dẫn.
+  - **Nút Full Page (Toàn trang)**: Mở popup modal overlay chiếm 90% chiều rộng trang (`w-[90vw]`, `h-[90vh]`), có hiệu ứng zoom-in, nền mờ blur, khóa cuộn trang nền; tắt bằng nút Thu nhỏ, click ngoài hoặc phím `Escape`.
+  - **Nút Copy HTML**: Sao chép mã HTML đã render vào clipboard; có sẵn ở cả header preview thường và trong modal Full Page.
+  - **Nút Clear / Load Sample**: Nằm trên thanh header của editor, bên cạnh tiêu đề.
+  - **Thống kê tài liệu**: Hiển thị số từ, số ký tự và thời gian đọc ước tính.
+  - Hỗ trợ đầy đủ bilingual EN / VI.
+  - Dependency mới: `marked@^12.0.0` và `@types/marked@^12.0.0`.
+
 ### Cải tiến (Changed)
 - **Đồng bộ vị trí nút Sao chép (Copy)**: Đưa nút Sao chép lên thanh tiêu đề phía trên khung kết quả (tương tự như trang định dạng JSON) cho các công cụ:
   - Mã hoá / Giải mã (Encoder/Decoder)
@@ -171,7 +184,7 @@ Tất cả các thay đổi quan trọng của dự án **NUB Portal** sẽ đư
 - [ ] API testing tool
 - [ ] Regex tester
 - [ ] Color picker & converter
-- [ ] Markdown preview
+- [x] Markdown preview ✅
 - [ ] Hash generator (MD5, SHA256, etc.)
 - [ ] UUID generator
 - [ ] Timestamp converter
@@ -186,6 +199,7 @@ Tất cả các thay đổi quan trọng của dự án **NUB Portal** sẽ đư
 - `@monaco-editor/react@4.7.0`
 - `monaco-editor@0.55.1`
 - `js-yaml@4.1.0`
+- `marked@12.0.0`
 - `lucide-react@1.14.0`
 - `vite@6.3.0`
 - `typescript@5.8.0`
@@ -204,11 +218,12 @@ src/
 │   ├── diff-checker-tool/
 │   ├── poco-generator-tool/
 │   ├── sql-to-poco-tool/
-│   └── jwt-decoder-tool/
+│   ├── jwt-decoder-tool/
+│   └── markdown-preview-tool/
 ├── lib/               # Utilities (versionCheck, etc.)
 └── ...
 ```
 
 ---
 
-**Cập nhật lần cuối:** 2026-05-21
+**Cập nhật lần cuối:** 2026-05-21 (thêm Markdown Preview)

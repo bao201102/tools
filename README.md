@@ -28,6 +28,7 @@ Các công cụ được nhóm trên **menu** và **trang chủ** thành ba mụ
 | **JWT Decoder** | `/jwt-decoder` | Decode header và payload JWT cục bộ, hiển thị JSON đã format. |
 | **JSON Escape** | `/json-escape` | Escape văn bản/JSON (`\"`, `\n`, `\t`, `\\`…); tùy chọn wrap in quotes, escape Unicode, thống kê ký tự. |
 | **JSON Unescape** | `/json-unescape` | Chuyển chuỗi JSON escaped về JSON dễ đọc; unwrap nhiều lớp, format pretty-print. |
+| **Markdown Preview** | `/markdown-preview` | Soạn thảo và xem trước Markdown thời gian thực; Full Page modal 90% rộng, Copy HTML, auto-collapse editor. |
 
 ### Convert
 | Công cụ | Route | Mô tả ngắn |
@@ -59,6 +60,7 @@ Các công cụ được nhóm trên **menu** và **trang chủ** thành ba mụ
 - **React Router 7.6.0** — Định tuyến SPA
 - **Monaco Editor 0.55.1** (`@monaco-editor/react` 4.7.0) — Code editor với syntax highlighting và diff viewer
 - **js-yaml 4.1.0** — Parse & dump YAML
+- **marked 12.0.0** — Biên dịch Markdown → HTML phía client
 - **lucide-react 1.14.0** — Icon library
 
 ### Infrastructure & DevOps
@@ -236,7 +238,8 @@ tools/
 │   │   ├── diff-checker-tool/
 │   │   ├── poco-generator-tool/
 │   │   ├── sql-to-poco-tool/
-│   │   └── jwt-decoder-tool/
+│   │   ├── jwt-decoder-tool/
+│   │   └── markdown-preview-tool/ # Markdown Preview (/markdown-preview)
 │   ├── lib/                   # Utilities
 │   │   └── versionCheck.ts    # Client-side version checking
 │   └── ...
@@ -266,7 +269,7 @@ Nếu dự án mở nguồn, hãy bổ sung file `LICENSE` và hướng dẫn đ
 ---
 
 **Phiên bản:** 0.0.0  
-**Cập nhật lần cuối:** 2026-05-18
+**Cập nhật lần cuối:** 2026-05-21 (thêm Markdown Preview)
 
 ## 📝 Changelog
 
