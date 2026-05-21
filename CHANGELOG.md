@@ -8,6 +8,14 @@ Tất cả các thay đổi quan trọng của dự án **NUB Portal** sẽ đư
 
 ## [Unreleased]
 
+### Cải tiến (Changed)
+- **Đồng bộ vị trí nút Sao chép (Copy)**: Đưa nút Sao chép lên thanh tiêu đề phía trên khung kết quả (tương tự như trang định dạng JSON) cho các công cụ:
+  - Mã hoá / Giải mã (Encoder/Decoder)
+  - Sinh C# POCO từ JSON (JSON → C#)
+  - Sinh C# POCO từ SQL (SQL → C#)
+  - Đánh chỉ số C# Proto (C# Proto Reindex)
+  - Xoá thuộc tính C# Proto (C# Remove Proto)
+
 ### Đang phát triển
 - Thêm các công cụ mới theo lộ trình
 

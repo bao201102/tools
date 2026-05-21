@@ -76,13 +76,6 @@ export function CsharpProtoRemoveEditor() {
     window.setTimeout(() => setCopyState('idle'), 2000)
   }, [output])
 
-  const copyLabel =
-    copyState === 'copied'
-      ? t('common.copied')
-      : copyState === 'failed'
-        ? t('common.failed')
-        : t('tool.csharpProtoRemove.copyOutput')
-
   return (
     <div className="mx-auto flex min-h-0 w-full max-w-[1300px] flex-1 flex-col gap-4 p-6 lg:p-8">
       <div className="shrink-0">
@@ -111,9 +104,19 @@ export function CsharpProtoRemoveEditor() {
           </div>
         </div>
         <div className="flex min-h-0 flex-1 flex-col gap-2">
-          <span id="csharp-proto-remove-output-label" className="shrink-0 text-sm font-medium text-ink">
-            {t('common.output')}
-          </span>
+          <div className="flex shrink-0 items-center justify-between">
+            <span id="csharp-proto-remove-output-label" className="text-sm font-medium text-ink">
+              {t('common.output')}
+            </span>
+            <button
+              type="button"
+              onClick={handleCopyOutput}
+              disabled={!output}
+              className="rounded-md border border-hairline bg-surface-1 px-3 py-1 text-xs font-medium text-ink shadow-sm transition-colors hover:bg-surface-2 hover:border-hairline-strong disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {copyState === 'copied' ? t('common.copied') + '!' : copyState === 'failed' ? t('common.failed') : t('common.copy')}
+            </button>
+          </div>
           <div className="relative h-full overflow-hidden rounded-lg border border-hairline shadow-sm">
             <CsharpMonacoPane labelId="csharp-proto-remove-output-label" value={output} readOnly />
           </div>
@@ -123,9 +126,6 @@ export function CsharpProtoRemoveEditor() {
       <div className="flex shrink-0 flex-wrap gap-2">
         <Button onClick={clear}>
           {t('common.clear')}
-        </Button>
-        <Button onClick={handleCopyOutput} disabled={!output}>
-          {copyLabel}
         </Button>
       </div>
     </div>
