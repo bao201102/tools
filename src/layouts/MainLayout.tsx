@@ -65,7 +65,10 @@ function LogoMark() {
 function MenuIcon({ open }: { open: boolean }) {
   return (
     <svg
-      className="h-6 w-6 text-ink"
+      className={cn(
+        "h-6 w-6 text-ink transition-transform duration-300",
+        open ? "rotate-90" : "rotate-0"
+      )}
       fill="none"
       viewBox="0 0 24 24"
       stroke="currentColor"
@@ -302,7 +305,7 @@ export default function MainLayout() {
         </nav>
 
         {/* Right side - Theme, language, GitHub & mobile menu */}
-        <div className="flex items-center justify-self-end gap-2">
+        <div className="absolute right-4 top-1/2 -translate-y-1/2 flex items-center gap-2 lg:relative lg:right-auto lg:top-auto lg:translate-y-0 lg:justify-self-end">
         <div className="hidden items-center gap-2 lg:flex">
           <ThemeSwitcher />
           {/* Language Switcher inline */}
@@ -372,83 +375,85 @@ export default function MainLayout() {
       </header>
 
       {/* Mobile Navigation Overlay */}
-      {navOpen && (
-        <>
-          <div
-            className="fixed inset-0 z-40 bg-semantic-overlay backdrop-blur-[1px] lg:hidden"
-            onClick={() => setNavOpen(false)}
-          />
-          <div
-            id="mobile-nav"
-            className="fixed right-0 top-16 z-50 h-[calc(100vh-4rem)] w-64 overflow-y-auto border-l border-hairline bg-surface-1 shadow-xl lg:hidden"
-          >
-            <nav className="flex flex-col gap-1 p-4" aria-label="Mobile">
-              {navGroups.map((group) => (
-                <div key={group.id} className="flex flex-col gap-1">
-                  {group.labelKey && (
-                    <div className="mt-2 px-3 py-2 text-xs font-semibold uppercase tracking-wide text-ink-tertiary">
-                      {t(group.labelKey)}
-                    </div>
-                  )}
-                  {group.items.map((item) => {
-                    if (item.kind === 'external') {
-                      return (
-                        <a
-                          key={item.href}
-                          href={item.href}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="rounded-md px-3 py-2 text-sm font-medium text-ink-subtle hover:bg-surface-2 hover:text-ink"
-                          onClick={() => setNavOpen(false)}
-                        >
-                          {t(item.labelKey)}
-                        </a>
+      <div
+        className={cn(
+          "fixed inset-0 z-40 bg-semantic-overlay backdrop-blur-[1px] lg:hidden transition-opacity duration-300",
+          navOpen ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
+        )}
+        onClick={() => setNavOpen(false)}
+      />
+      <div
+        id="mobile-nav"
+        className={cn(
+          "fixed right-0 top-16 z-50 h-[calc(100vh-4rem)] w-64 overflow-y-auto border-l border-hairline bg-surface-1 shadow-xl lg:hidden transition-transform duration-300 ease-in-out",
+          navOpen ? "translate-x-0" : "translate-x-full"
+        )}
+      >
+        <nav className="flex flex-col gap-1 p-4" aria-label="Mobile">
+          {navGroups.map((group) => (
+            <div key={group.id} className="flex flex-col gap-1">
+              {group.labelKey && (
+                <div className="mt-2 px-3 py-2 text-xs font-semibold uppercase tracking-wide text-ink-tertiary">
+                  {t(group.labelKey)}
+                </div>
+              )}
+              {group.items.map((item) => {
+                if (item.kind === 'external') {
+                  return (
+                    <a
+                      key={item.href}
+                      href={item.href}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="rounded-md px-3 py-2 text-sm font-medium text-ink-subtle hover:bg-surface-2 hover:text-ink"
+                      onClick={() => setNavOpen(false)}
+                    >
+                      {t(item.labelKey)}
+                    </a>
+                  )
+                }
+
+                return (
+                  <NavLink
+                    key={item.to}
+                    to={item.to}
+                    end={item.end}
+                    className={({ isActive }) =>
+                      cn(
+                        'rounded-md px-3 py-2 text-sm font-medium',
+                        isActive
+                          ? 'bg-primary text-on-primary'
+                          : 'text-ink-subtle hover:bg-surface-2 hover:text-ink'
                       )
                     }
+                    onClick={() => setNavOpen(false)}
+                  >
+                    {t(item.labelKey)}
+                  </NavLink>
+                )
+              })}
+            </div>
+          ))}
 
-                    return (
-                      <NavLink
-                        key={item.to}
-                        to={item.to}
-                        end={item.end}
-                        className={({ isActive }) =>
-                          cn(
-                            'rounded-md px-3 py-2 text-sm font-medium',
-                            isActive
-                              ? 'bg-primary text-on-primary'
-                              : 'text-ink-subtle hover:bg-surface-2 hover:text-ink'
-                          )
-                        }
-                        onClick={() => setNavOpen(false)}
-                      >
-                        {t(item.labelKey)}
-                      </NavLink>
-                    )
-                  })}
-                </div>
-              ))}
-
-              {/* Divider & Switchers */}
-              <div className="mt-6 border-t border-hairline pt-4 flex flex-col gap-3 px-3">
-                <div className="flex items-center justify-between">
-                  <span className="text-xs font-semibold uppercase tracking-wide text-ink-tertiary">{t('theme.label')}</span>
-                  <ThemeSwitcher />
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-xs font-semibold uppercase tracking-wide text-ink-tertiary">{t('lang.label')}</span>
-                  <LanguageSwitcher />
-                </div>
-              </div>
-            </nav>
+          {/* Divider & Switchers */}
+          <div className="mt-6 border-t border-hairline pt-4 flex flex-col gap-3 px-3">
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-semibold uppercase tracking-wide text-ink-tertiary">{t('theme.label')}</span>
+              <ThemeSwitcher />
+            </div>
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-semibold uppercase tracking-wide text-ink-tertiary">{t('lang.label')}</span>
+              <LanguageSwitcher />
+            </div>
           </div>
-        </>
-      )}
+        </nav>
+      </div>
 
       {/* Main content area */}
       <div className="relative flex min-h-0 flex-1 flex-col">
         <main className="flex min-h-0 min-w-0 flex-1 flex-col pb-[env(safe-area-inset-bottom)]">
           <div className="flex min-h-0 h-full flex-1 flex-col overflow-y-auto bg-surface-1">
-            <Outlet />
+            <Outlet context={{ navOpen }} />
           </div>
         </main>
       </div>

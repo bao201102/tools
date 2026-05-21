@@ -1,5 +1,7 @@
-import { Link } from 'react-router-dom'
+import { useEffect, useRef, useState } from 'react'
+import { Link, useOutletContext } from 'react-router-dom'
 import {
+  ArrowUp,
   ArrowUpRight,
   FileJson,
   GitCompare,
@@ -77,8 +79,59 @@ const sections: readonly Section[] = [
 
 export default function HomePage() {
   const { t } = useLocale()
+  const containerRef = useRef<HTMLDivElement>(null)
+  const [showScrollTop, setShowScrollTop] = useState(false)
+  const context = useOutletContext<{ navOpen?: boolean }>()
+  const isNavOpen = context?.navOpen ?? false
+
+  useEffect(() => {
+    const handleScroll = (e: Event) => {
+      const target = e.target as HTMLElement
+      if (!target) return
+      
+      const scrollTop = target.scrollTop !== undefined 
+        ? target.scrollTop 
+        : (document.documentElement?.scrollTop || window.scrollY || 0)
+      if (scrollTop > 300) {
+        setShowScrollTop(true)
+      } else {
+        setShowScrollTop(false)
+      }
+    }
+
+    // Capture all scroll events in the capture phase (since scroll events don't bubble)
+    window.addEventListener('scroll', handleScroll, true)
+    return () => {
+      window.removeEventListener('scroll', handleScroll, true)
+    }
+  }, [])
+
+  const scrollToTop = () => {
+    const topElement = document.getElementById('home-page-top')
+    if (topElement) {
+      topElement.scrollIntoView({
+        behavior: 'smooth',
+        block: 'start',
+      })
+    } else {
+      const scrollableContainer = containerRef.current?.closest('.overflow-y-auto') || document.querySelector('.overflow-y-auto')
+      if (scrollableContainer) {
+        scrollableContainer.scrollTo({
+          top: 0,
+          behavior: 'smooth',
+        })
+      } else {
+        window.scrollTo({
+          top: 0,
+          behavior: 'smooth',
+        })
+      }
+    }
+  }
+
   return (
-    <div className="relative min-h-full w-full overflow-x-hidden bg-canvas">
+    <div ref={containerRef} className="relative min-h-full w-full overflow-x-hidden bg-canvas">
+      <div id="home-page-top" className="absolute top-0 left-0 pointer-events-none" />
       {/* Ambient Glows */}
       <div className="ambient-glow -left-20 -top-20 opacity-70 dark:opacity-80" />
       <div className="ambient-glow right-1/4 bottom-1/4 opacity-30 dark:opacity-40" />
@@ -107,7 +160,7 @@ export default function HomePage() {
                   <li key={tool.kind === 'internal' ? tool.route : tool.href}>
                     {tool.kind === 'external' ? (
                       <a
-                        href={tool.href}
+                         href={tool.href}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="group block rounded-lg outline-none focus-visible:ds-focus-ring h-full"
@@ -161,6 +214,19 @@ export default function HomePage() {
           ))}
         </div>
       </div>
+
+      {/* Scroll to Top Button */}
+      <button
+        onClick={scrollToTop}
+        className={`fixed bottom-6 right-6 z-40 flex h-11 w-11 items-center justify-center rounded-full border border-hairline bg-surface-1/80 text-ink shadow-lg backdrop-blur-md transition-all duration-300 hover:bg-primary hover:text-white hover:border-transparent hover:scale-110 active:scale-95 ${
+          showScrollTop && !isNavOpen
+            ? 'pointer-events-auto opacity-100 translate-y-0'
+            : 'pointer-events-none opacity-0 translate-y-4'
+        }`}
+        aria-label="Scroll to top"
+      >
+        <ArrowUp className="h-5 w-5" />
+      </button>
     </div>
   )
 }

@@ -793,7 +793,7 @@ export function JsonEditor() {
 
       {/* Extracted Output Editor */}
       {extractedOutput && (
-        <div className="shrink-0">
+        <div className="shrink-0 pb-12">
           <div className="flex items-center justify-between mb-2">
             <h3 className="text-sm font-medium text-ink">{t('tool.json.extractedOutput')}</h3>
             <button
