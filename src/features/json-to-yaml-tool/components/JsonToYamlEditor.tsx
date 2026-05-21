@@ -1,5 +1,5 @@
 import Editor from '@monaco-editor/react'
-import { useCallback, useState, type ReactNode } from 'react'
+import { useCallback, useState } from 'react'
 import { useLocale } from '../../../lib/i18n'
 import { useAdaptiveEditorHeight } from '../../../lib/useAdaptiveEditorHeight'
 import { useMonacoEditorTheme } from '../../../lib/useMonacoEditorTheme'

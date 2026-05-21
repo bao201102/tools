@@ -1,5 +1,5 @@
 import { DiffEditor } from '@monaco-editor/react'
-import { useCallback, useRef, useState, type ReactNode } from 'react'
+import { useCallback, useRef, useState } from 'react'
 import { useLocale } from '../../../lib/i18n'
 import { useAdaptiveEditorHeightWithOptions } from '../../../lib/useAdaptiveEditorHeight'
 import { useMonacoEditorTheme } from '../../../lib/useMonacoEditorTheme'

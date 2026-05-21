@@ -9,8 +9,27 @@ Tất cả các thay đổi quan trọng của dự án **NUB Portal** sẽ đư
 ## [Unreleased]
 
 ### Đang phát triển
-- Cải thiện UX/UI cho các công cụ hiện có
-- Tối ưu hóa performance
+- Thêm các công cụ mới theo lộ trình
+
+---
+
+## [0.1.0] - 2026-05-21
+
+### Thêm mới (Added)
+- **JSON to YAML** (`/json-to-yaml`): Bổ sung công cụ chuyển đổi định dạng JSON sang YAML với xác thực cú pháp tự động và Monaco Editor đồng bộ giao diện.
+- **Tách trang Escape & Unescape**: Tách công cụ xử lý chuỗi JSON thành hai trang riêng biệt để nâng cao trải nghiệm người dùng:
+  - `/json-escape`: Escape các ký tự đặc biệt, tuỳ chọn bọc dấu ngoặc kép, escape Unicode (`\uXXXX`), hiển thị thống kê chi tiết và bảng tham chiếu.
+  - `/json-unescape`: Giải mã chuỗi JSON đã escape về dạng định dạng JSON chuẩn.
+- **JSON Tree View & Field Extraction** (`/json`):
+  - Bổ sung tab **Tree View** hiển thị cấu trúc cây phân cấp trực quan của đối tượng JSON với tính năng Mở rộng (Expand All) / Thu gọn (Collapse All).
+  - Thêm tính năng **Trích xuất trường cụ thể** (Field Extraction): cho phép người dùng chọn nhanh các trường trong dữ liệu JSON để trích xuất ra một đối tượng JSON mới.
+  - Tích hợp thêm **thống kê dữ liệu JSON** (dung lượng, số lượng key, độ sâu, số lượng object và array).
+- **Tính năng Scroll-to-Top**: Bổ sung nút cuộn nhanh lên đầu trang ở góc dưới bên phải trang chủ (`HomePage`).
+
+### Cải tiến & Tối ưu hóa (Changed)
+- **Giao diện & Trải nghiệm Trang chủ**: Thiết kế lại trang chủ với phong cách hiện đại hơn, bổ sung hiệu ứng viền phát sáng (ambient glow), lưới thẻ (card grid) responsive và hiệu ứng click phản hồi trực quan trên các thẻ công cụ.
+- **Đồng bộ giao diện nút bấm**: Đồng nhất kiểu dáng thiết kế của component `Button` trên toàn bộ ứng dụng.
+- **Cải tiến Version Check**: Tích hợp thanh thông báo phiên bản mới ở góc dưới màn hình và tự động reload trang khi chuyển route để đảm bảo không bị gián đoạn dữ liệu người dùng đang nhập.
 
 ---
 
@@ -50,8 +69,9 @@ Tất cả các thay đổi quan trọng của dự án **NUB Portal** sẽ đư
   - Tự động thêm `[JsonPropertyName("...")]`
   - Hỗ trợ nested objects và arrays
 
-### ✅ YAML Tools
-- **YAML Formatter & Validator** (`/yaml`)
+### ✅ YAML Tools (JSON to YAML)
+- **JSON to YAML Converter** (`/json-to-yaml`)
+  - Chuyển đổi JSON sang YAML tự động
   - Parse YAML bằng `js-yaml`
   - Normalize real-time
   - Báo lỗi cú pháp trực quan
@@ -169,7 +189,7 @@ src/
 ├── features/           # Các công cụ (feature-based structure)
 │   ├── json-tool/
 │   ├── json-escape-tool/
-│   ├── yaml-tool/
+│   ├── json-to-yaml-tool/
 │   ├── csharp-proto-tool/
 │   ├── csharp-proto-remove-tool/
 │   ├── encoder-tool/
@@ -183,4 +203,4 @@ src/
 
 ---
 
-**Cập nhật lần cuối:** 2026-05-12
+**Cập nhật lần cuối:** 2026-05-21
