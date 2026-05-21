@@ -3,3 +3,4 @@ dist
 *.local
 public/sitemap.xml
 public/version.json
+*.tsbuildinfo
