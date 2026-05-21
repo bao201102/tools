@@ -6,7 +6,8 @@ export type ButtonVariant =
   | 'secondary'
   | 'tertiary'
   | 'inverse'
-  | 'danger'
+
+export type ButtonSize = 'sm' | 'md'
 
 const variantClasses: Record<ButtonVariant, string> = {
   primary:
@@ -17,18 +18,23 @@ const variantClasses: Record<ButtonVariant, string> = {
     'border border-transparent bg-canvas text-ink hover:bg-surface-2 active:bg-surface-3',
   inverse:
     'border border-transparent bg-inverse-canvas text-inverse-ink hover:bg-inverse-surface-1 active:bg-inverse-surface-2 shadow-sm',
-  danger:
-    'border border-error-border bg-error-surface text-error-fg hover:bg-error-surface-strong active:bg-error-surface-strong',
+}
+
+const sizeClasses: Record<ButtonSize, string> = {
+  sm: 'px-3 py-1 text-xs',
+  md: 'px-4 py-2 text-sm',
 }
 
 type ButtonProps = {
   variant?: ButtonVariant
+  size?: ButtonSize
   className?: string
   children: ReactNode
 } & ButtonHTMLAttributes<HTMLButtonElement>
 
 export function Button({
   variant = 'secondary',
+  size = 'md',
   className = '',
   type = 'button',
   children,
@@ -38,8 +44,9 @@ export function Button({
     <button
       type={type}
       className={cn(
-        'inline-flex min-h-10 cursor-pointer items-center justify-center gap-2 rounded-md px-3.5 py-2 text-button font-medium tracking-normal transition-colors',
+        'inline-flex cursor-pointer items-center justify-center gap-2 rounded-md font-medium tracking-normal transition-colors',
         'outline-none focus-visible:ds-focus-ring disabled:cursor-not-allowed disabled:opacity-50',
+        sizeClasses[size],
         variantClasses[variant],
         className
       )}

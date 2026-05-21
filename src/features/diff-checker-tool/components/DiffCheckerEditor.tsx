@@ -47,27 +47,7 @@ function detectLanguageFromText(text: string): DiffLanguage {
   return 'plaintext'
 }
 
-function ToolbarButton({
-  children,
-  onClick,
-  variant = 'default',
-}: {
-  children: ReactNode
-  onClick: () => void
-  variant?: 'default' | 'danger'
-}) {
-  const base = 'rounded-md px-3 py-2 text-sm font-medium transition-colors shadow-sm'
-  const styles =
-    variant === 'danger'
-      ? 'border border-error-border bg-error-surface text-error-fg hover:bg-error-surface-strong'
-      : 'border border-hairline bg-surface-1 text-ink hover:bg-surface-2 hover:border-hairline-strong'
-
-  return (
-    <button type="button" className={`${base} ${styles}`} onClick={onClick}>
-      {children}
-    </button>
-  )
-}
+import { Button, Input } from '../../../components/ui'
 
 export function DiffCheckerEditor() {
   const { t } = useLocale()
@@ -91,10 +71,28 @@ export function DiffCheckerEditor() {
   const [originalLabel, setOriginalLabel] = useState(() => t('tool.diff.original'))
   const [modifiedLabel, setModifiedLabel] = useState(() => t('tool.diff.modified'))
   const [splitWidths, setSplitWidths] = useState({ left: 1, right: 1 })
+  const [copyOriginalState, setCopyOriginalState] = useState<'idle' | 'copied'>('idle')
+  const [copyModifiedState, setCopyModifiedState] = useState<'idle' | 'copied'>('idle')
   const editorHeight = useAdaptiveEditorHeightWithOptions(
     [originalSnapshot, modifiedSnapshot],
     { wordWrap: false, lineHeightPx: 18 },
   )
+
+  const handleCopy = useCallback(async (text: string, pane: 'original' | 'modified') => {
+    if (!text) return
+    try {
+      await navigator.clipboard.writeText(text)
+      if (pane === 'original') {
+        setCopyOriginalState('copied')
+        setTimeout(() => setCopyOriginalState('idle'), 2000)
+      } else {
+        setCopyModifiedState('copied')
+        setTimeout(() => setCopyModifiedState('idle'), 2000)
+      }
+    } catch {
+      // ignore
+    }
+  }, [])
 
   const updateDetectedLanguage = useCallback((original: string, modified: string) => {
     const source = modified.trim() ? modified : original
@@ -162,20 +160,38 @@ export function DiffCheckerEditor() {
           gridTemplateColumns: renderSideBySide ? `${splitWidths.left}fr ${splitWidths.right}fr` : undefined,
         }}
       >
-        <input
-          type="text"
-          className="rounded-md border border-hairline bg-surface-1 px-3 py-2 text-sm text-ink placeholder:text-ink-subtle focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
-          value={originalLabel}
-          onChange={(e) => setOriginalLabel(e.target.value)}
-          placeholder={t('tool.diff.original')}
-        />
-        <input
-          type="text"
-          className="rounded-md border border-hairline bg-surface-1 px-3 py-2 text-sm text-ink placeholder:text-ink-subtle focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
-          value={modifiedLabel}
-          onChange={(e) => setModifiedLabel(e.target.value)}
-          placeholder={t('tool.diff.modified')}
-        />
+        <div className="flex gap-2">
+          <Input
+            type="text"
+            className="flex-1 min-h-10"
+            value={originalLabel}
+            onChange={(e) => setOriginalLabel(e.target.value)}
+            placeholder={t('tool.diff.original')}
+          />
+          <Button
+            onClick={() => handleCopy(originalSnapshot, 'original')}
+            disabled={!originalSnapshot}
+            className="text-xs whitespace-nowrap"
+          >
+            {copyOriginalState === 'copied' ? t('common.copied') : t('common.copy')}
+          </Button>
+        </div>
+        <div className="flex gap-2">
+          <Input
+            type="text"
+            className="flex-1 min-h-10"
+            value={modifiedLabel}
+            onChange={(e) => setModifiedLabel(e.target.value)}
+            placeholder={t('tool.diff.modified')}
+          />
+          <Button
+            onClick={() => handleCopy(modifiedSnapshot, 'modified')}
+            disabled={!modifiedSnapshot}
+            className="text-xs whitespace-nowrap"
+          >
+            {copyModifiedState === 'copied' ? t('common.copied') : t('common.copy')}
+          </Button>
+        </div>
       </div>
 
       <div
@@ -231,13 +247,13 @@ export function DiffCheckerEditor() {
       </div>
 
       <div className="flex shrink-0 flex-wrap gap-2">
-        <ToolbarButton onClick={handleToggleView}>
+        <Button onClick={handleToggleView}>
           {renderSideBySide ? t('tool.diff.inlineView') : t('tool.diff.sideBySideView')}
-        </ToolbarButton>
-        <ToolbarButton onClick={handleSwap}>{t('common.swap')}</ToolbarButton>
-        <ToolbarButton onClick={handleClearAll} variant="danger">
+        </Button>
+        <Button onClick={handleSwap}>{t('common.swap')}</Button>
+        <Button onClick={handleClearAll}>
           {t('tool.diff.clearAll')}
-        </ToolbarButton>
+        </Button>
       </div>
     </div>
   )

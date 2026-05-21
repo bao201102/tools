@@ -4,6 +4,7 @@ import { useLocale } from '../../../lib/i18n'
 import { useAdaptiveEditorHeight } from '../../../lib/useAdaptiveEditorHeight'
 import { useMonacoEditorTheme } from '../../../lib/useMonacoEditorTheme'
 import { useJsonToYaml } from '../hooks/useJsonToYaml'
+import { Button } from '../../../components/ui'
 
 const editorOptions = {
   minimap: { enabled: false },
@@ -13,31 +14,6 @@ const editorOptions = {
   padding: { top: 8, bottom: 8 },
   automaticLayout: true,
   tabSize: 2,
-}
-
-function ToolbarButton({
-  children,
-  onClick,
-  disabled,
-  variant = 'default',
-}: {
-  children: ReactNode
-  onClick: () => void
-  disabled?: boolean
-  variant?: 'default' | 'danger'
-}) {
-  const base =
-    'rounded-md px-3 py-2 text-sm font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-50 shadow-sm'
-  const styles =
-    variant === 'danger'
-      ? 'border border-error-border bg-error-surface text-error-fg hover:bg-error-surface-strong'
-      : 'border border-hairline bg-surface-1 text-ink hover:bg-surface-2 hover:border-hairline-strong'
-
-  return (
-    <button type="button" className={`${base} ${styles}`} onClick={onClick} disabled={disabled}>
-      {children}
-    </button>
-  )
 }
 
 function YamlMonacoPane({
@@ -148,13 +124,13 @@ export function JsonToYamlEditor() {
             <span id="yaml-input-label" className="shrink-0 text-sm font-medium text-ink">
               {t('common.input')}
             </span>
-            <button
-              type="button"
+            <Button
               onClick={handleLoadExample}
-              className="rounded-md border border-hairline bg-surface-1 px-3 py-1 text-xs font-medium text-primary shadow-sm transition-colors hover:bg-surface-2 hover:border-hairline-strong"
+              size="sm"
+              className="text-primary"
             >
-              Load Example
-            </button>
+              {t('tool.json.loadSample')}
+            </Button>
           </div>
           <div className="relative h-full overflow-hidden rounded-lg border border-hairline shadow-sm">
             <YamlMonacoPane
@@ -171,14 +147,13 @@ export function JsonToYamlEditor() {
             <span id="yaml-output-label" className="shrink-0 text-sm font-medium text-ink">
               {t('common.output')}
             </span>
-            <button
-              type="button"
+            <Button
               onClick={handleCopy}
               disabled={!output}
-              className="rounded-md border border-hairline bg-surface-1 px-3 py-1 text-xs font-medium text-ink shadow-sm transition-colors hover:bg-surface-2 hover:border-hairline-strong disabled:opacity-50 disabled:cursor-not-allowed"
+              size="sm"
             >
               {copyLabel}
-            </button>
+            </Button>
           </div>
           <div className="relative h-full overflow-hidden rounded-lg border border-hairline shadow-sm">
             <YamlMonacoPane labelId="yaml-output-label" value={output} readOnly />
@@ -187,9 +162,9 @@ export function JsonToYamlEditor() {
       </div>
 
       <div className="flex shrink-0 flex-wrap gap-2">
-        <ToolbarButton onClick={clear} variant="danger">
+        <Button onClick={clear}>
           {t('common.clear')}
-        </ToolbarButton>
+        </Button>
       </div>
     </div>
   )

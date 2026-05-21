@@ -4,6 +4,7 @@ import { useLocale } from '../../../lib/i18n'
 import { useAdaptiveEditorHeight } from '../../../lib/useAdaptiveEditorHeight'
 import { useMonacoEditorTheme } from '../../../lib/useMonacoEditorTheme'
 import { useCsharpProtoRemove } from '../hooks/useCsharpProtoRemove'
+import { Button } from '../../../components/ui'
 
 const editorOptions = {
   minimap: { enabled: false },
@@ -13,31 +14,6 @@ const editorOptions = {
   padding: { top: 8, bottom: 8 },
   automaticLayout: true,
   tabSize: 2,
-}
-
-function ToolbarButton({
-  children,
-  onClick,
-  disabled,
-  variant = 'default',
-}: {
-  children: ReactNode
-  onClick: () => void
-  disabled?: boolean
-  variant?: 'default' | 'danger'
-}) {
-  const base =
-    'rounded-md px-3 py-2 text-sm font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-50 shadow-sm'
-  const styles =
-    variant === 'danger'
-      ? 'border border-error-border bg-error-surface text-error-fg hover:bg-error-surface-strong'
-      : 'border border-hairline bg-surface-1 text-ink hover:bg-surface-2 hover:border-hairline-strong'
-
-  return (
-    <button type="button" className={`${base} ${styles}`} onClick={onClick} disabled={disabled}>
-      {children}
-    </button>
-  )
 }
 
 function CsharpMonacoPane({
@@ -145,12 +121,12 @@ export function CsharpProtoRemoveEditor() {
       </div>
 
       <div className="flex shrink-0 flex-wrap gap-2">
-        <ToolbarButton onClick={clear} variant="danger">
+        <Button onClick={clear}>
           {t('common.clear')}
-        </ToolbarButton>
-        <ToolbarButton onClick={handleCopyOutput} disabled={!output}>
+        </Button>
+        <Button onClick={handleCopyOutput} disabled={!output}>
           {copyLabel}
-        </ToolbarButton>
+        </Button>
       </div>
     </div>
   )

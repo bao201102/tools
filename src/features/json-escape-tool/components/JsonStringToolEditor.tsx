@@ -1,9 +1,10 @@
 import Editor from '@monaco-editor/react'
-import { useCallback, useMemo, useState, type ReactNode } from 'react'
+import { useCallback, useMemo, useState } from 'react'
 import { useLocale, type TranslationKey } from '../../../lib/i18n'
 import { useAdaptiveEditorHeight } from '../../../lib/useAdaptiveEditorHeight'
 import { useMonacoEditorTheme } from '../../../lib/useMonacoEditorTheme'
 import { ERROR_PANEL_PREFIX } from '../constants'
+import { Button } from '../../../components/ui'
 
 const editorOptions = {
   minimap: { enabled: false },
@@ -16,31 +17,6 @@ const editorOptions = {
 }
 
 type MonacoLang = 'plaintext' | 'json'
-
-function ToolbarButton({
-  children,
-  onClick,
-  disabled,
-  variant = 'default',
-}: {
-  children: ReactNode
-  onClick: () => void
-  disabled?: boolean
-  variant?: 'default' | 'danger'
-}) {
-  const base =
-    'rounded-md px-3 py-2 text-sm font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-50 shadow-sm'
-  const styles =
-    variant === 'danger'
-      ? 'border border-error-border bg-error-surface text-error-fg hover:bg-error-surface-strong'
-      : 'border border-hairline bg-surface-1 text-ink hover:bg-surface-2 hover:border-hairline-strong'
-
-  return (
-    <button type="button" className={`${base} ${styles}`} onClick={onClick} disabled={disabled}>
-      {children}
-    </button>
-  )
-}
 
 function MonacoPane({
   labelId,
@@ -164,9 +140,9 @@ export function JsonStringToolEditor({
             <span id="json-tool-output-label" className="text-sm font-medium text-ink">
               {t(outputLabelKey)}
             </span>
-            <ToolbarButton onClick={copyOutput} disabled={!output || output.startsWith(ERROR_PANEL_PREFIX)}>
+            <Button onClick={copyOutput} disabled={!output || output.startsWith(ERROR_PANEL_PREFIX)} size="sm">
               {copyLabel}
-            </ToolbarButton>
+            </Button>
           </div>
           <div className="relative h-full overflow-hidden rounded-lg border border-hairline shadow-sm">
             {showOutputEditor ? (
@@ -189,9 +165,9 @@ export function JsonStringToolEditor({
       </div>
 
       <div className="flex shrink-0 flex-wrap gap-2">
-        <ToolbarButton onClick={onClear} variant="danger">
+        <Button onClick={onClear}>
           {t('common.clear')}
-        </ToolbarButton>
+        </Button>
       </div>
     </div>
   )

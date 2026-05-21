@@ -1,32 +1,8 @@
-import { useCallback, useState, type ReactNode } from 'react'
+import { useCallback, useState } from 'react'
 import { useAdaptiveEditorHeight } from '../../../lib/useAdaptiveEditorHeight'
 import { useLocale } from '../../../lib/i18n'
 import { useJwtDecoder } from '../hooks/useJwtDecoder'
-
-function ToolbarButton({
-  children,
-  onClick,
-  disabled,
-  variant = 'default',
-}: {
-  children: ReactNode
-  onClick: () => void
-  disabled?: boolean
-  variant?: 'default' | 'danger'
-}) {
-  const base =
-    'rounded-md px-3 py-2 text-sm font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-50 shadow-sm'
-  const styles =
-    variant === 'danger'
-      ? 'border border-error-border bg-error-surface text-error-fg hover:bg-error-surface-strong'
-      : 'border border-hairline bg-surface-1 text-ink hover:bg-surface-2 hover:border-hairline-strong'
-
-  return (
-    <button type="button" className={`${base} ${styles}`} onClick={onClick} disabled={disabled}>
-      {children}
-    </button>
-  )
-}
+import { Button, Textarea } from '../../../components/ui'
 
 type OutputPaneProps = {
   id: string
@@ -44,16 +20,16 @@ function OutputPane({ id, label, value, copyLabel, onCopy }: OutputPaneProps) {
         <label htmlFor={id} className="text-sm font-medium text-ink">
           {label}
         </label>
-        <ToolbarButton onClick={onCopy} disabled={!value}>
+        <Button onClick={onCopy} disabled={!value} size="sm">
           {copyLabel}
-        </ToolbarButton>
+        </Button>
       </div>
-      <textarea
+      <Textarea
         id={id}
         readOnly
         value={value}
         spellCheck={false}
-        className="min-h-[240px] w-full flex-1 resize-y rounded-lg border border-hairline bg-surface-2 p-4 font-mono text-sm leading-relaxed text-ink focus:outline-none shadow-sm"
+        className="min-h-[240px] w-full flex-1 resize-y bg-surface-2 p-4 font-mono text-sm leading-relaxed text-ink shadow-sm"
         placeholder={t('tool.jwt.placeholder', { label })}
       />
     </div>
@@ -124,14 +100,14 @@ export function JwtDecoderEditor() {
         <label htmlFor="jwt-input" className="text-sm font-medium text-ink">
           {t('tool.jwt.input')}
         </label>
-        <textarea
+        <Textarea
           id="jwt-input"
           value={input}
           onChange={(event) => setInput(event.target.value)}
           spellCheck={false}
-          className="min-h-[140px] w-full resize-y rounded-lg border border-hairline bg-surface-1 p-3 font-mono text-sm leading-relaxed text-ink placeholder:text-ink-subtle focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 sm:min-h-[180px] sm:p-4 shadow-sm"
+          className="min-h-[140px] w-full resize-y font-mono text-sm leading-relaxed sm:min-h-[180px] p-3 sm:p-4 shadow-sm"
           placeholder={t('tool.jwt.inputPlaceholder')}
-          aria-invalid={error ? true : undefined}
+          error={!!error}
         />
       </div>
 
@@ -156,9 +132,9 @@ export function JwtDecoderEditor() {
       </div>
 
       <div className="flex shrink-0 flex-wrap gap-2">
-        <ToolbarButton onClick={clear} variant="danger">
+        <Button onClick={clear}>
           {t('common.clear')}
-        </ToolbarButton>
+        </Button>
       </div>
     </div>
   )

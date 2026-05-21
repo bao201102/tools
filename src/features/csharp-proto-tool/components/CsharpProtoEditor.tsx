@@ -1,9 +1,10 @@
 import Editor from '@monaco-editor/react'
-import { useCallback, useState, type ReactNode } from 'react'
+import { useCallback, useState } from 'react'
 import { useLocale } from '../../../lib/i18n'
 import { useAdaptiveEditorHeight } from '../../../lib/useAdaptiveEditorHeight'
 import { useMonacoEditorTheme } from '../../../lib/useMonacoEditorTheme'
 import { useCsharpProto } from '../hooks/useCsharpProto'
+import { Button, Input } from '../../../components/ui'
 
 const editorOptions = {
   minimap: { enabled: false },
@@ -13,31 +14,6 @@ const editorOptions = {
   padding: { top: 8, bottom: 8 },
   automaticLayout: true,
   tabSize: 2,
-}
-
-function ToolbarButton({
-  children,
-  onClick,
-  disabled,
-  variant = 'default',
-}: {
-  children: ReactNode
-  onClick: () => void
-  disabled?: boolean
-  variant?: 'default' | 'danger'
-}) {
-  const base =
-    'rounded-md px-3 py-2 text-sm font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-50 shadow-sm'
-  const styles =
-    variant === 'danger'
-      ? 'border border-error-border bg-error-surface text-error-fg hover:bg-error-surface-strong'
-      : 'border border-hairline bg-surface-1 text-ink hover:bg-surface-2 hover:border-hairline-strong'
-
-  return (
-    <button type="button" className={`${base} ${styles}`} onClick={onClick} disabled={disabled}>
-      {children}
-    </button>
-  )
 }
 
 function CsharpMonacoPane({
@@ -122,7 +98,7 @@ export function CsharpProtoEditor() {
           <label htmlFor="proto-start-number" className="text-xs font-medium text-ink-muted">
             {t('tool.csharpProto.startNumber')}
           </label>
-          <input
+          <Input
             id="proto-start-number"
             type="number"
             min={1}
@@ -132,7 +108,7 @@ export function CsharpProtoEditor() {
               const v = parseInt(e.target.value, 10)
               setStartNumber(Number.isNaN(v) ? 1 : v)
             }}
-            className="w-full max-w-[8rem] rounded-md border border-hairline bg-surface-1 px-3 py-2 text-sm text-ink focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 sm:w-28 sm:max-w-none shadow-sm"
+            className="w-full max-w-[8rem] sm:w-28 sm:max-w-none min-h-10 text-sm shadow-sm"
           />
         </div>
       </div>
@@ -165,12 +141,12 @@ export function CsharpProtoEditor() {
       </div>
 
       <div className="flex shrink-0 flex-wrap gap-2">
-        <ToolbarButton onClick={clear} variant="danger">
+        <Button onClick={clear}>
           {t('common.clear')}
-        </ToolbarButton>
-        <ToolbarButton onClick={handleCopyOutput} disabled={!output}>
+        </Button>
+        <Button onClick={handleCopyOutput} disabled={!output}>
           {copyLabel}
-        </ToolbarButton>
+        </Button>
       </div>
     </div>
   )

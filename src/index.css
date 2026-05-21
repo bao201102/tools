@@ -313,7 +313,7 @@ body {
  * --------------------------------------------------------------------------- */
 * {
   scrollbar-width: thin;
-  scrollbar-color: rgba(255, 255, 255, 0.2) transparent;
+  scrollbar-color: color-mix(in srgb, var(--ds-color-ink) 20%, transparent) transparent;
 }
 
 *::-webkit-scrollbar {
@@ -327,12 +327,13 @@ body {
 
 *::-webkit-scrollbar-thumb {
   border-radius: 5px;
-  background: rgba(255, 255, 255, 0.2);
+  background: color-mix(in srgb, var(--ds-color-ink) 20%, transparent);
   border: 2px solid var(--ds-color-surface-1);
   background-clip: content-box;
 }
 
 *::-webkit-scrollbar-thumb:hover {
-  background: rgba(255, 255, 255, 0.3);
+  background: color-mix(in srgb, var(--ds-color-ink) 30%, transparent);
   background-clip: content-box;
 }
+
