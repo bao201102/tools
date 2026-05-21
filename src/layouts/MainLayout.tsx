@@ -51,19 +51,14 @@ const navGroups: NavGroup[] = [
 
 function LogoMark() {
   return (
-    <div
-      className="flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-md border border-hairline bg-surface-1 shadow-sm"
-      aria-hidden
-    >
-      <img
-        src="/favicon.svg"
-        alt=""
-        width={28}
-        height={28}
-        className="h-7 w-7 object-contain opacity-95"
-        decoding="async"
-      />
-    </div>
+    <img
+      src="/favicon.png"
+      alt="NUB Portal"
+      width={40}
+      height={40}
+      className="h-10 w-10 shrink-0 rounded-lg object-cover opacity-95"
+      decoding="async"
+    />
   )
 }
 
