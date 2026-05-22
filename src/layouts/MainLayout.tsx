@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { NavLink, Outlet, useLocation } from 'react-router-dom'
+import { Maximize2, Minimize2 } from 'lucide-react'
 import { cn } from '../lib/cn'
 import { useLocale, type Locale, type TranslationKey } from '../lib/i18n'
 import {
@@ -154,6 +155,7 @@ function CloseIcon() {
   )
 }
 
+
 export default function MainLayout() {
   const { t, locale, setLocale } = useLocale()
   const [navOpen, setNavOpen] = useState(false)
@@ -162,6 +164,21 @@ export default function MainLayout() {
   const [updateAvailable, setUpdateAvailable] = useState(isUpdateAvailable)
   const [bannerDismissed, setBannerDismissed] = useState(false)
   const lastPathRef = useRef(location.pathname)
+  const [isFullWidth, setIsFullWidth] = useState(() => {
+    try {
+      return localStorage.getItem('isFullWidth') === 'true'
+    } catch {
+      return false
+    }
+  })
+
+  useEffect(() => {
+    try {
+      localStorage.setItem('isFullWidth', String(isFullWidth))
+    } catch {
+      // Ignore
+    }
+  }, [isFullWidth])
 
   useEffect(() => {
     setNavOpen(false)
@@ -212,7 +229,7 @@ export default function MainLayout() {
   const showBanner = updateAvailable && !bannerDismissed
 
   return (
-    <div className="flex h-screen w-full flex-col overflow-hidden bg-canvas text-ink">
+    <div className={cn("flex h-screen w-full flex-col overflow-hidden bg-canvas text-ink", isFullWidth && "layout-full-width")}>
       {/* Top navigation bar - JSONLint style */}
       <header className="sticky top-0 z-30 grid h-16 shrink-0 grid-cols-[1fr_auto_1fr] items-center border-b border-hairline bg-surface-1 px-4 shadow-sm lg:px-6">
         {/* Logo */}
@@ -308,6 +325,23 @@ export default function MainLayout() {
         {/* Right side - Theme, language, GitHub & mobile menu */}
         <div className="absolute right-4 top-1/2 -translate-y-1/2 flex items-center gap-2 lg:relative lg:right-auto lg:top-auto lg:translate-y-0 lg:justify-self-end">
         <div className="hidden items-center gap-2 lg:flex">
+          <button
+            type="button"
+            onClick={() => setIsFullWidth((f) => !f)}
+            aria-label={t('nav.fullWidth')}
+            title={t('nav.fullWidth')}
+            className={cn(
+              'flex h-9 w-9 items-center justify-center rounded-md border border-hairline bg-surface-2',
+              'text-ink-subtle transition-colors hover:bg-surface-1 hover:text-ink',
+              'outline-none focus-visible:ds-focus-ring'
+            )}
+          >
+            {isFullWidth ? (
+              <Minimize2 className="h-4 w-4" />
+            ) : (
+              <Maximize2 className="h-4 w-4" />
+            )}
+          </button>
           <ThemeSwitcher />
           {/* Language Switcher inline */}
           <div

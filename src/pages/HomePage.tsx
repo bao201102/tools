@@ -157,7 +157,7 @@ export default function HomePage() {
               <h2 className="mb-[var(--ds-spacing-md)] px-0 font-display text-eyebrow font-medium text-ink-tertiary">
                 {t(section.titleKey)}
               </h2>
-              <ul className="grid grid-cols-1 gap-[var(--ds-spacing-lg)] sm:grid-cols-2 lg:grid-cols-3">
+              <ul className="grid grid-cols-1 gap-[var(--ds-spacing-lg)] sm:grid-cols-[repeat(auto-fill,minmax(320px,1fr))]">
                 {section.items.map((tool) => (
                   <li key={tool.kind === 'internal' ? tool.route : tool.href}>
                     {tool.kind === 'external' ? (

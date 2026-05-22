@@ -20,6 +20,7 @@ Tất cả các thay đổi quan trọng của dự án **NUB Portal** sẽ đư
   - **Thống kê tài liệu**: Hiển thị số từ, số ký tự và thời gian đọc ước tính.
   - Hỗ trợ đầy đủ bilingual EN / VI.
   - Dependency mới: `marked@^12.0.0` và `@types/marked@^12.0.0`.
+- **Bật/Tắt tràn màn hình (Full Width Toggle)**: Bổ sung nút phóng to ở thanh Header cho phép bật/tắt chế độ tràn viền (co giãn rộng tối đa, giữ khoảng đệm padding 2 bên cân đối thẳng hàng với Header: 1rem trên mobile, 1.5rem trên desktop) cho tất cả các trang công cụ và trang chủ. Đồng thời, cải tiến danh sách công cụ ở trang chủ thành dạng Grid tự động co giãn (`auto-fill`) số lượng card trên mỗi hàng tùy thuộc vào chiều rộng màn hình để tránh kéo giãn quá mức khi phóng to. Trạng thái được lưu trong `localStorage`.
 
 ### Cải tiến (Changed)
 - **Đồng bộ vị trí nút Sao chép (Copy)**: Đưa nút Sao chép lên thanh tiêu đề phía trên khung kết quả (tương tự như trang định dạng JSON) cho các công cụ:

@@ -337,3 +337,20 @@ body {
   background-clip: content-box;
 }
 
+/* Full width layout - align side padding with header */
+.layout-full-width .max-w-\[1300px\],
+.layout-full-width .max-w-content {
+  max-width: 100% !important;
+  padding-left: 1rem !important;
+  padding-right: 1rem !important;
+}
+
+@media (min-width: 1024px) {
+  .layout-full-width .max-w-\[1300px\],
+  .layout-full-width .max-w-content {
+    padding-left: 1.5rem !important;
+    padding-right: 1.5rem !important;
+  }
+}
+
+

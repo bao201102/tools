@@ -1,7 +1,7 @@
 import { useMemo } from 'react'
 
 export const EDITOR_HEIGHT_MIN = 400
-export const EDITOR_HEIGHT_MAX = 600
+export const EDITOR_HEIGHT_MAX = 700
 
 /** Label row + gap above Monaco inside a two-column editor grid */
 export const EDITOR_GRID_CHROME_PX = 40

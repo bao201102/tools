@@ -31,6 +31,7 @@ export const translations = {
     'nav.item.goldPrice': 'Gold Price Tracker',
     'nav.item.n8n': 'n8n Automation',
     'nav.item.markdownPreview': 'Markdown Preview',
+    'nav.fullWidth': 'Toggle Full Width',
 
     // Update banner
     'banner.newVersion': 'A new version is available',
@@ -271,6 +272,7 @@ export const translations = {
     'nav.item.goldPrice': 'Theo dõi giá vàng',
     'nav.item.n8n': 'Tự động hoá n8n',
     'nav.item.markdownPreview': 'Xem trước Markdown',
+    'nav.fullWidth': 'Bật/Tắt tràn màn hình',
 
     // Update banner
     'banner.newVersion': 'Có phiên bản mới sẵn có',
