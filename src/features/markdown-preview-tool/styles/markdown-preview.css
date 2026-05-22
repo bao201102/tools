@@ -246,7 +246,7 @@
   border: 0 !important;
   border-radius: 0 !important;
   background-color: var(--ds-color-surface-2) !important;
-  overflow-x: auto;
+  overflow-x: auto !important;
 }
 
 .md-code-pre code {
