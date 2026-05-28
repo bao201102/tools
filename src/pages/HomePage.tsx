@@ -17,6 +17,7 @@ import {
   Coins,
   Workflow,
   FileText,
+  Server,
   type LucideIcon,
 } from 'lucide-react'
 import { Card } from '../components/ui'
@@ -74,6 +75,7 @@ const sections: readonly Section[] = [
     titleKey: 'nav.group.utility',
     items: [
       { kind: 'external', titleKey: 'home.dash.gold.title', descKey: 'home.dash.gold.desc', href: 'https://gold.nub.io.vn/', icon: Coins },
+      { kind: 'external', titleKey: 'home.dash.vps.title', descKey: 'home.dash.vps.desc', href: 'https://vps-monitoring.nub.io.vn/', icon: Server },
       { kind: 'external', titleKey: 'home.dash.n8n.title', descKey: 'home.dash.n8n.desc', href: 'https://n8n.nub.io.vn/', icon: Workflow },
     ],
   },

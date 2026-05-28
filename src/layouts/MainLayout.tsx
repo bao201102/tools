@@ -46,6 +46,7 @@ const navGroups: NavGroup[] = [
     labelKey: 'nav.group.utility',
     items: [
       { kind: 'external', href: 'https://gold.nub.io.vn/', labelKey: 'nav.item.goldPrice' },
+      { kind: 'external', href: 'https://vps-monitoring.nub.io.vn/', labelKey: 'nav.item.vpsMonitoring' },
       { kind: 'external', href: 'https://n8n.nub.io.vn/', labelKey: 'nav.item.n8n' },
     ],
   },
