@@ -488,7 +488,7 @@ export default function MainLayout() {
       {/* Main content area */}
       <div className="relative flex min-h-0 flex-1 flex-col">
         <main className="flex min-h-0 min-w-0 flex-1 flex-col pb-[env(safe-area-inset-bottom)]">
-          <div className="flex min-h-0 h-full flex-1 flex-col overflow-y-auto bg-surface-1">
+          <div className="flex min-h-0 h-full flex-1 flex-col overflow-y-auto bg-canvas">
             <Outlet context={{ navOpen }} />
           </div>
         </main>

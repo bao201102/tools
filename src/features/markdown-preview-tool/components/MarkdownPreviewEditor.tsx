@@ -5,6 +5,7 @@ import { useLocale } from '../../../lib/i18n'
 import { useMonacoEditorTheme } from '../../../lib/useMonacoEditorTheme'
 import { useMarkdownPreview } from '../hooks/useMarkdownPreview'
 import '../styles/markdown-preview.css'
+import { Button } from '../../../components/ui'
 
 const editorOptions = {
   minimap: { enabled: false },
@@ -42,7 +43,7 @@ function ImageLightbox({ src, alt, onClose }: { src: string; alt: string; onClos
         <button
           type="button"
           onClick={onClose}
-          className="absolute -top-3 -right-3 flex h-8 w-8 items-center justify-center rounded-full border border-hairline bg-surface-1 shadow-md text-ink hover:bg-surface-2 cursor-pointer transition-colors"
+          className="absolute -top-3 -right-3 flex h-8 w-8 items-center justify-center rounded-full border border-hairline bg-surface-1 shadow-md text-ink hover:bg-surface-2 cursor-pointer transition-colors outline-none focus-visible:ds-focus-ring"
         >
           <X className="w-4 h-4" />
         </button>
@@ -202,21 +203,23 @@ export function MarkdownPreviewEditor() {
             <span className="text-xs text-ink-subtle">{isExpanded ? '▼' : '▶'}</span>
           </button>
           <div className="flex items-center gap-2">
-            <button
-              type="button"
+            <Button
+              variant="secondary"
+              size="sm"
               onClick={handleClear}
               disabled={!input.trim()}
-              className="rounded-md border border-hairline bg-surface-1 px-3 py-1 text-xs font-medium text-ink shadow-sm transition-colors hover:bg-surface-2 hover:border-hairline-strong cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+              className="cursor-pointer"
             >
               {t('tool.markdown.clear')}
-            </button>
-            <button
-              type="button"
+            </Button>
+            <Button
+              variant="secondary"
+              size="sm"
               onClick={loadSample}
-              className="rounded-md border border-hairline bg-surface-1 px-3 py-1 text-xs font-medium text-primary shadow-sm transition-colors hover:bg-surface-2 hover:border-hairline-strong cursor-pointer"
+              className="cursor-pointer text-primary hover:text-primary-hover"
             >
               {t('tool.markdown.loadSample')}
-            </button>
+            </Button>
           </div>
         </div>
 
@@ -247,7 +250,7 @@ export function MarkdownPreviewEditor() {
             <button
               type="button"
               onClick={(e) => { e.stopPropagation(); handleExpand() }}
-              className="rounded px-2.5 py-1 text-xs font-semibold bg-surface-1 border border-hairline text-primary hover:bg-surface-2 cursor-pointer"
+              className="rounded px-2.5 py-1 text-xs font-semibold bg-surface-1 border border-hairline text-primary hover:bg-surface-2 cursor-pointer outline-none focus-visible:ds-focus-ring"
             >
               {t('tool.markdown.edit')}
             </button>
@@ -262,22 +265,24 @@ export function MarkdownPreviewEditor() {
             <div className="flex shrink-0 items-center justify-between">
               <h3 className="text-sm font-medium text-ink">{t('tool.markdown.output')}</h3>
               <div className="flex items-center gap-2">
-                <button
-                  type="button"
+                <Button
+                  variant="secondary"
+                  size="sm"
                   onClick={() => setIsPreviewMaximized(true)}
-                  className="rounded-md border border-hairline bg-surface-1 px-3 py-1 text-xs font-medium text-ink shadow-sm transition-colors hover:bg-surface-2 hover:border-hairline-strong cursor-pointer flex items-center gap-1"
+                  className="cursor-pointer flex items-center gap-1"
                 >
                   <Maximize2 className="w-3.5 h-3.5" />
                   <span>{t('tool.markdown.maximize')}</span>
-                </button>
-                <button
-                  type="button"
+                </Button>
+                <Button
+                  variant="secondary"
+                  size="sm"
                   onClick={handleCopy}
                   disabled={!output}
-                  className="rounded-md border border-hairline bg-surface-1 px-3 py-1 text-xs font-medium text-ink shadow-sm transition-colors hover:bg-surface-2 hover:border-hairline-strong disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+                  className="cursor-pointer"
                 >
                   {copyLabel}
-                </button>
+                </Button>
               </div>
             </div>
             <div className="relative overflow-hidden rounded-lg border border-hairline shadow-sm bg-surface-1 min-h-[300px] max-h-[500px] flex flex-col">
@@ -289,13 +294,9 @@ export function MarkdownPreviewEditor() {
 
           {/* Bottom Clear */}
           <div className="flex shrink-0 flex-wrap gap-2">
-            <button
-              type="button"
-              onClick={handleClear}
-              className="rounded-md border border-hairline bg-surface-1 px-4 py-2 text-sm font-medium text-ink shadow-sm transition-colors hover:bg-surface-2 hover:border-hairline-strong cursor-pointer"
-            >
+            <Button variant="secondary" onClick={handleClear} className="cursor-pointer">
               {t('tool.markdown.clear')}
-            </button>
+            </Button>
           </div>
 
           {/* Status Bar */}
@@ -337,22 +338,24 @@ export function MarkdownPreviewEditor() {
             <div className="flex shrink-0 items-center justify-between px-6 py-4 border-b border-hairline bg-surface-2/40">
               <h3 className="text-base font-semibold text-ink">{t('tool.markdown.output')}</h3>
               <div className="flex items-center gap-2">
-                <button
-                  type="button"
+                <Button
+                  variant="secondary"
+                  size="sm"
                   onClick={handleCopy}
                   disabled={!output}
-                  className="rounded-md border border-hairline bg-surface-1 px-3 py-1.5 text-xs font-medium text-ink shadow-sm transition-colors hover:bg-surface-2 hover:border-hairline-strong disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+                  className="cursor-pointer"
                 >
                   {copyLabel}
-                </button>
-                <button
-                  type="button"
+                </Button>
+                <Button
+                  variant="secondary"
+                  size="sm"
                   onClick={() => setIsPreviewMaximized(false)}
-                  className="rounded-md border border-hairline bg-surface-1 px-3 py-1.5 text-xs font-medium text-ink shadow-sm transition-colors hover:bg-surface-2 hover:border-hairline-strong cursor-pointer flex items-center gap-1.5"
+                  className="cursor-pointer flex items-center gap-1.5"
                 >
                   <Minimize2 className="w-4 h-4" />
                   <span>{t('tool.markdown.minimize')}</span>
-                </button>
+                </Button>
               </div>
             </div>
             {/* Modal Content */}

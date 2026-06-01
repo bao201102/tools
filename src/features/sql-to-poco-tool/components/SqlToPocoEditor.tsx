@@ -119,7 +119,7 @@ export function SqlToPocoEditor() {
           <span id="sql-input-label" className="shrink-0 text-sm font-medium text-ink">
             {t('tool.sqlPoco.inputSql')}
           </span>
-          <div className="relative h-full overflow-hidden rounded-lg border border-hairline shadow-sm">
+          <div className="relative h-full overflow-hidden rounded-lg border border-hairline shadow-sm bg-surface-1">
             <EditorPane
               labelId="sql-input-label"
               language="sql"
@@ -136,16 +136,16 @@ export function SqlToPocoEditor() {
             <span id="sql-output-label" className="text-sm font-medium text-ink">
               {t('tool.sqlPoco.generatedCsharp')}
             </span>
-            <button
-              type="button"
+            <Button
+              variant="secondary"
+              size="sm"
               onClick={handleCopy}
               disabled={!output}
-              className="rounded-md border border-hairline bg-surface-1 px-3 py-1 text-xs font-medium text-ink shadow-sm transition-colors hover:bg-surface-2 hover:border-hairline-strong disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {copyState === 'copied' ? t('common.copied') + '!' : copyState === 'failed' ? t('common.failed') : t('common.copy')}
-            </button>
+            </Button>
           </div>
-          <div className="relative h-full overflow-hidden rounded-lg border border-hairline shadow-sm">
+          <div className="relative h-full overflow-hidden rounded-lg border border-hairline shadow-sm bg-surface-1">
             <EditorPane labelId="sql-output-label" language="csharp" value={output} readOnly />
           </div>
         </div>

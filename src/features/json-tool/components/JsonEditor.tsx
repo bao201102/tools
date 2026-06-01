@@ -6,7 +6,7 @@ import {
   useAdaptiveEditorHeight,
 } from '../../../lib/useAdaptiveEditorHeight'
 import { useMonacoEditorTheme } from '../../../lib/useMonacoEditorTheme'
-import { Input } from '../../../components/ui/Input'
+import { Button, Input } from '../../../components/ui'
 
 const editorOptions = {
   minimap: { enabled: false },
@@ -165,7 +165,7 @@ function JsonTreeView({ data }: { data: any }) {
             {!isEmpty && (
               <button
                 onClick={() => togglePath(path)}
-                className="flex-shrink-0 w-4 h-4 flex items-center justify-center text-ink-muted hover:text-ink"
+                className="flex-shrink-0 w-4 h-4 flex items-center justify-center text-ink-muted hover:text-ink outline-none focus-visible:ds-focus-ring rounded-sm"
               >
                 {isExpanded ? '▼' : '▶'}
               </button>
@@ -220,20 +220,22 @@ function JsonTreeView({ data }: { data: any }) {
     <div className="h-full flex flex-col">
       <div className="flex items-center justify-between mb-3 pb-3 border-b border-hairline">
         <div className="flex gap-2">
-          <button
+          <Button
+            variant="secondary"
+            size="sm"
             onClick={expandAll}
             disabled={allExpanded}
-            className="rounded-md border border-hairline bg-surface-1 px-3 py-1.5 text-xs font-medium text-ink shadow-sm transition-colors hover:bg-surface-2 hover:border-hairline-strong disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {t('tool.json.expandAll')}
-          </button>
-          <button
+          </Button>
+          <Button
+            variant="secondary"
+            size="sm"
             onClick={collapseAll}
             disabled={expandedPaths.size === 0}
-            className="rounded-md border border-hairline bg-surface-1 px-3 py-1.5 text-xs font-medium text-ink shadow-sm transition-colors hover:bg-surface-2 hover:border-hairline-strong disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {t('tool.json.collapseAll')}
-          </button>
+          </Button>
         </div>
       </div>
       <div className="flex-1 overflow-auto font-mono text-sm">
@@ -569,16 +571,17 @@ export function JsonEditor() {
         <div className="flex min-h-0 flex-col gap-2">
           <div className="flex shrink-0 items-center justify-between">
             <h3 className="text-sm font-medium text-ink">{t('tool.json.original')}</h3>
-            <button
-              type="button"
+            <Button
+              variant="secondary"
+              size="sm"
               onClick={handleLoadSample}
-              className="rounded-md border border-hairline bg-surface-1 px-3 py-1 text-xs font-medium text-primary shadow-sm transition-colors hover:bg-surface-2 hover:border-hairline-strong"
+              className="text-primary hover:text-primary-hover"
             >
               {t('tool.json.loadSample')}
-            </button>
+            </Button>
           </div>
           <div
-            className="relative overflow-hidden rounded-lg border border-hairline shadow-sm"
+            className="relative overflow-hidden rounded-lg border border-hairline shadow-sm bg-surface-1"
             style={{ height: monacoPaneHeight }}
           >
             <Editor
@@ -602,39 +605,31 @@ export function JsonEditor() {
         <div className="flex min-h-0 flex-col gap-2">
           <div className="flex shrink-0 items-center justify-between">
             <div className="flex items-center gap-2">
-              <button
-                type="button"
+              <Button
+                variant={viewMode === 'editor' ? 'primary' : 'secondary'}
+                size="sm"
                 onClick={() => setViewMode('editor')}
-                className={`rounded-md px-3 py-1 text-xs font-medium transition-colors ${
-                  viewMode === 'editor'
-                    ? 'bg-primary text-white'
-                    : 'bg-surface-1 text-ink border border-hairline hover:bg-surface-2'
-                }`}
               >
                 {t('tool.json.editor')}
-              </button>
-              <button
-                type="button"
+              </Button>
+              <Button
+                variant={viewMode === 'tree' ? 'primary' : 'secondary'}
+                size="sm"
                 onClick={() => setViewMode('tree')}
                 disabled={!parsedData}
-                className={`rounded-md px-3 py-1 text-xs font-medium transition-colors ${
-                  viewMode === 'tree'
-                    ? 'bg-primary text-white'
-                    : 'bg-surface-1 text-ink border border-hairline hover:bg-surface-2'
-                } disabled:opacity-50 disabled:cursor-not-allowed`}
               >
                 {t('tool.json.treeView')}
-              </button>
+              </Button>
             </div>
             {viewMode === 'editor' && (
-              <button
-                type="button"
+              <Button
+                variant="secondary"
+                size="sm"
                 onClick={handleCopy}
                 disabled={!output}
-                className="rounded-md border border-hairline bg-surface-1 px-3 py-1 text-xs font-medium text-ink shadow-sm transition-colors hover:bg-surface-2 hover:border-hairline-strong disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {copyState === 'copied' ? t('common.copied') + '!' : t('common.copy')}
-              </button>
+              </Button>
             )}
           </div>
           <div
@@ -674,45 +669,33 @@ export function JsonEditor() {
 
       {/* Action Buttons */}
       <div className="flex shrink-0 flex-wrap gap-2">
-        <button
-          type="button"
-          onClick={handleClear}
-          className="rounded-md border border-hairline bg-surface-1 px-4 py-2 text-sm font-medium text-ink shadow-sm transition-colors hover:bg-surface-2 hover:border-hairline-strong"
-        >
+        <Button onClick={handleClear}>
           {t('common.clear')}
-        </button>
-        <button
-          type="button"
+        </Button>
+        <Button
           onClick={handlePrettify}
           disabled={!!error || !input}
-          className="rounded-md border border-hairline bg-surface-1 px-4 py-2 text-sm font-medium text-ink shadow-sm transition-colors hover:bg-surface-2 hover:border-hairline-strong disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {t('tool.json.prettify')}
-        </button>
-        <button
-          type="button"
+        </Button>
+        <Button
           onClick={handleCompress}
           disabled={!!error || !input}
-          className="rounded-md border border-hairline bg-surface-1 px-4 py-2 text-sm font-medium text-ink shadow-sm transition-colors hover:bg-surface-2 hover:border-hairline-strong disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {t('tool.json.compress')}
-        </button>
-        <button
-          type="button"
+        </Button>
+        <Button
           onClick={handleSortKeys}
           disabled={!!error || !input}
-          className="rounded-md border border-hairline bg-surface-1 px-4 py-2 text-sm font-medium text-ink shadow-sm transition-colors hover:bg-surface-2 hover:border-hairline-strong disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {t('tool.json.sortKeys')}
-        </button>
-        <button
-          type="button"
+        </Button>
+        <Button
           onClick={handleStringify}
           disabled={!!error || !input}
-          className="rounded-md border border-hairline bg-surface-1 px-4 py-2 text-sm font-medium text-ink shadow-sm transition-colors hover:bg-surface-2 hover:border-hairline-strong disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {t('tool.json.stringify')}
-        </button>
+        </Button>
       </div>
 
       {/* Status Bar */}
@@ -761,28 +744,28 @@ export function JsonEditor() {
           <div className="flex items-center justify-between mb-3">
             <h3 className="text-sm font-medium text-ink">{t('tool.json.extractFields')}</h3>
             <div className="flex gap-2">
-              <button
-                type="button"
+              <Button
+                variant="secondary"
+                size="sm"
                 onClick={selectAllFields}
-                className="rounded-md border border-hairline bg-surface-1 px-3 py-1 text-xs font-medium text-ink shadow-sm transition-colors hover:bg-surface-2 hover:border-hairline-strong"
               >
                 {t('tool.json.selectAll')}
-              </button>
-              <button
-                type="button"
+              </Button>
+              <Button
+                variant="secondary"
+                size="sm"
                 onClick={deselectAllFields}
-                className="rounded-md border border-hairline bg-surface-1 px-3 py-1 text-xs font-medium text-ink shadow-sm transition-colors hover:bg-surface-2 hover:border-hairline-strong"
               >
                 {t('tool.json.deselectAll')}
-              </button>
-              <button
-                type="button"
+              </Button>
+              <Button
+                variant="primary"
+                size="sm"
                 onClick={handleExtractFields}
                 disabled={selectedFields.size === 0}
-                className="rounded-md border border-hairline bg-primary px-3 py-1 text-xs font-medium text-white shadow-sm transition-colors hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {t('tool.json.extractSelected', { count: selectedFields.size })}
-              </button>
+              </Button>
             </div>
           </div>
           <div className="mb-3">
@@ -802,7 +785,7 @@ export function JsonEditor() {
                     key={field}
                     type="button"
                     onClick={() => toggleFieldSelection(field)}
-                    className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium transition-all ${
+                    className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium transition-all outline-none focus-visible:ds-focus-ring ${
                       selectedFields.has(field)
                         ? 'bg-primary text-white shadow-sm hover:bg-primary/90'
                         : 'bg-surface-1 text-ink border border-hairline hover:bg-surface-2 hover:border-hairline-strong'
@@ -835,8 +818,9 @@ export function JsonEditor() {
         <div className="shrink-0 pb-12">
           <div className="flex items-center justify-between mb-2">
             <h3 className="text-sm font-medium text-ink">{t('tool.json.extractedOutput')}</h3>
-            <button
-              type="button"
+            <Button
+              variant="secondary"
+              size="sm"
               onClick={async () => {
                 try {
                   await navigator.clipboard.writeText(extractedOutput)
@@ -844,10 +828,9 @@ export function JsonEditor() {
                   // Ignore
                 }
               }}
-              className="rounded-md border border-hairline bg-surface-1 px-3 py-1 text-xs font-medium text-ink shadow-sm transition-colors hover:bg-surface-2 hover:border-hairline-strong"
             >
               {t('common.copy')}
-            </button>
+            </Button>
           </div>
           <div className="relative h-[300px] overflow-hidden rounded-lg border border-hairline shadow-sm">
             <Editor

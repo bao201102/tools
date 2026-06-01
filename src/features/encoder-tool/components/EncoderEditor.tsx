@@ -88,14 +88,14 @@ export function EncoderEditor() {
             <label htmlFor="encoder-output" className="text-sm font-medium text-ink">
               {t('common.output')}
             </label>
-            <button
-              type="button"
+            <Button
+              variant="secondary"
+              size="sm"
               onClick={handleCopy}
               disabled={!output}
-              className="rounded-md border border-hairline bg-surface-1 px-3 py-1 text-xs font-medium text-ink shadow-sm transition-colors hover:bg-surface-2 hover:border-hairline-strong disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {copyState === 'copied' ? t('common.copied') + '!' : t('common.copy')}
-            </button>
+            </Button>
           </div>
           <Textarea
             id="encoder-output"
