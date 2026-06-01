@@ -6,6 +6,7 @@ import {
   useAdaptiveEditorHeight,
 } from '../../../lib/useAdaptiveEditorHeight'
 import { useMonacoEditorTheme } from '../../../lib/useMonacoEditorTheme'
+import { Input } from '../../../components/ui/Input'
 
 const editorOptions = {
   minimap: { enabled: false },
@@ -257,6 +258,11 @@ export function JsonEditor() {
   const [detectedFields, setDetectedFields] = useState<string[]>([])
   const [selectedFields, setSelectedFields] = useState<Set<string>>(new Set())
   const [extractedOutput, setExtractedOutput] = useState('')
+  const [fieldSearchQuery, setFieldSearchQuery] = useState('')
+
+  const filteredFields = detectedFields.filter(field =>
+    field.toLowerCase().includes(fieldSearchQuery.toLowerCase())
+  )
 
   // Auto-validate and format
   useEffect(() => {
@@ -267,6 +273,7 @@ export function JsonEditor() {
       setParsedData(null)
       setDetectedFields([])
       setSelectedFields(new Set())
+      setFieldSearchQuery('')
       return
     }
 
@@ -318,6 +325,7 @@ export function JsonEditor() {
     setDetectedFields([])
     setSelectedFields(new Set())
     setExtractedOutput('')
+    setFieldSearchQuery('')
   }, [])
 
   const handleCompress = useCallback(() => {
@@ -457,11 +465,27 @@ export function JsonEditor() {
   }
 
   const selectAllFields = () => {
-    setSelectedFields(new Set(detectedFields))
+    if (fieldSearchQuery) {
+      setSelectedFields(prev => {
+        const next = new Set(prev)
+        filteredFields.forEach(f => next.add(f))
+        return next
+      })
+    } else {
+      setSelectedFields(new Set(detectedFields))
+    }
   }
 
   const deselectAllFields = () => {
-    setSelectedFields(new Set())
+    if (fieldSearchQuery) {
+      setSelectedFields(prev => {
+        const next = new Set(prev)
+        filteredFields.forEach(f => next.delete(f))
+        return next
+      })
+    } else {
+      setSelectedFields(new Set())
+    }
   }
 
   const handleExtractFields = useCallback(() => {
@@ -761,29 +785,44 @@ export function JsonEditor() {
               </button>
             </div>
           </div>
+          <div className="mb-3">
+            <Input
+              type="text"
+              placeholder={t('tool.json.searchFields')}
+              value={fieldSearchQuery}
+              onChange={(e) => setFieldSearchQuery(e.target.value)}
+              className="!min-h-[38px] py-1.5 text-sm"
+            />
+          </div>
           <div className="max-h-48 overflow-y-auto rounded border border-hairline bg-surface-2 p-3">
-            <div className="flex flex-wrap gap-2">
-              {detectedFields.map(field => (
-                <button
-                  key={field}
-                  type="button"
-                  onClick={() => toggleFieldSelection(field)}
-                  className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium transition-all ${
-                    selectedFields.has(field)
-                      ? 'bg-primary text-white shadow-sm hover:bg-primary/90'
-                      : 'bg-surface-1 text-ink border border-hairline hover:bg-surface-2 hover:border-hairline-strong'
-                  }`}
-                  title={field}
-                >
-                  <span>{field}</span>
-                  {selectedFields.has(field) && (
-                    <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                    </svg>
-                  )}
-                </button>
-              ))}
-            </div>
+            {filteredFields.length > 0 ? (
+              <div className="flex flex-wrap gap-2">
+                {filteredFields.map(field => (
+                  <button
+                    key={field}
+                    type="button"
+                    onClick={() => toggleFieldSelection(field)}
+                    className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium transition-all ${
+                      selectedFields.has(field)
+                        ? 'bg-primary text-white shadow-sm hover:bg-primary/90'
+                        : 'bg-surface-1 text-ink border border-hairline hover:bg-surface-2 hover:border-hairline-strong'
+                    }`}
+                    title={field}
+                  >
+                    <span>{field}</span>
+                    {selectedFields.has(field) && (
+                      <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                      </svg>
+                    )}
+                  </button>
+                ))}
+              </div>
+            ) : (
+              <div className="text-sm text-ink-subtle text-center py-4">
+                {t('tool.json.noFieldsFound')}
+              </div>
+            )}
           </div>
           <p className="mt-2 text-xs text-ink-muted">
             {t('tool.json.extractPrompt')}
