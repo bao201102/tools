@@ -7,10 +7,12 @@ type TextareaProps = {
 } & TextareaHTMLAttributes<HTMLTextAreaElement>
 
 export function Textarea({ error = false, className = '', ...rest }: TextareaProps) {
+  const hasHeightConstraint = /\b(min-h|h)-/.test(className)
   return (
     <textarea
       className={cn(
-        'w-full min-h-24 rounded-md border bg-surface-1 px-3 py-2 text-body text-ink',
+        'w-full rounded-md border bg-surface-1 px-3 py-2 text-body text-ink',
+        !hasHeightConstraint && 'min-h-24',
         'placeholder:text-ink-tertiary',
         'outline-none transition-colors focus-visible:ds-focus-ring',
         error

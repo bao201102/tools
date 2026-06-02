@@ -29,7 +29,7 @@ function OutputPane({ id, label, value, copyLabel, onCopy }: OutputPaneProps) {
         readOnly
         value={value}
         spellCheck={false}
-        className="min-h-[240px] w-full flex-1 resize-y bg-surface-2 p-4 font-mono text-sm leading-relaxed text-ink shadow-sm"
+        className="min-h-[240px] max-h-[80vh] h-[calc(100%-2.5rem)] w-full resize-y bg-surface-2 p-4 font-mono text-sm leading-relaxed text-ink shadow-sm"
         placeholder={t('tool.jwt.placeholder', { label })}
       />
     </div>
@@ -82,7 +82,7 @@ export function JwtDecoderEditor() {
         : t('tool.jwt.copyPayload')
 
   return (
-    <div className="mx-auto flex min-h-0 w-full max-w-[1300px] flex-1 flex-col gap-4 p-6 lg:p-8">
+    <div className="mx-auto flex w-full max-w-[1300px] flex-col gap-4 p-6 lg:p-8">
       <div className="shrink-0">
         <p className="text-sm text-ink-muted">{t('tool.jwt.desc')}</p>
       </div>
@@ -105,7 +105,7 @@ export function JwtDecoderEditor() {
           value={input}
           onChange={(event) => setInput(event.target.value)}
           spellCheck={false}
-          className="min-h-[140px] w-full resize-y font-mono text-sm leading-relaxed sm:min-h-[180px] p-3 sm:p-4 shadow-sm"
+          className="min-h-[140px] max-h-[50vh] w-full resize-y font-mono text-sm leading-relaxed sm:min-h-[180px] p-3 sm:p-4 shadow-sm"
           placeholder={t('tool.jwt.inputPlaceholder')}
           error={!!error}
         />
@@ -113,7 +113,7 @@ export function JwtDecoderEditor() {
 
       <div
         className="grid min-h-0 grid-cols-1 gap-4 w-full lg:grid-cols-2 lg:gap-6"
-        style={{ height: editorHeight }}
+        style={{ minHeight: editorHeight }}
       >
         <OutputPane
           id="jwt-header-output"
