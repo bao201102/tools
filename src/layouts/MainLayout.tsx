@@ -34,6 +34,11 @@ const navGroups: NavGroup[] = [
     labelKey: 'nav.group.convert',
     items: [
       { kind: 'internal', to: '/json-to-yaml', labelKey: 'nav.item.yamlFormatter' },
+      { kind: 'internal', to: '/yaml-to-json', labelKey: 'nav.item.yamlToJson' },
+      { kind: 'internal', to: '/json-to-csv', labelKey: 'nav.item.jsonToCsv' },
+      { kind: 'internal', to: '/csv-to-json', labelKey: 'nav.item.csvToJson' },
+      { kind: 'internal', to: '/json-to-excel', labelKey: 'nav.item.jsonToExcel' },
+      { kind: 'internal', to: '/excel-to-json', labelKey: 'nav.item.excelToJson' },
       { kind: 'internal', to: '/encoder', labelKey: 'nav.item.encoder' },
       { kind: 'internal', to: '/json-to-csharp', labelKey: 'nav.item.jsonToCsharp' },
       { kind: 'internal', to: '/sql-to-csharp', labelKey: 'nav.item.sqlToCsharp' },

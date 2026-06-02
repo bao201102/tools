@@ -63,6 +63,11 @@ const sections: readonly Section[] = [
     titleKey: 'home.section.convert',
     items: [
       { kind: 'internal', titleKey: 'home.tool.yaml.title', descKey: 'home.tool.yaml.desc', route: '/json-to-yaml', icon: RefreshCw },
+      { kind: 'internal', titleKey: 'home.tool.yamlToJson.title', descKey: 'home.tool.yamlToJson.desc', route: '/yaml-to-json', icon: FileJson },
+      { kind: 'internal', titleKey: 'home.tool.jsonToCsv.title', descKey: 'home.tool.jsonToCsv.desc', route: '/json-to-csv', icon: FileText },
+      { kind: 'internal', titleKey: 'home.tool.csvToJson.title', descKey: 'home.tool.csvToJson.desc', route: '/csv-to-json', icon: FileJson },
+      { kind: 'internal', titleKey: 'home.tool.jsonToExcel.title', descKey: 'home.tool.jsonToExcel.desc', route: '/json-to-excel', icon: FileText },
+      { kind: 'internal', titleKey: 'home.tool.excelToJson.title', descKey: 'home.tool.excelToJson.desc', route: '/excel-to-json', icon: FileJson },
       { kind: 'internal', titleKey: 'home.tool.encoder.title', descKey: 'home.tool.encoder.desc', route: '/encoder', icon: Hash },
       { kind: 'internal', titleKey: 'home.tool.poco.title', descKey: 'home.tool.poco.desc', route: '/json-to-csharp', icon: Terminal },
       { kind: 'internal', titleKey: 'home.tool.sqlPoco.title', descKey: 'home.tool.sqlPoco.desc', route: '/sql-to-csharp', icon: Database },

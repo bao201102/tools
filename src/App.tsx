@@ -8,6 +8,11 @@ const JsonPage = lazy(() => import('./pages/JsonPage'))
 const JsonEscapePage = lazy(() => import('./pages/JsonEscapePage'))
 const JsonUnescapePage = lazy(() => import('./pages/JsonUnescapePage'))
 const JsonToYamlPage = lazy(() => import('./pages/JsonToYamlPage'))
+const JsonToCsvPage = lazy(() => import('./pages/JsonToCsvPage'))
+const CsvToJsonPage = lazy(() => import('./pages/CsvToJsonPage'))
+const YamlToJsonPage = lazy(() => import('./pages/YamlToJsonPage'))
+const JsonToExcelPage = lazy(() => import('./pages/JsonToExcelPage'))
+const ExcelToJsonPage = lazy(() => import('./pages/ExcelToJsonPage'))
 const CsharpProtoPage = lazy(() => import('./pages/CsharpProtoPage'))
 const CsharpProtoRemovePage = lazy(() => import('./pages/CsharpProtoRemovePage'))
 const EncoderPage = lazy(() => import('./pages/EncoderPage'))
@@ -33,6 +38,11 @@ export default function App() {
           <Route path="json-escape" element={<JsonEscapePage />} />
           <Route path="json-unescape" element={<JsonUnescapePage />} />
           <Route path="json-to-yaml" element={<JsonToYamlPage />} />
+          <Route path="json-to-csv" element={<JsonToCsvPage />} />
+          <Route path="csv-to-json" element={<CsvToJsonPage />} />
+          <Route path="yaml-to-json" element={<YamlToJsonPage />} />
+          <Route path="json-to-excel" element={<JsonToExcelPage />} />
+          <Route path="excel-to-json" element={<ExcelToJsonPage />} />
           <Route path="csharp-proto" element={<CsharpProtoPage />} />
           <Route path="csharp-proto-remove" element={<CsharpProtoRemovePage />} />
           <Route path="encoder" element={<EncoderPage />} />

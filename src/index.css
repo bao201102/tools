@@ -238,7 +238,9 @@
   --text-body-sm: 0.875rem;
   --text-body-sm--line-height: 1.5;
 
-  --text-caption: 0.75rem;
+  --text-xs: 0.8125rem;
+
+  --text-caption: 0.8125rem;
   --text-caption--line-height: 1.4;
 
   --text-button: 0.875rem;
