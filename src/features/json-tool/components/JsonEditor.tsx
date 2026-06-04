@@ -1,5 +1,6 @@
 import Editor from '@monaco-editor/react'
 import { useCallback, useEffect, useState, useRef } from 'react'
+import { useLocalStorageState } from '../../../lib/useLocalStorageState'
 import { useLocale } from '../../../lib/i18n'
 import {
   getMonacoPaneHeight,
@@ -249,8 +250,8 @@ export function JsonEditor() {
   const { t } = useLocale()
   const editorTheme = useMonacoEditorTheme()
 
-  const [editorValue, setEditorValue] = useState('')
-  const [debouncedInput, setDebouncedInput] = useState('')
+  const [editorValue, setEditorValue] = useLocalStorageState('json:editorValue', '')
+  const [debouncedInput, setDebouncedInput] = useLocalStorageState('json:debouncedInput', '')
   const [output, setOutput] = useState('')
   const [error, setError] = useState<string | null>(null)
   const [stats, setStats] = useState<JsonStats>({ size: 0, keys: 0, depth: 0, objects: 0, arrays: 0 })

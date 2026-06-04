@@ -1,4 +1,5 @@
-import { useCallback, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
+import { useLocalStorageState } from '../../../lib/useLocalStorageState'
 
 function parseErrorMessage(error: unknown): string {
   return error instanceof Error ? error.message : 'Invalid CSV format'
@@ -77,11 +78,11 @@ function parseValue(val: string): unknown {
 }
 
 export function useCsvToJson() {
-  const [input, setInput] = useState('')
+  const [input, setInput] = useLocalStorageState('csv-to-json:input', '')
   const [output, setOutput] = useState('')
   const [error, setError] = useState<string | null>(null)
-  const [delimiter, setDelimiter] = useState(',')
-  const [firstRowIsHeaders, setFirstRowIsHeaders] = useState(true)
+  const [delimiter, setDelimiter] = useLocalStorageState('csv-to-json:delimiter', ',')
+  const [firstRowIsHeaders, setFirstRowIsHeaders] = useLocalStorageState('csv-to-json:firstRowIsHeaders', true)
 
   const convertCsvToJson = useCallback((value: string, currentDelimiter: string, currentFirstRowIsHeaders: boolean) => {
     if (value.trim() === '') {
@@ -132,26 +133,17 @@ export function useCsvToJson() {
     }
   }, [])
 
-  const onInputChange = useCallback((value: string) => {
-    setInput(value)
-    convertCsvToJson(value, delimiter, firstRowIsHeaders)
-  }, [delimiter, firstRowIsHeaders, convertCsvToJson])
-
-  const onDelimiterChange = useCallback((value: string) => {
-    setDelimiter(value)
-    convertCsvToJson(input, value, firstRowIsHeaders)
-  }, [input, firstRowIsHeaders, convertCsvToJson])
-
-  const onFirstRowIsHeadersChange = useCallback((value: boolean) => {
-    setFirstRowIsHeaders(value)
-    convertCsvToJson(input, delimiter, value)
-  }, [input, delimiter, convertCsvToJson])
+  useEffect(() => {
+    convertCsvToJson(input, delimiter, firstRowIsHeaders)
+  }, [input, delimiter, firstRowIsHeaders, convertCsvToJson])
 
   const clear = useCallback(() => {
     setInput('')
+    setDelimiter(',')
+    setFirstRowIsHeaders(true)
     setOutput('')
     setError(null)
-  }, [])
+  }, [setInput, setDelimiter, setFirstRowIsHeaders])
 
   return {
     input,
@@ -159,9 +151,9 @@ export function useCsvToJson() {
     error,
     delimiter,
     firstRowIsHeaders,
-    onInputChange,
-    onDelimiterChange,
-    onFirstRowIsHeadersChange,
+    onInputChange: setInput,
+    onDelimiterChange: setDelimiter,
+    onFirstRowIsHeadersChange: setFirstRowIsHeaders,
     clear,
   }
 }

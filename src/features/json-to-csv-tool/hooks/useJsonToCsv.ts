@@ -1,4 +1,5 @@
-import { useCallback, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
+import { useLocalStorageState } from '../../../lib/useLocalStorageState'
 
 function parseErrorMessage(error: unknown): string {
   return error instanceof Error ? error.message : 'Invalid JSON'
@@ -17,11 +18,11 @@ function escapeCSVValue(val: unknown, delimiter: string): string {
 }
 
 export function useJsonToCsv() {
-  const [input, setInput] = useState('')
+  const [input, setInput] = useLocalStorageState('json-to-csv:input', '')
   const [output, setOutput] = useState('')
   const [error, setError] = useState<string | null>(null)
-  const [delimiter, setDelimiter] = useState(',')
-  const [includeHeaders, setIncludeHeaders] = useState(true)
+  const [delimiter, setDelimiter] = useLocalStorageState('json-to-csv:delimiter', ',')
+  const [includeHeaders, setIncludeHeaders] = useLocalStorageState('json-to-csv:includeHeaders', true)
 
   const convertJsonToCsv = useCallback((value: string, currentDelimiter: string, currentIncludeHeaders: boolean) => {
     if (value.trim() === '') {
@@ -91,26 +92,17 @@ export function useJsonToCsv() {
     }
   }, [])
 
-  const onInputChange = useCallback((value: string) => {
-    setInput(value)
-    convertJsonToCsv(value, delimiter, includeHeaders)
-  }, [delimiter, includeHeaders, convertJsonToCsv])
-
-  const onDelimiterChange = useCallback((value: string) => {
-    setDelimiter(value)
-    convertJsonToCsv(input, value, includeHeaders)
-  }, [input, includeHeaders, convertJsonToCsv])
-
-  const onIncludeHeadersChange = useCallback((value: boolean) => {
-    setIncludeHeaders(value)
-    convertJsonToCsv(input, delimiter, value)
-  }, [input, delimiter, convertJsonToCsv])
+  useEffect(() => {
+    convertJsonToCsv(input, delimiter, includeHeaders)
+  }, [input, delimiter, includeHeaders, convertJsonToCsv])
 
   const clear = useCallback(() => {
     setInput('')
+    setDelimiter(',')
+    setIncludeHeaders(true)
     setOutput('')
     setError(null)
-  }, [])
+  }, [setInput, setDelimiter, setIncludeHeaders])
 
   return {
     input,
@@ -118,9 +110,9 @@ export function useJsonToCsv() {
     error,
     delimiter,
     includeHeaders,
-    onInputChange,
-    onDelimiterChange,
-    onIncludeHeadersChange,
+    onInputChange: setInput,
+    onDelimiterChange: setDelimiter,
+    onIncludeHeadersChange: setIncludeHeaders,
     clear,
   }
 }

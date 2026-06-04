@@ -1,4 +1,5 @@
-import { useCallback, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
+import { useLocalStorageState } from '../../../lib/useLocalStorageState'
 
 type Mode = 'base64' | 'url'
 type Direction = 'encode' | 'decode'
@@ -43,11 +44,11 @@ function processValue(input: string, mode: Mode, direction: Direction): { output
 }
 
 export function useEncoder() {
-  const [input, setInputState] = useState('')
+  const [input, setInputState] = useLocalStorageState('encoder:input', '')
   const [output, setOutput] = useState('')
   const [error, setError] = useState<string | null>(null)
-  const [mode, setModeState] = useState<Mode>('base64')
-  const [direction, setDirectionState] = useState<Direction>('encode')
+  const [mode, setModeState] = useLocalStorageState<Mode>('encoder:mode', 'base64')
+  const [direction, setDirectionState] = useLocalStorageState<Direction>('encoder:direction', 'encode')
 
   const applyProcessing = useCallback((nextInput: string, nextMode: Mode, nextDirection: Direction) => {
     const result = processValue(nextInput, nextMode, nextDirection)
@@ -55,43 +56,22 @@ export function useEncoder() {
     setError(result.error)
   }, [])
 
-  const setInput = useCallback(
-    (value: string) => {
-      setInputState(value)
-      applyProcessing(value, mode, direction)
-    },
-    [applyProcessing, direction, mode],
-  )
-
-  const setMode = useCallback(
-    (nextMode: Mode) => {
-      setModeState(nextMode)
-      applyProcessing(input, nextMode, direction)
-    },
-    [applyProcessing, direction, input],
-  )
-
-  const setDirection = useCallback(
-    (nextDirection: Direction) => {
-      setDirectionState(nextDirection)
-      applyProcessing(input, mode, nextDirection)
-    },
-    [applyProcessing, input, mode],
-  )
+  useEffect(() => {
+    applyProcessing(input, mode, direction)
+  }, [input, mode, direction, applyProcessing])
 
   const clear = useCallback(() => {
     setInputState('')
     setOutput('')
     setError(null)
-  }, [])
+  }, [setInputState])
 
   const swap = useCallback(() => {
     const nextInput = output
     const nextDirection: Direction = direction === 'encode' ? 'decode' : 'encode'
     setInputState(nextInput)
     setDirectionState(nextDirection)
-    applyProcessing(nextInput, mode, nextDirection)
-  }, [applyProcessing, direction, mode, output])
+  }, [direction, output, setInputState, setDirectionState])
 
   return {
     input,
@@ -99,9 +79,9 @@ export function useEncoder() {
     error,
     mode,
     direction,
-    setInput,
-    setMode,
-    setDirection,
+    setInput: setInputState,
+    setMode: setModeState,
+    setDirection: setDirectionState,
     clear,
     swap,
   }

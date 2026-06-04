@@ -1,8 +1,9 @@
-import { useCallback, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { decodeJwt } from '../utils/jwtDecoder'
+import { useLocalStorageState } from '../../../lib/useLocalStorageState'
 
 export function useJwtDecoder() {
-  const [input, setInputState] = useState('')
+  const [input, setInputState] = useLocalStorageState('jwt-decoder:input', '')
   const [headerOutput, setHeaderOutput] = useState('')
   const [payloadOutput, setPayloadOutput] = useState('')
   const [error, setError] = useState<string | null>(null)
@@ -27,24 +28,17 @@ export function useJwtDecoder() {
     }
   }, [])
 
-  const setInput = useCallback(
-    (value: string) => {
-      setInputState(value)
-      applyDecode(value)
-    },
-    [applyDecode],
-  )
+  useEffect(() => {
+    applyDecode(input)
+  }, [input, applyDecode])
 
   const clear = useCallback(() => {
-    setInput('')
-    setHeaderOutput('')
-    setPayloadOutput('')
-    setError(null)
-  }, [])
+    setInputState('')
+  }, [setInputState])
 
   return {
     input,
-    setInput,
+    setInput: setInputState,
     headerOutput,
     payloadOutput,
     error,

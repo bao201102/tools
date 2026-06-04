@@ -1,5 +1,6 @@
 import { DiffEditor } from '@monaco-editor/react'
-import { useCallback, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
+import { useLocalStorageState } from '../../../lib/useLocalStorageState'
 import { useLocale } from '../../../lib/i18n'
 import { useAdaptiveEditorHeightWithOptions } from '../../../lib/useAdaptiveEditorHeight'
 import { useMonacoEditorTheme } from '../../../lib/useMonacoEditorTheme'
@@ -65,11 +66,11 @@ export function DiffCheckerEditor() {
   } | null>(null)
   const originalValueRef = useRef('')
   const modifiedValueRef = useRef('')
-  const [originalSnapshot, setOriginalSnapshot] = useState('')
-  const [modifiedSnapshot, setModifiedSnapshot] = useState('')
+  const [originalSnapshot, setOriginalSnapshot] = useLocalStorageState('diff-checker:originalSnapshot', '')
+  const [modifiedSnapshot, setModifiedSnapshot] = useLocalStorageState('diff-checker:modifiedSnapshot', '')
   const [language, setLanguage] = useState<DiffLanguage>('plaintext')
-  const [originalLabel, setOriginalLabel] = useState(() => t('tool.diff.original'))
-  const [modifiedLabel, setModifiedLabel] = useState(() => t('tool.diff.modified'))
+  const [originalLabel, setOriginalLabel] = useLocalStorageState('diff-checker:originalLabel', () => t('tool.diff.original'))
+  const [modifiedLabel, setModifiedLabel] = useLocalStorageState('diff-checker:modifiedLabel', () => t('tool.diff.modified'))
   const [splitWidths, setSplitWidths] = useState({ left: 1, right: 1 })
   const [copyOriginalState, setCopyOriginalState] = useState<'idle' | 'copied'>('idle')
   const [copyModifiedState, setCopyModifiedState] = useState<'idle' | 'copied'>('idle')
@@ -98,6 +99,10 @@ export function DiffCheckerEditor() {
     const source = modified.trim() ? modified : original
     setLanguage(detectLanguageFromText(source))
   }, [])
+
+  useEffect(() => {
+    updateDetectedLanguage(originalSnapshot, modifiedSnapshot)
+  }, [originalSnapshot, modifiedSnapshot, updateDetectedLanguage])
 
   const syncSnapshotsFromEditors = useCallback(() => {
     if (originalEditorRef.current) {

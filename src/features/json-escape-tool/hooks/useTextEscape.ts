@@ -1,4 +1,5 @@
-import { useCallback, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
+import { useLocalStorageState } from '../../../lib/useLocalStorageState'
 import {
   countEscapeableChars,
   escapePlainText,
@@ -36,10 +37,10 @@ function initialState() {
 const INITIAL_ESCAPE_STATE = initialState()
 
 export function useTextEscape() {
-  const [input, setInput] = useState(INITIAL_ESCAPE_STATE.input)
+  const [input, setInput] = useLocalStorageState('json-escape:input', INITIAL_ESCAPE_STATE.input)
   const [output, setOutput] = useState(INITIAL_ESCAPE_STATE.output)
-  const [wrapInQuotes, setWrapInQuotes] = useState(INITIAL_ESCAPE_STATE.wrapInQuotes)
-  const [escapeUnicode, setEscapeUnicode] = useState(INITIAL_ESCAPE_STATE.escapeUnicode)
+  const [wrapInQuotes, setWrapInQuotes] = useLocalStorageState('json-escape:wrapInQuotes', INITIAL_ESCAPE_STATE.wrapInQuotes)
+  const [escapeUnicode, setEscapeUnicode] = useLocalStorageState('json-escape:escapeUnicode', INITIAL_ESCAPE_STATE.escapeUnicode)
   const [stats, setStats] = useState<EscapeStats | null>(INITIAL_ESCAPE_STATE.stats)
 
   const escape = useCallback(() => {
@@ -49,11 +50,16 @@ export function useTextEscape() {
     setStats(nextStats)
   }, [input, wrapInQuotes, escapeUnicode])
 
+  useEffect(() => {
+    const options = { wrapInQuotes, escapeUnicode }
+    const { output: nextOutput, stats: nextStats } = computeEscapeState(input, options)
+    setOutput(nextOutput)
+    setStats(nextStats)
+  }, [input, wrapInQuotes, escapeUnicode])
+
   const clear = useCallback(() => {
     setInput('')
-    setOutput('')
-    setStats(null)
-  }, [])
+  }, [setInput])
 
   return {
     input,

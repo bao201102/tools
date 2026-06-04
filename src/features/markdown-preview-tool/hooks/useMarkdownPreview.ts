@@ -1,5 +1,6 @@
 import { marked } from 'marked'
 import { useCallback, useState, useMemo, useEffect, useRef } from 'react'
+import { useLocalStorageState } from '../../../lib/useLocalStorageState'
 import hljs from 'highlight.js/lib/core'
 import csharp from 'highlight.js/lib/languages/csharp'
 import javascript from 'highlight.js/lib/languages/javascript'
@@ -325,7 +326,7 @@ function extractMermaid(md: string): { processed: string; graphs: Map<string, st
 }
 
 export function useMarkdownPreview() {
-  const [input, setInput] = useState('')
+  const [input, setInput] = useLocalStorageState('markdown-preview:input', '')
   const [output, setOutput] = useState('')
   const darkRef = useRef(document.documentElement.classList.contains('dark'))
 

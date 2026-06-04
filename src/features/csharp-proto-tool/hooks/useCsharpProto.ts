@@ -1,4 +1,5 @@
-import { useCallback, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
+import { useLocalStorageState } from '../../../lib/useLocalStorageState'
 
 const PROTO_MEMBER_ATTR_RE = /\[ProtoMember\s*\(\s*\d*\s*\)\s*\]\s*/g
 const PROTO_CONTRACT_ATTR_RE = /\[ProtoContract\s*(?:\([^)]*\))?\s*\]/
@@ -116,40 +117,33 @@ export function processCsharpProtoSource(input: string, startNumber: number): st
 }
 
 export function useCsharpProto() {
-  const [input, setInput] = useState('')
+  const [input, setInput] = useLocalStorageState('csharp-proto:input', '')
   const [output, setOutput] = useState('')
-  const [startNumber, setStartNumber] = useState(1)
+  const [startNumber, setStartNumber] = useLocalStorageState('csharp-proto:startNumber', 1)
 
   const getSafeStart = useCallback((value: number) => {
     return Number.isFinite(value) && value >= 1 ? Math.floor(value) : 1
   }, [])
 
+  useEffect(() => {
+    setOutput(processCsharpProtoSource(input, getSafeStart(startNumber)))
+  }, [input, startNumber, getSafeStart])
+
   const clear = useCallback(() => {
     setInput('')
-    setOutput('')
-  }, [])
-
-  const setInputLive = useCallback(
-    (value: string) => {
-      setInput(value)
-      const start = getSafeStart(startNumber)
-      setOutput(processCsharpProtoSource(value, start))
-    },
-    [getSafeStart, startNumber],
-  )
+    setStartNumber(1)
+  }, [setInput, setStartNumber])
 
   const setStartNumberSafe = useCallback(
     (value: number) => {
-      const safe = getSafeStart(value)
-      setStartNumber(safe)
-      setOutput(processCsharpProtoSource(input, safe))
+      setStartNumber(getSafeStart(value))
     },
-    [getSafeStart, input],
+    [getSafeStart, setStartNumber],
   )
 
   return {
     input,
-    setInput: setInputLive,
+    setInput,
     output,
     startNumber,
     setStartNumber: setStartNumberSafe,

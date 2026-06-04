@@ -1,11 +1,12 @@
-import { useCallback, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { generateSqlToPoco } from '../utils/sqlToPoco'
+import { useLocalStorageState } from '../../../lib/useLocalStorageState'
 
 export function useSqlToPoco() {
-  const [input, setInputState] = useState('')
+  const [input, setInputState] = useLocalStorageState('sql-to-poco:input', '')
   const [output, setOutput] = useState('')
   const [error, setError] = useState<string | null>(null)
-  const [className, setClassNameState] = useState('')
+  const [className, setClassNameState] = useLocalStorageState('sql-to-poco:className', '')
 
   const applyGenerate = useCallback((nextInput: string, nextClassName: string) => {
     if (nextInput.trim() === '') {
@@ -24,36 +25,22 @@ export function useSqlToPoco() {
     }
   }, [])
 
-  const setInput = useCallback(
-    (value: string) => {
-      setInputState(value)
-      applyGenerate(value, className)
-    },
-    [applyGenerate, className],
-  )
-
-  const setClassName = useCallback(
-    (value: string) => {
-      setClassNameState(value)
-      applyGenerate(input, value)
-    },
-    [applyGenerate, input],
-  )
+  useEffect(() => {
+    applyGenerate(input, className)
+  }, [input, className, applyGenerate])
 
   const clear = useCallback(() => {
     setInputState('')
-    setOutput('')
-    setError(null)
     setClassNameState('')
-  }, [])
+  }, [setInputState, setClassNameState])
 
   return {
     input,
-    setInput,
+    setInput: setInputState,
     output,
     error,
     className,
-    setClassName,
+    setClassName: setClassNameState,
     clear,
   }
 }

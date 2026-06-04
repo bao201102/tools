@@ -1,4 +1,4 @@
-import { useCallback, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import * as XLSX from 'xlsx'
 
 function parseErrorMessage(error: unknown): string {
@@ -74,11 +74,13 @@ function parseValue(val: string): unknown {
   return val
 }
 
+import { useLocalStorageState } from '../../../lib/useLocalStorageState'
+
 export function useExcelToJson() {
   const [output, setOutput] = useState('')
   const [error, setError] = useState<string | null>(null)
   const [fileName, setFileName] = useState<string | null>(null)
-  const [pastedText, setPastedText] = useState('')
+  const [pastedText, setPastedText] = useLocalStorageState('excel-to-json:pastedText', '')
 
   const handleFileUpload = useCallback((file: File) => {
     setFileName(file.name)
@@ -150,12 +152,21 @@ export function useExcelToJson() {
     }
   }, [])
 
+  useEffect(() => {
+    if (pastedText.trim() !== '') {
+      handlePasteConvert(pastedText)
+    } else {
+      setOutput('')
+      setError(null)
+    }
+  }, [pastedText, handlePasteConvert])
+
   const clear = useCallback(() => {
     setOutput('')
     setError(null)
     setFileName(null)
     setPastedText('')
-  }, [])
+  }, [setPastedText])
 
   return {
     output,

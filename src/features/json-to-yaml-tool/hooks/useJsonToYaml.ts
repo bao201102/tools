@@ -1,5 +1,6 @@
 import yaml from 'js-yaml'
-import { useCallback, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
+import { useLocalStorageState } from '../../../lib/useLocalStorageState'
 
 function parseErrorMessage(error: unknown): string {
   return error instanceof Error ? error.message : 'Invalid JSON'
@@ -12,20 +13,19 @@ const dumpOptions: yaml.DumpOptions = {
 }
 
 export function useJsonToYaml() {
-  const [input, setInput] = useState('')
+  const [input, setInput] = useLocalStorageState('json-to-yaml:input', '')
   const [output, setOutput] = useState('')
   const [error, setError] = useState<string | null>(null)
 
-  const onInputChange = useCallback((value: string) => {
-    setInput(value)
-    if (value.trim() === '') {
+  useEffect(() => {
+    if (input.trim() === '') {
       setOutput('')
       setError(null)
       return
     }
     try {
       // Parse as JSON first
-      const data = JSON.parse(value)
+      const data = JSON.parse(input)
       // Convert to YAML
       setOutput(yaml.dump(data, dumpOptions))
       setError(null)
@@ -33,19 +33,17 @@ export function useJsonToYaml() {
       setOutput('')
       setError(parseErrorMessage(e))
     }
-  }, [])
+  }, [input])
 
   const clear = useCallback(() => {
     setInput('')
-    setOutput('')
-    setError(null)
-  }, [])
+  }, [setInput])
 
   return {
     input,
     output,
     error,
-    onInputChange,
+    onInputChange: setInput,
     clear,
   }
 }

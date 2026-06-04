@@ -1,5 +1,6 @@
-import { useCallback, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import * as XLSX from 'xlsx'
+import { useLocalStorageState } from '../../../lib/useLocalStorageState'
 
 function parseErrorMessage(error: unknown): string {
   return error instanceof Error ? error.message : 'Invalid JSON'
@@ -22,10 +23,10 @@ function flattenObject(obj: any, prefix = '', res: any = {}): any {
 }
 
 export function useJsonToExcel() {
-  const [input, setInput] = useState('')
+  const [input, setInput] = useLocalStorageState('json-to-excel:input', '')
   const [error, setError] = useState<string | null>(null)
-  const [sheetName, setSheetName] = useState('Sheet1')
-  const [flatten, setFlatten] = useState(true)
+  const [sheetName, setSheetName] = useLocalStorageState('json-to-excel:sheetName', 'Sheet1')
+  const [flatten, setFlatten] = useLocalStorageState('json-to-excel:flatten', true)
   
   // States for preview
   const [previewHeaders, setPreviewHeaders] = useState<string[]>([])
@@ -91,6 +92,10 @@ export function useJsonToExcel() {
     setShowPreview(true)
   }, [input, flatten, parseJson])
 
+  useEffect(() => {
+    generatePreview()
+  }, [input, flatten, generatePreview])
+
   const downloadExcel = useCallback(() => {
     const items = parseJson(input)
     if (!items || items.length === 0) return
@@ -108,10 +113,12 @@ export function useJsonToExcel() {
   const clear = useCallback(() => {
     setInput('')
     setError(null)
+    setSheetName('Sheet1')
+    setFlatten(true)
     setPreviewHeaders([])
     setPreviewRows([])
     setShowPreview(false)
-  }, [])
+  }, [setInput, setSheetName, setFlatten])
 
   return {
     input,

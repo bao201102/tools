@@ -1,11 +1,12 @@
-import { useCallback, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { generatePocoCode } from '../utils/pocoGenerator'
+import { useLocalStorageState } from '../../../lib/useLocalStorageState'
 
 export function usePocoGenerator() {
-  const [input, setInputState] = useState('')
+  const [input, setInputState] = useLocalStorageState('poco-generator:input', '')
   const [output, setOutput] = useState('')
   const [error, setError] = useState<string | null>(null)
-  const [rootClassName, setRootClassName] = useState('Root')
+  const [rootClassName, setRootClassName] = useLocalStorageState('poco-generator:rootClassName', 'Root')
 
   const applyGenerate = useCallback((nextInput: string, nextRootClassName: string) => {
     if (nextInput.trim() === '') {
@@ -24,36 +25,22 @@ export function usePocoGenerator() {
     }
   }, [])
 
-  const setInput = useCallback(
-    (value: string) => {
-      setInputState(value)
-      applyGenerate(value, rootClassName)
-    },
-    [applyGenerate, rootClassName],
-  )
-
-  const setRootClassNameLive = useCallback(
-    (value: string) => {
-      setRootClassName(value)
-      applyGenerate(input, value)
-    },
-    [applyGenerate, input],
-  )
+  useEffect(() => {
+    applyGenerate(input, rootClassName)
+  }, [input, rootClassName, applyGenerate])
 
   const clear = useCallback(() => {
-    setInput('')
-    setOutput('')
-    setError(null)
+    setInputState('')
     setRootClassName('Root')
-  }, [])
+  }, [setInputState, setRootClassName])
 
   return {
     input,
-    setInput,
+    setInput: setInputState,
     output,
     error,
     rootClassName,
-    setRootClassName: setRootClassNameLive,
+    setRootClassName,
     clear,
   }
 }
