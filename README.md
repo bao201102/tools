@@ -264,7 +264,7 @@ Dự án sử dụng **GitHub Actions** để tự động build và deploy:
 
 ## 📄 License & đóng góp
 
-Nếu dự án mở nguồn, hãy bổ sung file `LICENSE` và hướng dẫn đóng góp (CONTRIBUTING). Mọi ý kiến cải thiện công cụ hoặc bản dịch README đều được chào đón.
+Dự án được phát hành dưới mã nguồn mở theo [MIT License](file:///d:/Project%20Test/tools/LICENSE). Mọi ý kiến cải thiện công cụ hoặc đóng góp đều được chào đón.
 
 ---
 
