@@ -1,5 +1,5 @@
 import Editor from '@monaco-editor/react'
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useState, useRef } from 'react'
 import { useLocale } from '../../../lib/i18n'
 import {
   getMonacoPaneHeight,
@@ -32,7 +32,7 @@ type JsonStats = {
 function calculateJsonStats(json: string): JsonStats {
   try {
     const parsed = JSON.parse(json)
-    
+
     const countKeys = (obj: any): number => {
       if (typeof obj !== 'object' || obj === null) return 0
       let count = 0
@@ -56,7 +56,7 @@ function calculateJsonStats(json: string): JsonStats {
     const countTypes = (obj: any): { objects: number; arrays: number } => {
       let objects = 0
       let arrays = 0
-      
+
       if (Array.isArray(obj)) {
         arrays++
         obj.forEach(item => {
@@ -72,12 +72,12 @@ function calculateJsonStats(json: string): JsonStats {
           arrays += counts.arrays
         })
       }
-      
+
       return { objects, arrays }
     }
 
     const types = countTypes(parsed)
-    
+
     return {
       size: new Blob([json]).size,
       keys: countKeys(parsed),
@@ -187,11 +187,11 @@ function JsonTreeView({ data }: { data: any }) {
               <div>
                 {type === 'array'
                   ? value.map((item: any, index: number) =>
-                      renderValue(item, `${path}[${index}]`, undefined, depth + 1)
-                    )
+                    renderValue(item, `${path}[${index}]`, undefined, depth + 1)
+                  )
                   : Object.entries(value).map(([k, v]) =>
-                      renderValue(v, `${path}.${k}`, k, depth + 1)
-                    )}
+                    renderValue(v, `${path}.${k}`, k, depth + 1)
+                  )}
               </div>
               <div style={{ marginLeft: `${indent}px` }} className="text-ink-muted py-0.5 px-1">
                 {type === 'array' ? ']' : '}'}
@@ -248,27 +248,46 @@ function JsonTreeView({ data }: { data: any }) {
 export function JsonEditor() {
   const { t } = useLocale()
   const editorTheme = useMonacoEditorTheme()
-  const [input, setInput] = useState('')
+
+  const [editorValue, setEditorValue] = useState('')
+  const [debouncedInput, setDebouncedInput] = useState('')
   const [output, setOutput] = useState('')
   const [error, setError] = useState<string | null>(null)
   const [stats, setStats] = useState<JsonStats>({ size: 0, keys: 0, depth: 0, objects: 0, arrays: 0 })
   const [copyState, setCopyState] = useState<'idle' | 'copied'>('idle')
   const [viewMode, setViewMode] = useState<ViewMode>('editor')
   const [parsedData, setParsedData] = useState<any>(null)
-  const editorHeight = useAdaptiveEditorHeight(input, output)
+
+  // Optimizing: Calculate height based on debounced input to prevent recalculations on every keystroke
+  const editorHeight = useAdaptiveEditorHeight(debouncedInput, output)
   const monacoPaneHeight = getMonacoPaneHeight(editorHeight)
   const [detectedFields, setDetectedFields] = useState<string[]>([])
   const [selectedFields, setSelectedFields] = useState<Set<string>>(new Set())
   const [extractedOutput, setExtractedOutput] = useState('')
   const [fieldSearchQuery, setFieldSearchQuery] = useState('')
 
+  const currentValueRef = useRef('')
+  const debounceTimerRef = useRef<any>(null)
+
   const filteredFields = detectedFields.filter(field =>
     field.toLowerCase().includes(fieldSearchQuery.toLowerCase())
   )
 
-  // Auto-validate and format
+  const handleEditorChange = useCallback((value: string | undefined) => {
+    const val = value ?? ''
+    currentValueRef.current = val
+
+    if (debounceTimerRef.current) {
+      clearTimeout(debounceTimerRef.current)
+    }
+    debounceTimerRef.current = setTimeout(() => {
+      setDebouncedInput(val)
+    }, 300)
+  }, [])
+
+  // Auto-validate and format based on debounced input
   useEffect(() => {
-    if (!input.trim()) {
+    if (!debouncedInput.trim()) {
       setError(null)
       setOutput('')
       setStats({ size: 0, keys: 0, depth: 0, objects: 0, arrays: 0 })
@@ -280,10 +299,10 @@ export function JsonEditor() {
     }
 
     try {
-      const parsed = JSON.parse(input)
+      const parsed = JSON.parse(debouncedInput)
       setError(null)
       setParsedData(parsed)
-      
+
       // Detect all fields (normalize array indices to generic pattern)
       const fields = new Set<string>()
       const detectFields = (obj: any, prefix = '') => {
@@ -304,7 +323,7 @@ export function JsonEditor() {
       }
       detectFields(parsed)
       setDetectedFields(Array.from(fields).sort())
-      
+
       const formatted = JSON.stringify(parsed, null, 2)
       setOutput(formatted)
       setStats(calculateJsonStats(formatted))
@@ -314,12 +333,23 @@ export function JsonEditor() {
       setParsedData(null)
       setDetectedFields([])
       setSelectedFields(new Set())
-      setStats({ size: new Blob([input]).size, keys: 0, depth: 0, objects: 0, arrays: 0 })
+      setStats({ size: new Blob([debouncedInput]).size, keys: 0, depth: 0, objects: 0, arrays: 0 })
     }
-  }, [input])
+  }, [debouncedInput])
+
+  // Clear debounce timer on unmount
+  useEffect(() => {
+    return () => {
+      if (debounceTimerRef.current) {
+        clearTimeout(debounceTimerRef.current)
+      }
+    }
+  }, [])
 
   const handleClear = useCallback(() => {
-    setInput('')
+    setEditorValue('')
+    setDebouncedInput('')
+    currentValueRef.current = ''
     setOutput('')
     setError(null)
     setStats({ size: 0, keys: 0, depth: 0, objects: 0, arrays: 0 })
@@ -331,31 +361,37 @@ export function JsonEditor() {
   }, [])
 
   const handleCompress = useCallback(() => {
-    if (!input) return
+    const current = currentValueRef.current
+    if (!current) return
     try {
-      const parsed = JSON.parse(input)
+      const parsed = JSON.parse(current)
       const compressed = JSON.stringify(parsed)
       setOutput(compressed)
     } catch {
       // Already has error
     }
-  }, [input])
+  }, [])
 
   const handlePrettify = useCallback(() => {
-    if (!input) return
+    const current = currentValueRef.current
+    if (!current) return
     try {
-      const parsed = JSON.parse(input)
+      const parsed = JSON.parse(current)
       const prettified = JSON.stringify(parsed, null, 2)
+      setEditorValue(prettified)
+      setDebouncedInput(prettified)
+      currentValueRef.current = prettified
       setOutput(prettified)
     } catch {
       // Already has error
     }
-  }, [input])
+  }, [])
 
   const handleSortKeys = useCallback(() => {
-    if (!input) return
+    const current = currentValueRef.current
+    if (!current) return
     try {
-      const parsed = JSON.parse(input)
+      const parsed = JSON.parse(current)
       const sortObject = (obj: any): any => {
         if (Array.isArray(obj)) {
           return obj.map(sortObject)
@@ -375,20 +411,20 @@ export function JsonEditor() {
     } catch {
       // Already has error
     }
-  }, [input])
+  }, [])
 
   const handleStringify = useCallback(() => {
-    if (!input) return
+    const current = currentValueRef.current
+    if (!current) return
     try {
-      const parsed = JSON.parse(input)
-      // Stringify to compact JSON, then stringify again to escape it as a string
+      const parsed = JSON.parse(current)
       const compactJson = JSON.stringify(parsed)
       const escapedString = JSON.stringify(compactJson)
       setOutput(escapedString)
     } catch {
       // Already has error
     }
-  }, [input])
+  }, [])
 
   const handleCopy = useCallback(async () => {
     if (!output) return
@@ -413,13 +449,16 @@ export function JsonEditor() {
       },
       hobbies: ["reading", "coding", "traveling"]
     }
-    setInput(JSON.stringify(sample, null, 2))
+    const sampleStr = JSON.stringify(sample, null, 2)
+    setEditorValue(sampleStr)
+    setDebouncedInput(sampleStr)
+    currentValueRef.current = sampleStr
   }, [])
 
   const toggleFieldSelection = (field: string) => {
     setSelectedFields(prev => {
       const next = new Set(prev)
-      
+
       if (next.has(field)) {
         // Deselecting: remove this field and all its children
         next.delete(field)
@@ -428,7 +467,7 @@ export function JsonEditor() {
             next.delete(f)
           }
         })
-        
+
         // Also deselect all parent fields
         const parts = field.split('.')
         for (let i = parts.length - 1; i > 0; i--) {
@@ -443,7 +482,7 @@ export function JsonEditor() {
             next.add(f)
           }
         })
-        
+
         // Check if all siblings are selected, then select parent
         const parts = field.split('.')
         for (let i = parts.length - 1; i > 0; i--) {
@@ -452,16 +491,16 @@ export function JsonEditor() {
             const fParts = f.split('.')
             return fParts.length === i + 1 && f.startsWith(parentPath + '.')
           })
-          
+
           // Check if all direct children are selected
           const allChildrenSelected = childrenFields.every(child => next.has(child))
-          
+
           if (allChildrenSelected && childrenFields.length > 0) {
             next.add(parentPath)
           }
         }
       }
-      
+
       return next
     })
   }
@@ -495,23 +534,23 @@ export function JsonEditor() {
 
     const extractFieldsFromObject = (obj: any, selectedPaths: Set<string>): any => {
       const result: any = {}
-      
+
       // Get only top-level selected fields (not children if parent is selected)
       const topLevelFields = Array.from(selectedPaths).filter(path => {
-        return !Array.from(selectedPaths).some(other => 
+        return !Array.from(selectedPaths).some(other =>
           other !== path && path.startsWith(other + '.')
         )
       })
-      
+
       topLevelFields.forEach(path => {
         const parts = path.split('.')
         let current = obj
         let resultCurrent = result
-        
+
         // Navigate through the path
         for (let i = 0; i < parts.length; i++) {
           const part = parts[i]
-          
+
           if (i === parts.length - 1) {
             // Last part - set the value (could be primitive or object)
             if (current && current[part] !== undefined) {
@@ -531,12 +570,12 @@ export function JsonEditor() {
           }
         }
       })
-      
+
       return result
     }
 
     let result: any
-    
+
     // Check if root is an array
     if (Array.isArray(parsedData)) {
       result = parsedData.map(item => extractFieldsFromObject(item, selectedFields))
@@ -589,9 +628,9 @@ export function JsonEditor() {
               width="100%"
               language="json"
               theme={editorTheme}
-              value={input}
+              value={editorValue}
               options={editorOptions}
-              onChange={(v) => setInput(v ?? '')}
+              onChange={handleEditorChange}
               loading={
                 <div className="flex h-full items-center justify-center bg-surface-2 text-sm text-ink-subtle">
                   {t('common.loadingEditor')}
@@ -674,25 +713,25 @@ export function JsonEditor() {
         </Button>
         <Button
           onClick={handlePrettify}
-          disabled={!!error || !input}
+          disabled={!!error || !debouncedInput}
         >
           {t('tool.json.prettify')}
         </Button>
         <Button
           onClick={handleCompress}
-          disabled={!!error || !input}
+          disabled={!!error || !debouncedInput}
         >
           {t('tool.json.compress')}
         </Button>
         <Button
           onClick={handleSortKeys}
-          disabled={!!error || !input}
+          disabled={!!error || !debouncedInput}
         >
           {t('tool.json.sortKeys')}
         </Button>
         <Button
           onClick={handleStringify}
-          disabled={!!error || !input}
+          disabled={!!error || !debouncedInput}
         >
           {t('tool.json.stringify')}
         </Button>
@@ -700,11 +739,10 @@ export function JsonEditor() {
 
       {/* Status Bar */}
       <div
-        className={`shrink-0 rounded-md px-4 py-3 text-sm font-medium ${
-          error
+        className={`shrink-0 rounded-md px-4 py-3 text-sm font-medium ${error
             ? 'bg-error-surface text-error-fg border border-error-border'
             : 'bg-primary/10 text-primary border border-primary/20'
-        }`}
+          }`}
       >
         {error ? (
           <div className="flex items-center gap-2">
@@ -785,11 +823,10 @@ export function JsonEditor() {
                     key={field}
                     type="button"
                     onClick={() => toggleFieldSelection(field)}
-                    className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium transition-all outline-none focus-visible:ds-focus-ring ${
-                      selectedFields.has(field)
+                    className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium transition-all outline-none focus-visible:ds-focus-ring ${selectedFields.has(field)
                         ? 'bg-primary text-white shadow-sm hover:bg-primary/90'
                         : 'bg-surface-1 text-ink border border-hairline hover:bg-surface-2 hover:border-hairline-strong'
-                    }`}
+                      }`}
                     title={field}
                   >
                     <span>{field}</span>
