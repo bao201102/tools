@@ -355,4 +355,14 @@ body {
   }
 }
 
+/* ---------------------------------------------------------------------------
+ * Fix Cumulative Layout Shift (CLS) for Monaco Editor
+ * Prevent shifts reported in div.lines-content > div.view-lines
+ * --------------------------------------------------------------------------- */
+.monaco-editor .lines-content,
+.monaco-editor .view-lines {
+  contain: layout;
+}
+
+
 
