@@ -1,5 +1,5 @@
 import Editor from '@monaco-editor/react'
-import { useCallback, useEffect, useState, useRef } from 'react'
+import { useCallback, useEffect, useMemo, useState, useRef } from 'react'
 import { useLocalStorageState } from '../../../lib/useLocalStorageState'
 import { useLocale } from '../../../lib/i18n'
 import {
@@ -263,8 +263,9 @@ export function JsonEditor() {
   const editorHeight = useAdaptiveEditorHeight(debouncedInput, output)
   const monacoPaneHeight = getMonacoPaneHeight(editorHeight)
   const [detectedFields, setDetectedFields] = useState<string[]>([])
-  const [selectedFields, setSelectedFields] = useState<Set<string>>(new Set())
-  const [extractedOutput, setExtractedOutput] = useState('')
+  const [selectedFieldsArray, setSelectedFieldsArray] = useLocalStorageState<string[]>('json:selectedFields', [])
+  const selectedFields = useMemo(() => new Set(selectedFieldsArray), [selectedFieldsArray])
+  const [extractedOutput, setExtractedOutput] = useLocalStorageState('json:extractedOutput', '')
   const [fieldSearchQuery, setFieldSearchQuery] = useState('')
 
   const currentValueRef = useRef('')
@@ -294,7 +295,7 @@ export function JsonEditor() {
       setStats({ size: 0, keys: 0, depth: 0, objects: 0, arrays: 0 })
       setParsedData(null)
       setDetectedFields([])
-      setSelectedFields(new Set())
+      setSelectedFieldsArray([])
       setFieldSearchQuery('')
       return
     }
@@ -333,10 +334,10 @@ export function JsonEditor() {
       setOutput('')
       setParsedData(null)
       setDetectedFields([])
-      setSelectedFields(new Set())
+      setSelectedFieldsArray([])
       setStats({ size: new Blob([debouncedInput]).size, keys: 0, depth: 0, objects: 0, arrays: 0 })
     }
-  }, [debouncedInput])
+  }, [debouncedInput, setSelectedFieldsArray])
 
   // Clear debounce timer on unmount
   useEffect(() => {
@@ -356,10 +357,10 @@ export function JsonEditor() {
     setStats({ size: 0, keys: 0, depth: 0, objects: 0, arrays: 0 })
     setParsedData(null)
     setDetectedFields([])
-    setSelectedFields(new Set())
+    setSelectedFieldsArray([])
     setExtractedOutput('')
     setFieldSearchQuery('')
-  }, [])
+  }, [setEditorValue, setDebouncedInput, setSelectedFieldsArray, setExtractedOutput])
 
   const handleCompress = useCallback(() => {
     const current = currentValueRef.current
@@ -457,7 +458,7 @@ export function JsonEditor() {
   }, [])
 
   const toggleFieldSelection = (field: string) => {
-    setSelectedFields(prev => {
+    setSelectedFieldsArray(prev => {
       const next = new Set(prev)
 
       if (next.has(field)) {
@@ -502,31 +503,31 @@ export function JsonEditor() {
         }
       }
 
-      return next
+      return Array.from(next)
     })
   }
 
   const selectAllFields = () => {
     if (fieldSearchQuery) {
-      setSelectedFields(prev => {
+      setSelectedFieldsArray(prev => {
         const next = new Set(prev)
         filteredFields.forEach(f => next.add(f))
-        return next
+        return Array.from(next)
       })
     } else {
-      setSelectedFields(new Set(detectedFields))
+      setSelectedFieldsArray(detectedFields)
     }
   }
 
   const deselectAllFields = () => {
     if (fieldSearchQuery) {
-      setSelectedFields(prev => {
+      setSelectedFieldsArray(prev => {
         const next = new Set(prev)
         filteredFields.forEach(f => next.delete(f))
-        return next
+        return Array.from(next)
       })
     } else {
-      setSelectedFields(new Set())
+      setSelectedFieldsArray([])
     }
   }
 
