@@ -18,6 +18,7 @@ const editorOptions = {
   automaticLayout: true,
   tabSize: 2,
   lineNumbers: 'on' as const,
+  fixedOverflowWidgets: true,
 }
 
 type ViewMode = 'editor' | 'tree'
@@ -268,7 +269,7 @@ export function JsonEditor() {
   const [extractedOutput, setExtractedOutput] = useLocalStorageState('json:extractedOutput', '')
   const [fieldSearchQuery, setFieldSearchQuery] = useState('')
 
-  const currentValueRef = useRef('')
+  const currentValueRef = useRef(editorValue)
   const debounceTimerRef = useRef<any>(null)
 
   const filteredFields = detectedFields.filter(field =>
@@ -284,7 +285,16 @@ export function JsonEditor() {
     }
     debounceTimerRef.current = setTimeout(() => {
       setDebouncedInput(val)
+      setEditorValue(val)
     }, 300)
+  }, [setDebouncedInput, setEditorValue])
+
+  // Sync editorValue with debouncedInput on mount if they are out of sync
+  useEffect(() => {
+    if (debouncedInput && debouncedInput !== editorValue) {
+      setEditorValue(debouncedInput)
+      currentValueRef.current = debouncedInput
+    }
   }, [])
 
   // Auto-validate and format based on debounced input
@@ -297,6 +307,7 @@ export function JsonEditor() {
       setDetectedFields([])
       setSelectedFieldsArray([])
       setFieldSearchQuery('')
+      setExtractedOutput('')
       return
     }
 
@@ -335,9 +346,10 @@ export function JsonEditor() {
       setParsedData(null)
       setDetectedFields([])
       setSelectedFieldsArray([])
+      setExtractedOutput('')
       setStats({ size: new Blob([debouncedInput]).size, keys: 0, depth: 0, objects: 0, arrays: 0 })
     }
-  }, [debouncedInput, setSelectedFieldsArray])
+  }, [debouncedInput, setSelectedFieldsArray, setExtractedOutput])
 
   // Clear debounce timer on unmount
   useEffect(() => {
@@ -534,59 +546,57 @@ export function JsonEditor() {
   const handleExtractFields = useCallback(() => {
     if (!parsedData || selectedFields.size === 0) return
 
-    const extractFieldsFromObject = (obj: any, selectedPaths: Set<string>): any => {
-      const result: any = {}
+    // Get only top-level selected fields (not children if parent is selected)
+    const topLevelFields = Array.from(selectedFields).filter(path => {
+      return !Array.from(selectedFields).some(other =>
+        other !== path && path.startsWith(other + '.')
+      )
+    })
 
-      // Get only top-level selected fields (not children if parent is selected)
-      const topLevelFields = Array.from(selectedPaths).filter(path => {
-        return !Array.from(selectedPaths).some(other =>
-          other !== path && path.startsWith(other + '.')
-        )
-      })
-
-      topLevelFields.forEach(path => {
-        const parts = path.split('.')
-        let current = obj
-        let resultCurrent = result
-
-        // Navigate through the path
-        for (let i = 0; i < parts.length; i++) {
-          const part = parts[i]
-
-          if (i === parts.length - 1) {
-            // Last part - set the value (could be primitive or object)
-            if (current && current[part] !== undefined) {
-              resultCurrent[part] = current[part]
-            }
-          } else {
-            // Intermediate part - create structure
-            if (current && current[part] !== undefined) {
-              if (!resultCurrent[part]) {
-                resultCurrent[part] = Array.isArray(current[part]) ? [] : {}
-              }
-              current = current[part]
-              resultCurrent = resultCurrent[part]
-            } else {
-              break
-            }
+    // Build a tree of paths from topLevelFields
+    const tree: any = {}
+    topLevelFields.forEach(path => {
+      const parts = path.split('.')
+      let current = tree
+      parts.forEach((part, index) => {
+        if (index === parts.length - 1) {
+          if (!current[part]) {
+            current[part] = true
           }
+        } else {
+          if (current[part] === true || !current[part]) {
+            current[part] = {}
+          }
+          current = current[part]
         }
       })
+    })
 
-      return result
+    // Recursively extract values based on the tree node structure
+    const extractValue = (val: any, treeNode: any): any => {
+      if (val === null || val === undefined) return val
+      if (treeNode === true) return val
+
+      if (Array.isArray(val)) {
+        return val.map(item => extractValue(item, treeNode))
+      }
+
+      if (typeof val === 'object') {
+        const res: any = {}
+        Object.keys(treeNode).forEach(key => {
+          if (val[key] !== undefined) {
+            res[key] = extractValue(val[key], treeNode[key])
+          }
+        })
+        return res
+      }
+
+      return val
     }
 
-    let result: any
-
-    // Check if root is an array
-    if (Array.isArray(parsedData)) {
-      result = parsedData.map(item => extractFieldsFromObject(item, selectedFields))
-    } else {
-      result = extractFieldsFromObject(parsedData, selectedFields)
-    }
-
+    const result = extractValue(parsedData, tree)
     setExtractedOutput(JSON.stringify(result, null, 2))
-  }, [parsedData, selectedFields])
+  }, [parsedData, selectedFields, setExtractedOutput])
 
   const formatBytes = (bytes: number) => {
     if (bytes === 0) return '0 B'
@@ -684,8 +694,7 @@ export function JsonEditor() {
                 language="json"
                 theme={editorTheme}
                 value={output}
-                options={{ ...editorOptions, readOnly: false }}
-                onChange={(v) => setOutput(v ?? '')}
+                options={{ ...editorOptions, readOnly: true }}
                 loading={
                   <div className="flex h-full items-center justify-center bg-surface-2 text-sm text-ink-subtle">
                     {t('common.loadingEditor')}
@@ -878,8 +887,7 @@ export function JsonEditor() {
               language="json"
               theme={editorTheme}
               value={extractedOutput}
-              options={{ ...editorOptions, readOnly: false }}
-              onChange={(v) => setExtractedOutput(v ?? '')}
+              options={{ ...editorOptions, readOnly: true }}
               loading={
                 <div className="flex h-full items-center justify-center bg-surface-2 text-sm text-ink-subtle">
                   {t('common.loadingEditor')}

@@ -14,6 +14,7 @@ const editorOptions = {
   padding: { top: 8, bottom: 8 },
   automaticLayout: true,
   tabSize: 2,
+  fixedOverflowWidgets: true,
 }
 
 function YamlMonacoPane({

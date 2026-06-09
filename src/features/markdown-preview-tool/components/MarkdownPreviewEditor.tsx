@@ -16,6 +16,7 @@ const editorOptions = {
   automaticLayout: true,
   tabSize: 2,
   lineNumbers: 'on' as const,
+  fixedOverflowWidgets: true,
 }
 
 // ─── Image Lightbox ───────────────────────────────────────────────────────────

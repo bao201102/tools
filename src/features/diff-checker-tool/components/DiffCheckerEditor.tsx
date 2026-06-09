@@ -24,6 +24,7 @@ const editorOptions = {
   automaticLayout: true,
   renderSideBySideInlineBreakpoint: 0,
   originalEditable: true,
+  fixedOverflowWidgets: true,
 }
 
 function detectLanguageFromText(text: string): DiffLanguage {

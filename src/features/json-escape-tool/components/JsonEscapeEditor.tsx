@@ -14,6 +14,7 @@ const editorOptions = {
   padding: { top: 12, bottom: 12 },
   automaticLayout: true,
   lineNumbers: 'on' as const,
+  fixedOverflowWidgets: true,
 }
 
 const ESCAPE_REFERENCE = [
