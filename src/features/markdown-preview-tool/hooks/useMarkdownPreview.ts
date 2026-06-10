@@ -259,68 +259,179 @@ async function ensureMermaid(dark: boolean) {
 }
 
 // ─── marked config ───────────────────────────────────────────────────────────
-const renderer = new marked.Renderer()
+const lineExtensions = [
+  {
+    name: 'paragraph',
+    renderer(this: any, token: any) {
+      return `<p data-line="${token.lineStart || ''}">${this.parser.parseInline(token.tokens)}</p>\n`
+    }
+  },
+  {
+    name: 'heading',
+    renderer(this: any, token: any) {
+      return `<h${token.depth} data-line="${token.lineStart || ''}">${this.parser.parseInline(token.tokens)}</h${token.depth}>\n`
+    }
+  },
+  {
+    name: 'blockquote',
+    renderer(this: any, token: any) {
+      const body = this.parser.parse(token.tokens)
+      return `<blockquote data-line="${token.lineStart || ''}">\n${body}</blockquote>\n`
+    }
+  },
+  {
+    name: 'hr',
+    renderer(token: any) {
+      return `<hr data-line="${token.lineStart || ''}">\n`
+    }
+  },
+  {
+    name: 'list',
+    renderer(this: any, token: any) {
+      const ordered = token.ordered
+      const start = token.start
+      let body = ''
+      for (const item of token.items) {
+        let itemBody = ''
+        if (item.task) {
+          const checkbox = this.parser.options.renderer.checkbox(!!item.checked)
+          if (token.loose) {
+            if (item.tokens.length > 0 && item.tokens[0].type === 'paragraph') {
+              item.tokens[0].text = checkbox + ' ' + item.tokens[0].text
+              if (item.tokens[0].tokens && item.tokens[0].tokens.length > 0 && item.tokens[0].tokens[0].type === 'text') {
+                item.tokens[0].tokens[0].text = checkbox + ' ' + item.tokens[0].tokens[0].text
+              }
+            } else {
+              item.tokens.unshift({
+                type: 'text',
+                text: checkbox + ' '
+              })
+            }
+          } else {
+            itemBody += checkbox + ' '
+          }
+        }
+        itemBody += this.parser.parse(item.tokens, token.loose)
+        body += `<li data-line="${item.lineStart || ''}">${itemBody}</li>\n`
+      }
+      const tag = ordered ? 'ol' : 'ul'
+      const startAttr = (ordered && start !== 1) ? ` start="${start}"` : ''
+      return `<${tag}${startAttr} data-line="${token.lineStart || ''}">\n${body}</${tag}>\n`
+    }
+  },
+  {
+    name: 'table',
+    renderer(this: any, token: any) {
+      let header = ''
+      let cellHtml = ''
+      for (let i = 0; i < token.header.length; i++) {
+        const cell = token.header[i]
+        const align = token.align[i]
+        const alignAttr = align ? ` align="${align}"` : ''
+        cellHtml += `<th${alignAttr}>${this.parser.parseInline(cell.tokens)}</th>`
+      }
+      header = `<tr>\n${cellHtml}</tr>\n`
 
-// Custom code renderer: syntax highlighting + line numbers
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-;(renderer as any).code = function (code: string, infostring: string | undefined): string {
-  const text = code || ''
-  const rawLang = (infostring ?? '').trim()
+      let body = ''
+      for (const row of token.rows) {
+        cellHtml = ''
+        for (let i = 0; i < row.length; i++) {
+          const cell = row[i]
+          const align = token.align[i]
+          const alignAttr = align ? ` align="${align}"` : ''
+          cellHtml += `<td${alignAttr}>${this.parser.parseInline(cell.tokens)}</td>`
+        }
+        body += `<tr>\n${cellHtml}</tr>\n`
+      }
 
-  let highlighted: string
-  if (rawLang && hljs.getLanguage(rawLang)) {
-    highlighted = hljs.highlight(text, { language: rawLang }).value
-  } else {
-    highlighted = hljs.highlightAuto(text).value
+      return `<table data-line="${token.lineStart || ''}">\n`
+        + `<thead>\n`
+        + header
+        + `</thead>\n`
+        + `<tbody>\n`
+        + body
+        + `</tbody>\n`
+        + `</table>\n`
+    }
+  },
+  {
+    name: 'html',
+    renderer(token: any) {
+      const text = token.text || ''
+      if (text.includes('mermaid-placeholder')) {
+        return text.replace('class="mermaid-placeholder"', `class="mermaid-placeholder" data-line="${token.lineStart || ''}"`)
+      }
+      return text
+    }
+  },
+  {
+    name: 'code',
+    renderer(token: any) {
+      const text = token.text || ''
+      const rawLang = (token.lang ?? '').trim()
+
+      let highlighted: string
+      if (rawLang && hljs.getLanguage(rawLang)) {
+        highlighted = hljs.highlight(text, { language: rawLang }).value
+      } else {
+        highlighted = hljs.highlightAuto(text).value
+      }
+
+      const lines = highlighted.split('\n')
+      if (lines[lines.length - 1] === '') lines.pop()
+      const numberedLines = lines
+        .map(
+          (line, i) =>
+            `<span class="md-code-line"><span class="md-line-num">${i + 1}</span><span class="md-line-content">${line || '\u00a0'}</span></span>`
+        )
+        .join('')
+
+      const langLabel = rawLang || 'text'
+      return (
+        `<div class="md-code-block" data-code="${encodeURIComponent(text)}" data-line="${token.lineStart || ''}">` +
+        `<div class="md-code-header">` +
+        `<span class="md-code-lang">${langLabel}</span>` +
+        `<button class="md-copy-btn" type="button" aria-label="Copy code">` +
+        `<span class="md-copy-btn-content">` +
+        `<svg class="md-copy-icon" viewBox="0 0 24 24" width="12" height="12" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">` +
+        `<rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>` +
+        `<path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>` +
+        `</svg>` +
+        `<span class="md-copy-text">Copy</span>` +
+        `</span>` +
+        `<span class="md-copied-btn-content">` +
+        `<svg class="md-check-icon" viewBox="0 0 24 24" width="12" height="12" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">` +
+        `<polyline points="20 6 9 17 4 12"></polyline>` +
+        `</svg>` +
+        `<span class="md-copy-text">Copied!</span>` +
+        `</span>` +
+        `</button>` +
+        `</div>` +
+        `<pre class="md-code-pre hljs"><code class="language-${langLabel}">${numberedLines}</code></pre>` +
+        `</div>`
+      )
+    }
   }
+]
 
-  // Split into lines and wrap each one (enables line numbers via CSS)
-  const lines = highlighted.split('\n')
-  if (lines[lines.length - 1] === '') lines.pop() // trim trailing newline
-  const numberedLines = lines
-    .map(
-      (line, i) =>
-        `<span class="md-code-line"><span class="md-line-num">${i + 1}</span><span class="md-line-content">${line || '\u00a0'}</span></span>`
-    )
-    .join('')
-
-  const langLabel = rawLang || 'text'
-  return (
-    `<div class="md-code-block" data-code="${encodeURIComponent(text)}">` +
-    `<div class="md-code-header">` +
-    `<span class="md-code-lang">${langLabel}</span>` +
-    `<button class="md-copy-btn" type="button" aria-label="Copy code">` +
-    `<span class="md-copy-btn-content">` +
-    `<svg class="md-copy-icon" viewBox="0 0 24 24" width="12" height="12" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">` +
-    `<rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>` +
-    `<path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>` +
-    `</svg>` +
-    `<span class="md-copy-text">Copy</span>` +
-    `</span>` +
-    `<span class="md-copied-btn-content">` +
-    `<svg class="md-check-icon" viewBox="0 0 24 24" width="12" height="12" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">` +
-    `<polyline points="20 6 9 17 4 12"></polyline>` +
-    `</svg>` +
-    `<span class="md-copy-text">Copied!</span>` +
-    `</span>` +
-    `</button>` +
-    `</div>` +
-    `<pre class="md-code-pre hljs"><code class="language-${langLabel}">${numberedLines}</code></pre>` +
-    `</div>`
-  )
-}
-
-marked.use({ renderer, gfm: true, breaks: true })
+marked.use({ extensions: lineExtensions, gfm: true, breaks: true })
 
 // Replace ```mermaid blocks with a placeholder <div> before marked parses.
 // This keeps the raw mermaid source safe from HTML-escaping.
 function extractMermaid(md: string): { processed: string; graphs: Map<string, string> } {
   const graphs = new Map<string, string>()
   let idx = 0
-  const processed = md.replace(/```mermaid\n([\s\S]*?)```/g, (_match, code: string) => {
+  const processed = md.replace(/```mermaid\n([\s\S]*?)```/g, (match, code: string) => {
     const id = `mermaid-${idx++}`
     graphs.set(id, code.trim())
-    return `<div class="mermaid-placeholder" data-id="${id}"></div>`
+    
+    const newlinesCount = (match.match(/\n/g) || []).length
+    let placeholder = `<div class="mermaid-placeholder" data-id="${id}"`
+    for (let i = 0; i < newlinesCount; i++) {
+      placeholder += `\n     data-spacer-line-${i}=""`
+    }
+    placeholder += `></div>`
+    return placeholder
   })
   return { processed, graphs }
 }
@@ -345,7 +456,40 @@ export function useMarkdownPreview() {
     const run = async () => {
       try {
         const { processed, graphs } = extractMermaid(input)
-        const html = marked.parse(processed) as string
+        
+        // Lex processed markdown and map line numbers to tokens recursively
+        const tokens = marked.lexer(processed)
+        const assignLineNumbers = (tokensList: any[], startLine = 1) => {
+          let currentLine = startLine;
+          for (const token of tokensList) {
+            token.lineStart = currentLine;
+            
+            if (token.type === 'list' && token.items) {
+              let itemLine = currentLine;
+              for (const item of token.items) {
+                item.lineStart = itemLine;
+                
+                if (item.tokens) {
+                  assignLineNumbers(item.tokens, itemLine);
+                }
+                
+                const itemNewlines = (item.raw.match(/\n/g) || []).length;
+                itemLine += itemNewlines;
+                item.lineEnd = itemLine;
+              }
+            } else if (token.tokens) {
+              assignLineNumbers(token.tokens, currentLine);
+            }
+
+            const newlines = (token.raw.match(/\n/g) || []).length;
+            currentLine += newlines;
+            token.lineEnd = currentLine;
+          }
+        };
+        
+        assignLineNumbers(tokens);
+
+        const html = marked.parser(tokens)
 
         if (graphs.size === 0) {
           setOutput(html)
@@ -371,12 +515,38 @@ export function useMarkdownPreview() {
           })
         )
 
-        // Replace placeholders with rendered SVGs
+        // Replace placeholders with rendered SVGs (robust regex to match data-line and data-id)
         const finalHtml = html.replace(
-          /<div class="mermaid-placeholder" data-id="([^"]+)"><\/div>/g,
-          (_m, id) => {
+          /<div class="mermaid-placeholder"([^>]*?)><\/div>/g,
+          (_match, attrs) => {
+            const idMatch = attrs.match(/data-id="([^"]*)"/)
+            const lineMatch = attrs.match(/data-line="([^"]*)"/)
+            const id = idMatch ? idMatch[1] : ''
+            const line = lineMatch ? lineMatch[1] : ''
+
             const svg = svgMap.get(id) ?? ''
-            return `<div class="mermaid-diagram">${svg}</div>`
+            if (svg.includes('mermaid-error')) {
+              return svg
+            }
+            return (
+              `<div class="mermaid-wrapper" data-id="${id}" data-line="${line}">` +
+              `<div class="mermaid-controls">` +
+              `<button type="button" class="mermaid-control-btn zoom-in" title="Zoom In" aria-label="Zoom In">` +
+              `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>` +
+              `</button>` +
+              `<button type="button" class="mermaid-control-btn zoom-out" title="Zoom Out" aria-label="Zoom Out">` +
+              `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line></svg>` +
+              `</button>` +
+              `<button type="button" class="mermaid-control-btn zoom-reset" title="Reset Zoom" aria-label="Reset Zoom">` +
+              `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"></path><path d="M16 3h5v5"></path></svg>` +
+              `</button>` +
+              `</div>` +
+              `<div class="mermaid-viewport">` +
+              `<div class="mermaid-content">${svg}</div>` +
+              `</div>` +
+              `<div class="mermaid-zoom-hint">Hold Ctrl + Scroll to zoom • Drag to pan</div>` +
+              `</div>`
+            )
           }
         )
 
