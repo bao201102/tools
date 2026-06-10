@@ -94,12 +94,12 @@ function StatCard({
   icon: any
 }) {
   return (
-    <div className="flex flex-col items-center justify-center rounded-lg border border-hairline bg-surface-1 p-4 text-center transition-all duration-300 hover:border-hairline-strong hover:shadow-md hover:-translate-y-0.5 group">
-      <div className="mb-2 flex h-8 w-8 items-center justify-center rounded-full bg-primary/5 text-primary group-hover:bg-primary group-hover:text-on-primary transition-all duration-300">
-        <Icon className="h-4 w-4" />
+    <div className="flex flex-col items-center justify-center rounded-lg border border-hairline bg-surface-1 p-2 sm:p-4 text-center transition-all duration-300 hover:border-hairline-strong hover:shadow-md hover:-translate-y-0.5 group">
+      <div className="mb-1.5 flex h-6 w-6 sm:h-8 sm:w-8 items-center justify-center rounded-full bg-primary/5 text-primary group-hover:bg-primary group-hover:text-on-primary transition-all duration-300">
+        <Icon className="h-3 w-3 sm:h-4 sm:w-4" />
       </div>
-      <span className="text-2xl font-bold tracking-tight text-ink group-hover:text-primary transition-colors">{value}</span>
-      <span className="mt-1 text-xs font-medium text-ink-muted">{label}</span>
+      <span className="text-lg sm:text-2xl font-bold tracking-tight text-ink group-hover:text-primary transition-colors leading-none">{value}</span>
+      <span className="mt-1 text-[9px] sm:text-xs font-medium text-ink-muted leading-tight">{label}</span>
     </div>
   )
 }
@@ -225,7 +225,7 @@ export function LetterCountEditor() {
   }, [input, setInput])
 
   return (
-    <div className="mx-auto flex min-h-0 w-full max-w-[1300px] flex-1 flex-col gap-4 p-6 lg:p-8 relative">
+    <div className="mx-auto flex min-h-0 w-full max-w-[1300px] flex-1 flex-col gap-4 p-4 sm:p-6 lg:p-8 relative">
       {/* Ambient decorative glow */}
       <div className="ambient-glow -left-10 -top-10 opacity-30 dark:opacity-40" />
 
@@ -236,42 +236,45 @@ export function LetterCountEditor() {
       <div className="grid min-h-0 grid-cols-1 gap-4 w-full lg:grid-cols-2 lg:gap-6 relative z-10">
         {/* Left Column: Input Textarea */}
         <div className="flex min-h-0 flex-1 flex-col gap-2">
-          <div className="flex shrink-0 items-center justify-between">
-            <label htmlFor="letter-count-input" className="text-sm font-medium text-ink">
+          {/* Toolbar: label + action buttons */}
+          <div className="flex shrink-0 items-center justify-between gap-2">
+            <label htmlFor="letter-count-input" className="shrink-0 text-sm font-medium text-ink">
               {t('tool.letterCount.input')}
             </label>
-            <div className="flex items-center gap-2">
-              <Button
-                variant="secondary"
-                size="sm"
+            {/* Buttons: show text on sm+, icon-only on mobile */}
+            <div className="flex items-center gap-1.5">
+              <button
+                type="button"
                 onClick={loadSampleText}
-                className="text-primary hover:text-primary-hover flex items-center gap-1"
+                title={t('tool.json.loadSample')}
+                className="flex h-9 items-center justify-center gap-1.5 rounded-md border border-hairline bg-surface-1 px-2 sm:px-3 text-xs font-medium text-primary shadow-sm transition-colors hover:bg-surface-2 hover:border-hairline-strong active:bg-surface-3"
               >
-                <Sparkles className="h-3 w-3" />
-                {t('tool.json.loadSample')}
-              </Button>
-              <Button
-                variant="secondary"
-                size="sm"
+                <Sparkles className="h-3.5 w-3.5 shrink-0" />
+                <span className="hidden sm:inline">{t('tool.json.loadSample')}</span>
+              </button>
+              <button
+                type="button"
                 onClick={handleCopy}
                 disabled={!input}
-                className="flex items-center gap-1"
+                title={t('common.copy')}
+                className="flex h-9 items-center justify-center gap-1.5 rounded-md border border-hairline bg-surface-1 px-2 sm:px-3 text-xs font-medium text-ink shadow-sm transition-colors hover:bg-surface-2 hover:border-hairline-strong active:bg-surface-3 disabled:opacity-40 disabled:cursor-not-allowed"
               >
-                <Copy className="h-3 w-3" />
-                {copyState === 'copied' ? t('common.copied') + '!' : t('common.copy')}
-              </Button>
-              <Button
-                variant="secondary"
-                size="sm"
+                <Copy className="h-3.5 w-3.5 shrink-0" />
+                <span className="hidden sm:inline">{copyState === 'copied' ? t('common.copied') + '!' : t('common.copy')}</span>
+              </button>
+              <button
+                type="button"
                 onClick={handleClear}
                 disabled={!input}
-                className="flex items-center gap-1 text-error-fg hover:bg-error-surface/30"
+                title={t('common.clear')}
+                className="flex h-9 items-center justify-center gap-1.5 rounded-md border border-hairline bg-surface-1 px-2 sm:px-3 text-xs font-medium text-error-fg shadow-sm transition-colors hover:bg-error-surface/30 hover:border-error-border/40 active:bg-error-surface/50 disabled:opacity-40 disabled:cursor-not-allowed"
               >
-                <Trash2 className="h-3 w-3" />
-                {t('common.clear')}
-              </Button>
+                <Trash2 className="h-3.5 w-3.5 shrink-0" />
+                <span className="hidden sm:inline">{t('common.clear')}</span>
+              </button>
             </div>
           </div>
+
           <div style={{ height: editorHeight }} className="w-full">
             <Textarea
               id="letter-count-input"
@@ -284,13 +287,13 @@ export function LetterCountEditor() {
           </div>
 
           {/* Quick text transformations */}
-          <div className="mt-2 flex flex-wrap gap-2">
+          <div className="mt-1 grid grid-cols-2 gap-1.5 sm:flex sm:flex-wrap sm:gap-2">
             <Button
               variant="secondary"
               size="sm"
               onClick={handleUppercase}
               disabled={!input}
-              className="text-xs font-semibold"
+              className="text-xs font-semibold truncate"
             >
               {t('tool.letterCount.actions.uppercase')}
             </Button>
@@ -299,7 +302,7 @@ export function LetterCountEditor() {
               size="sm"
               onClick={handleLowercase}
               disabled={!input}
-              className="text-xs font-semibold"
+              className="text-xs font-semibold truncate"
             >
               {t('tool.letterCount.actions.lowercase')}
             </Button>
@@ -308,7 +311,7 @@ export function LetterCountEditor() {
               size="sm"
               onClick={handleTitleCase}
               disabled={!input}
-              className="text-xs font-semibold"
+              className="text-xs font-semibold truncate"
             >
               {t('tool.letterCount.actions.titlecase')}
             </Button>
@@ -317,7 +320,7 @@ export function LetterCountEditor() {
               size="sm"
               onClick={handleSentenceCase}
               disabled={!input}
-              className="text-xs font-semibold"
+              className="text-xs font-semibold truncate"
             >
               {t('tool.letterCount.actions.sentencecase')}
             </Button>
@@ -326,15 +329,13 @@ export function LetterCountEditor() {
 
         {/* Right Column: Statistics Grid */}
         <div className="flex min-h-0 flex-1 flex-col gap-2">
-          <div className="flex shrink-0 items-center justify-between h-[28px]">
+          <div className="flex shrink-0 items-center h-9">
             <h3 className="text-sm font-medium text-ink">{t('nav.group.tools')}</h3>
           </div>
-          <div
-            style={{ height: editorHeight }}
-            className="w-full overflow-y-auto rounded-lg border border-hairline bg-surface-2 p-4 sm:p-6 shadow-sm flex flex-col gap-6"
-          >
-            {/* Stats Cards Grid */}
-            <div className="grid grid-cols-2 gap-4 sm:grid-cols-3">
+          {/* Stats panel — auto height (no fixed), scrollable on overflow */}
+          <div className="w-full overflow-y-auto rounded-lg border border-hairline bg-surface-2 p-3 sm:p-4 shadow-sm flex flex-col gap-4">
+            {/* Stats Cards Grid: 3 cols on mobile, 3 cols on sm+ */}
+            <div className="grid grid-cols-3 gap-2 sm:gap-4">
               <StatCard
                 label={t('tool.letterCount.stats.chars')}
                 value={stats.chars}
@@ -368,29 +369,29 @@ export function LetterCountEditor() {
             </div>
 
             {/* Time Estimation */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 border-t border-hairline pt-6">
-              <div className="flex items-center gap-3 rounded-lg border border-hairline bg-surface-1 p-3.5 shadow-sm hover:shadow-md transition-shadow duration-300">
-                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
-                  <BookOpen className="h-5 w-5" />
+            <div className="grid grid-cols-2 gap-2 sm:gap-4 border-t border-hairline pt-4">
+              <div className="flex items-center gap-2.5 rounded-lg border border-hairline bg-surface-1 p-3 shadow-sm hover:shadow-md transition-shadow duration-300">
+                <div className="flex h-8 w-8 sm:h-10 sm:w-10 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                  <BookOpen className="h-4 w-4 sm:h-5 sm:w-5" />
                 </div>
-                <div>
+                <div className="min-w-0">
                   <div className="text-sm font-bold text-ink">
                     {stats.readingTime} {locale === 'vi' ? 'phút' : 'min'}
                   </div>
-                  <div className="text-xs text-ink-muted">
+                  <div className="text-[10px] sm:text-xs text-ink-muted leading-tight">
                     {t('tool.letterCount.stats.readingTime')}
                   </div>
                 </div>
               </div>
-              <div className="flex items-center gap-3 rounded-lg border border-hairline bg-surface-1 p-3.5 shadow-sm hover:shadow-md transition-shadow duration-300">
-                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
-                  <Volume2 className="h-5 w-5" />
+              <div className="flex items-center gap-2.5 rounded-lg border border-hairline bg-surface-1 p-3 shadow-sm hover:shadow-md transition-shadow duration-300">
+                <div className="flex h-8 w-8 sm:h-10 sm:w-10 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                  <Volume2 className="h-4 w-4 sm:h-5 sm:w-5" />
                 </div>
-                <div>
+                <div className="min-w-0">
                   <div className="text-sm font-bold text-ink">
                     {stats.speakingTime} {locale === 'vi' ? 'phút' : 'min'}
                   </div>
-                  <div className="text-xs text-ink-muted">
+                  <div className="text-[10px] sm:text-xs text-ink-muted leading-tight">
                     {t('tool.letterCount.stats.speakingTime')}
                   </div>
                 </div>
@@ -401,7 +402,7 @@ export function LetterCountEditor() {
       </div>
 
       {/* Density Analysis Tables */}
-      <div className="mt-4 flex flex-col sm:flex-row gap-4 lg:gap-6 relative z-10">
+      <div className="mt-2 grid grid-cols-1 sm:grid-cols-2 gap-4 lg:gap-6 relative z-10">
         <DensityTable
           title={t('tool.letterCount.density.chars')}
           data={stats.charDensity}
@@ -423,7 +424,7 @@ export function LetterCountEditor() {
       </div>
 
       {/* Extra layout spacing */}
-      <div className="h-12 w-full shrink-0" aria-hidden="true" />
+      <div className="h-8 w-full shrink-0" aria-hidden="true" />
     </div>
   )
 }

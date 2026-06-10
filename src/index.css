@@ -339,6 +339,16 @@ body {
   background-clip: content-box;
 }
 
+/* On touch devices: hide scrollbar visually (still scrollable) */
+@media (hover: none) and (pointer: coarse) {
+  * {
+    scrollbar-width: none;
+  }
+  *::-webkit-scrollbar {
+    display: none;
+  }
+}
+
 /* Full width layout - align side padding with header */
 .layout-full-width .max-w-\[1300px\],
 .layout-full-width .max-w-content {
@@ -362,6 +372,48 @@ body {
 .monaco-editor .lines-content,
 .monaco-editor .view-lines {
   contain: layout;
+}
+
+/* Premium micro-animations for dropdowns & interactive states */
+@keyframes slideUpFade {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideUpFadeCenter {
+  from {
+    opacity: 0;
+    transform: translate(-50%, 6px);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
+}
+
+.animate-slide-up-fade {
+  animation: slideUpFade 0.18s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.animate-slide-up-fade-center {
+  animation: slideUpFadeCenter 0.18s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* Premium Card hover glow overrides */
+.dark .group:hover .interactive-card-glow,
+.dark .interactive-card-glow:hover {
+  box-shadow: 0 0 25px 2px rgba(94, 106, 210, 0.16), 0 8px 30px rgba(0, 0, 0, 0.35) !important;
+}
+
+.group:hover .interactive-card-glow,
+.interactive-card-glow:hover {
+  box-shadow: 0 0 25px 2px rgba(94, 106, 210, 0.08), 0 8px 30px rgba(0, 0, 0, 0.08) !important;
 }
 
 

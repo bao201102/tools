@@ -150,9 +150,9 @@ export default function HomePage() {
       {/* Background Grid Pattern */}
       <div className="absolute inset-0 bg-grid-pattern opacity-40 pointer-events-none" />
 
-      <div className="relative z-10 mx-auto max-w-content px-[var(--ds-spacing-md)] py-[var(--ds-spacing-xxl)] sm:px-[var(--ds-spacing-xl)] sm:py-[var(--ds-spacing-section)]">
-        <header className="mb-[var(--ds-spacing-xxl)] max-w-3xl">
-          <h1 className="mt-2 font-display text-display-md font-semibold tracking-tight text-ink sm:text-display-lg bg-gradient-to-r from-ink via-ink to-ink-subtle bg-clip-text text-transparent">
+      <div className="relative z-10 mx-auto max-w-content px-4 py-10 sm:px-[var(--ds-spacing-xl)] sm:py-[var(--ds-spacing-section)]">
+        <header className="mb-8 sm:mb-[var(--ds-spacing-xxl)] max-w-3xl">
+          <h1 className="mt-2 font-display text-headline sm:text-display-md font-semibold tracking-tight text-ink sm:text-display-lg bg-gradient-to-r from-ink via-ink to-ink-subtle bg-clip-text text-transparent">
             {t('home.title')}
           </h1>
           <p className="mt-[var(--ds-spacing-md)] text-body-lg text-ink-muted">
@@ -166,7 +166,7 @@ export default function HomePage() {
               <h2 className="mb-[var(--ds-spacing-md)] px-0 font-display text-eyebrow font-medium text-ink-tertiary">
                 {t(section.titleKey)}
               </h2>
-              <ul className="grid grid-cols-1 gap-[var(--ds-spacing-lg)] sm:grid-cols-[repeat(auto-fill,minmax(320px,1fr))]">
+              <ul className="grid grid-cols-2 gap-3 min-[480px]:gap-[var(--ds-spacing-lg)] sm:grid-cols-[repeat(auto-fill,minmax(280px,1fr))] lg:grid-cols-[repeat(auto-fill,minmax(320px,1fr))]">
                 {section.items.map((tool) => (
                   <li key={tool.kind === 'internal' ? tool.route : tool.href}>
                     {tool.kind === 'external' ? (
@@ -176,7 +176,7 @@ export default function HomePage() {
                         rel="noopener noreferrer"
                         className="group block rounded-lg outline-none focus-visible:ds-focus-ring h-full"
                       >
-                        <Card interactive className="relative h-full flex flex-col justify-between min-h-[160px]">
+                        <Card interactive className="relative h-full flex flex-col justify-between min-h-[120px] sm:min-h-[160px]">
                           <div>
                             <div className="flex items-center gap-3">
                               <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-hairline bg-surface-2 text-primary group-hover:bg-primary group-hover:text-on-primary group-hover:border-transparent transition-all duration-300">
@@ -201,7 +201,7 @@ export default function HomePage() {
                         to={tool.route}
                         className="group block rounded-lg outline-none focus-visible:ds-focus-ring h-full"
                       >
-                        <Card interactive className="relative h-full flex flex-col justify-between min-h-[160px]">
+                        <Card interactive className="relative h-full flex flex-col justify-between min-h-[120px] sm:min-h-[160px]">
                           <div>
                             <div className="flex items-center gap-3">
                               <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-hairline bg-surface-2 text-primary group-hover:bg-primary group-hover:text-on-primary group-hover:border-transparent transition-all duration-300">

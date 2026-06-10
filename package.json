@@ -6,9 +6,11 @@
   "license": "MIT",
   "scripts": {
     "dev": "vite",
+    "copy-static-deps": "node scripts/copy-static-deps.js",
+    "predev": "npm run copy-static-deps",
     "generate-sitemap": "node scripts/generate-sitemap.js",
     "generate-version": "node scripts/generate-version.js",
-    "prebuild": "npm run generate-sitemap && npm run generate-version",
+    "prebuild": "npm run copy-static-deps && npm run generate-sitemap && npm run generate-version",
     "build": "tsc -b && vite build",
     "preview": "vite preview"
   },

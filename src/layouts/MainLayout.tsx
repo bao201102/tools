@@ -1,6 +1,10 @@
 import { useEffect, useRef, useState } from 'react'
 import { NavLink, Outlet, useLocation } from 'react-router-dom'
-import { Maximize2, Minimize2 } from 'lucide-react'
+import {
+  Maximize2, Minimize2, Braces, GitCompare, KeyRound, Code2, FileText, AlignLeft, Sigma,
+  ArrowLeftRight, FileCode2, Table2, Sheet, Lock, Cpu, Database, Wrench,
+  Coins, Monitor, Workflow, ExternalLink, ChevronRight,
+} from 'lucide-react'
 import { cn } from '../lib/cn'
 import { useLocale, type Locale, type TranslationKey } from '../lib/i18n'
 import {
@@ -12,48 +16,50 @@ import { ThemeSwitcher } from '../components/ThemeSwitcher'
 
 type NavInternalItem = { kind: 'internal'; to: string; labelKey: TranslationKey; end?: boolean }
 type NavExternalItem = { kind: 'external'; href: string; labelKey: TranslationKey }
-type NavItem = NavInternalItem | NavExternalItem
 
-type NavGroup = { id: string; labelKey?: TranslationKey; items: NavItem[] }
+type NavInternalItemWithIcon = NavInternalItem & { icon: React.ComponentType<{ className?: string }> }
+type NavExternalItemWithIcon = NavExternalItem & { icon: React.ComponentType<{ className?: string }> }
+type NavItemWithIcon = NavInternalItemWithIcon | NavExternalItemWithIcon
+type NavGroupWithIcon = { id: string; labelKey?: TranslationKey; items: NavItemWithIcon[] }
 
-const navGroups: NavGroup[] = [
+const navGroups: NavGroupWithIcon[] = [
   {
     id: 'tools',
     labelKey: 'nav.group.tools',
     items: [
-      { kind: 'internal', to: '/json', labelKey: 'nav.item.jsonFormatter' },
-      { kind: 'internal', to: '/diff-checker', labelKey: 'nav.item.diffChecker' },
-      { kind: 'internal', to: '/jwt-decoder', labelKey: 'nav.item.jwtDecoder' },
-      { kind: 'internal', to: '/json-escape', labelKey: 'nav.item.jsonEscape' },
-      { kind: 'internal', to: '/json-unescape', labelKey: 'nav.item.jsonUnescape' },
-      { kind: 'internal', to: '/markdown-preview', labelKey: 'nav.item.markdownPreview' },
-      { kind: 'internal', to: '/letter-count', labelKey: 'nav.item.letterCount' },
+      { kind: 'internal', to: '/json', labelKey: 'nav.item.jsonFormatter', icon: Braces },
+      { kind: 'internal', to: '/diff-checker', labelKey: 'nav.item.diffChecker', icon: GitCompare },
+      { kind: 'internal', to: '/jwt-decoder', labelKey: 'nav.item.jwtDecoder', icon: KeyRound },
+      { kind: 'internal', to: '/json-escape', labelKey: 'nav.item.jsonEscape', icon: Code2 },
+      { kind: 'internal', to: '/json-unescape', labelKey: 'nav.item.jsonUnescape', icon: FileCode2 },
+      { kind: 'internal', to: '/markdown-preview', labelKey: 'nav.item.markdownPreview', icon: FileText },
+      { kind: 'internal', to: '/letter-count', labelKey: 'nav.item.letterCount', icon: Sigma },
     ],
   },
   {
     id: 'convert',
     labelKey: 'nav.group.convert',
     items: [
-      { kind: 'internal', to: '/json-to-yaml', labelKey: 'nav.item.yamlFormatter' },
-      { kind: 'internal', to: '/yaml-to-json', labelKey: 'nav.item.yamlToJson' },
-      { kind: 'internal', to: '/json-to-csv', labelKey: 'nav.item.jsonToCsv' },
-      { kind: 'internal', to: '/csv-to-json', labelKey: 'nav.item.csvToJson' },
-      { kind: 'internal', to: '/json-to-excel', labelKey: 'nav.item.jsonToExcel' },
-      { kind: 'internal', to: '/excel-to-json', labelKey: 'nav.item.excelToJson' },
-      { kind: 'internal', to: '/encoder', labelKey: 'nav.item.encoder' },
-      { kind: 'internal', to: '/json-to-csharp', labelKey: 'nav.item.jsonToCsharp' },
-      { kind: 'internal', to: '/sql-to-csharp', labelKey: 'nav.item.sqlToCsharp' },
-      { kind: 'internal', to: '/csharp-proto', labelKey: 'nav.item.csharpProto' },
-      { kind: 'internal', to: '/csharp-proto-remove', labelKey: 'nav.item.csharpProtoRemove' },
+      { kind: 'internal', to: '/json-to-yaml', labelKey: 'nav.item.yamlFormatter', icon: AlignLeft },
+      { kind: 'internal', to: '/yaml-to-json', labelKey: 'nav.item.yamlToJson', icon: ArrowLeftRight },
+      { kind: 'internal', to: '/json-to-csv', labelKey: 'nav.item.jsonToCsv', icon: Table2 },
+      { kind: 'internal', to: '/csv-to-json', labelKey: 'nav.item.csvToJson', icon: Database },
+      { kind: 'internal', to: '/json-to-excel', labelKey: 'nav.item.jsonToExcel', icon: Sheet },
+      { kind: 'internal', to: '/excel-to-json', labelKey: 'nav.item.excelToJson', icon: Sheet },
+      { kind: 'internal', to: '/encoder', labelKey: 'nav.item.encoder', icon: Lock },
+      { kind: 'internal', to: '/json-to-csharp', labelKey: 'nav.item.jsonToCsharp', icon: Cpu },
+      { kind: 'internal', to: '/sql-to-csharp', labelKey: 'nav.item.sqlToCsharp', icon: Database },
+      { kind: 'internal', to: '/csharp-proto', labelKey: 'nav.item.csharpProto', icon: Wrench },
+      { kind: 'internal', to: '/csharp-proto-remove', labelKey: 'nav.item.csharpProtoRemove', icon: Wrench },
     ],
   },
   {
     id: 'utility',
     labelKey: 'nav.group.utility',
     items: [
-      { kind: 'external', href: 'https://gold.nub.io.vn/', labelKey: 'nav.item.goldPrice' },
-      { kind: 'external', href: 'https://vps-monitoring.nub.io.vn/', labelKey: 'nav.item.vpsMonitoring' },
-      { kind: 'external', href: 'https://n8n.nub.io.vn/', labelKey: 'nav.item.n8n' },
+      { kind: 'external', href: 'https://gold.nub.io.vn/', labelKey: 'nav.item.goldPrice', icon: Coins },
+      { kind: 'external', href: 'https://vps-monitoring.nub.io.vn/', labelKey: 'nav.item.vpsMonitoring', icon: Monitor },
+      { kind: 'external', href: 'https://n8n.nub.io.vn/', labelKey: 'nav.item.n8n', icon: Workflow },
     ],
   },
 ]
@@ -238,7 +244,7 @@ export default function MainLayout() {
   return (
     <div className={cn("flex h-screen w-full flex-col overflow-hidden bg-canvas text-ink", isFullWidth && "layout-full-width")}>
       {/* Top navigation bar - JSONLint style */}
-      <header className="sticky top-0 z-30 grid h-16 shrink-0 grid-cols-[1fr_auto_1fr] items-center border-b border-hairline bg-surface-1 px-4 shadow-sm lg:px-6">
+      <header className="sticky top-0 z-30 grid h-16 shrink-0 grid-cols-[1fr_auto_1fr] items-center border-b border-hairline bg-surface-1/85 backdrop-blur-md px-4 shadow-sm lg:px-6" style={{ paddingTop: 'env(safe-area-inset-top)' }}>
         {/* Logo */}
         <div className="flex items-center gap-3 justify-self-start">
           <NavLink to="/" className="flex items-center gap-3 outline-none focus-visible:ds-focus-ring rounded-md">
@@ -285,7 +291,7 @@ export default function MainLayout() {
 
                 {/* Dropdown menu */}
                 {openDropdown === group.id && (
-                  <div className="absolute left-1/2 top-full z-50 mt-1 max-h-[min(70vh,24rem)] w-56 -translate-x-1/2 overflow-y-auto rounded-md border border-hairline bg-surface-1 shadow-lg">
+                  <div className="absolute left-1/2 top-full z-50 mt-1 max-h-[min(70vh,24rem)] w-56 -translate-x-1/2 overflow-y-auto rounded-md border border-hairline bg-surface-1 shadow-lg animate-slide-up-fade-center">
                     <div className="py-1">
                       {group.items.map((item) => {
                         if (item.kind === 'external') {
@@ -419,76 +425,126 @@ export default function MainLayout() {
       {/* Mobile Navigation Overlay */}
       <div
         className={cn(
-          "fixed inset-0 z-40 bg-semantic-overlay backdrop-blur-[1px] lg:hidden transition-opacity duration-300",
+          "fixed inset-0 z-40 bg-black/40 backdrop-blur-sm lg:hidden transition-opacity duration-300",
           navOpen ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
         )}
         onClick={() => setNavOpen(false)}
       />
+
+      {/* Mobile Nav Drawer */}
       <div
         id="mobile-nav"
         className={cn(
-          "fixed right-0 top-16 z-50 h-[calc(100vh-4rem)] w-64 overflow-y-auto border-l border-hairline bg-surface-1 shadow-xl lg:hidden transition-transform duration-300 ease-in-out",
+          "fixed right-0 top-0 z-50 flex h-full w-72 flex-col border-l border-hairline/60 bg-surface-1 shadow-2xl lg:hidden",
+          "transition-transform duration-300 ease-[cubic-bezier(0.32,0.72,0,1)]",
           navOpen ? "translate-x-0" : "translate-x-full"
         )}
       >
-        <nav className="flex flex-col gap-1 p-4" aria-label="Mobile">
-          {navGroups.map((group) => (
-            <div key={group.id} className="flex flex-col gap-1">
+        {/* Drawer Header */}
+        <div className="relative flex shrink-0 items-center justify-between border-b border-hairline/60 px-5 py-4" style={{ paddingTop: 'max(1rem, env(safe-area-inset-top))' }}>
+          {/* Subtle gradient accent */}
+          <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-primary/60 to-transparent" />
+          <div className="flex items-center gap-3">
+            <img src="/favicon.png" alt="NUB" width={28} height={28} className="h-7 w-7 rounded-md object-cover" />
+            <span className="font-display text-base font-semibold tracking-tight text-ink">NUB Portal</span>
+          </div>
+          <button
+            type="button"
+            onClick={() => setNavOpen(false)}
+            aria-label={t('nav.closeNavigation')}
+            className="flex h-8 w-8 items-center justify-center rounded-md text-ink-subtle transition-colors hover:bg-surface-2 hover:text-ink active:bg-surface-3 outline-none focus-visible:ds-focus-ring"
+          >
+            <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+
+        {/* Scrollable nav area */}
+        <nav className="flex-1 overflow-y-auto overscroll-contain px-3 py-3" aria-label="Mobile">
+          {navGroups.map((group, gi) => (
+            <div key={group.id} className={cn('flex flex-col', gi > 0 && 'mt-1')}>
               {group.labelKey && (
-                <div className="mt-2 px-3 py-2 text-xs font-semibold uppercase tracking-wide text-ink-tertiary">
+                <div className="px-2 pb-1 pt-3 text-[10px] font-bold uppercase tracking-widest text-ink-tertiary">
                   {t(group.labelKey)}
                 </div>
               )}
-              {group.items.map((item) => {
-                if (item.kind === 'external') {
+              <div className="flex flex-col gap-0.5">
+                {group.items.map((item) => {
+                  const Icon = item.icon
+                  if (item.kind === 'external') {
+                    return (
+                      <a
+                        key={item.href}
+                        href={item.href}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="group flex min-h-11 items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-ink-subtle transition-colors hover:bg-surface-2 hover:text-ink active:bg-surface-3"
+                        onClick={() => setNavOpen(false)}
+                      >
+                        <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md border border-hairline bg-surface-2 text-ink-tertiary transition-colors group-hover:border-primary/30 group-hover:bg-primary/10 group-hover:text-primary">
+                          <Icon className="h-3.5 w-3.5" />
+                        </div>
+                        <span className="flex-1 truncate">{t(item.labelKey)}</span>
+                        <ExternalLink className="h-3 w-3 shrink-0 opacity-40" />
+                      </a>
+                    )
+                  }
+
                   return (
-                    <a
-                      key={item.href}
-                      href={item.href}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="rounded-md px-3 py-2 text-sm font-medium text-ink-subtle hover:bg-surface-2 hover:text-ink"
+                    <NavLink
+                      key={item.to}
+                      to={item.to}
+                      end={item.end}
+                      className={({ isActive }) =>
+                        cn(
+                          'group relative flex min-h-11 items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors',
+                          isActive
+                            ? 'bg-primary/10 text-primary'
+                            : 'text-ink-subtle hover:bg-surface-2 hover:text-ink active:bg-surface-3'
+                        )
+                      }
                       onClick={() => setNavOpen(false)}
                     >
-                      {t(item.labelKey)}
-                    </a>
+                      {({ isActive }) => (
+                        <>
+                          {/* Active left indicator */}
+                          {isActive && (
+                            <span className="absolute left-0 top-1/2 h-5 w-0.5 -translate-y-1/2 rounded-full bg-primary" />
+                          )}
+                          <div className={cn(
+                            'flex h-7 w-7 shrink-0 items-center justify-center rounded-md border transition-colors',
+                            isActive
+                              ? 'border-primary/30 bg-primary/10 text-primary'
+                              : 'border-hairline bg-surface-2 text-ink-tertiary group-hover:border-primary/20 group-hover:bg-primary/5 group-hover:text-primary'
+                          )}>
+                            <Icon className="h-3.5 w-3.5" />
+                          </div>
+                          <span className="flex-1 truncate">{t(item.labelKey)}</span>
+                          {isActive && <ChevronRight className="h-3.5 w-3.5 shrink-0 text-primary/60" />}
+                        </>
+                      )}
+                    </NavLink>
                   )
-                }
-
-                return (
-                  <NavLink
-                    key={item.to}
-                    to={item.to}
-                    end={item.end}
-                    className={({ isActive }) =>
-                      cn(
-                        'rounded-md px-3 py-2 text-sm font-medium',
-                        isActive
-                          ? 'bg-primary text-on-primary'
-                          : 'text-ink-subtle hover:bg-surface-2 hover:text-ink'
-                      )
-                    }
-                    onClick={() => setNavOpen(false)}
-                  >
-                    {t(item.labelKey)}
-                  </NavLink>
-                )
-              })}
+                })}
+              </div>
             </div>
           ))}
+        </nav>
 
-          {/* Divider & Switchers */}
-          <div className="mt-6 border-t border-hairline pt-4 flex flex-col gap-3 px-3">
+        {/* Drawer Footer — Theme & Language */}
+        <div className="shrink-0 border-t border-hairline/60 bg-surface-2/50 px-5 py-4" style={{ paddingBottom: 'max(1rem, env(safe-area-inset-bottom))' }}>
+          <div className="flex flex-col gap-3">
             <div className="flex items-center justify-between">
-              <span className="text-xs font-semibold uppercase tracking-wide text-ink-tertiary">{t('theme.label')}</span>
+              <span className="text-xs font-semibold text-ink-tertiary">{t('theme.label')}</span>
               <ThemeSwitcher />
             </div>
             <div className="flex items-center justify-between">
-              <span className="text-xs font-semibold uppercase tracking-wide text-ink-tertiary">{t('lang.label')}</span>
+              <span className="text-xs font-semibold text-ink-tertiary">{t('lang.label')}</span>
               <LanguageSwitcher />
             </div>
           </div>
-        </nav>
+        </div>
       </div>
 
       {/* Main content area */}

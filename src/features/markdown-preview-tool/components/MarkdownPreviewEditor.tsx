@@ -582,14 +582,14 @@ export function MarkdownPreviewEditor() {
   const hasInput = input.trim() !== ''
 
   return (
-    <div className="mx-auto flex min-h-0 w-full max-w-[1300px] flex-1 flex-col gap-4 p-6 pb-20 lg:p-8 lg:pb-28">
+    <div className="mx-auto flex min-h-0 w-full max-w-[1300px] flex-1 flex-col gap-4 p-4 pb-20 sm:p-6 lg:p-8 lg:pb-28">
       <div className="shrink-0">
         <p className="text-sm text-ink-muted">{t('tool.markdown.desc')}</p>
       </div>
 
       {isExpanded ? (
         <div className="flex flex-col gap-4 flex-1 min-h-0 shrink-0">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 h-[900px] lg:h-[680px] min-h-0 flex-1">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 h-[500px] sm:h-[700px] lg:h-[680px] min-h-0 flex-1">
             {/* Left Pane: Editor */}
             <div className="flex flex-col h-full gap-2 min-h-0">
               <div className="flex shrink-0 items-center justify-between">
@@ -633,7 +633,7 @@ export function MarkdownPreviewEditor() {
                 </div>
               </div>
 
-              <div ref={editorContainerRef} className="flex-1 min-h-0 relative overflow-hidden rounded-lg border border-hairline shadow-sm bg-surface-1">
+              <div ref={editorContainerRef} className="flex-1 min-h-0 relative overflow-hidden rounded-lg border border-hairline shadow-sm bg-surface-1" style={{ touchAction: 'pan-y' }}>
                 <Editor
                   height="100%"
                   width="100%"

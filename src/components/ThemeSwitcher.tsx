@@ -133,7 +133,7 @@ export function ThemeSwitcher() {
         <div
           role="listbox"
           aria-label={t('theme.label')}
-          className="absolute right-0 top-full z-50 mt-1 min-w-[10.5rem] overflow-hidden rounded-md border border-hairline bg-surface-1 py-1 shadow-lg"
+          className="absolute right-0 top-full z-50 mt-1 min-w-[10.5rem] overflow-hidden rounded-md border border-hairline bg-surface-1 py-1 shadow-lg animate-slide-up-fade"
         >
           {options.map(({ value, Icon }) => {
             const selected = preference === value

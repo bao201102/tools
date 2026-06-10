@@ -107,16 +107,13 @@ export function JsonEscapeEditor() {
     })
 
   return (
-    <div className="mx-auto flex min-h-0 w-full max-w-[1300px] flex-1 flex-col gap-4 p-6 lg:p-8">
+    <div className="mx-auto flex min-h-0 w-full max-w-[1300px] flex-1 flex-col gap-4 p-4 sm:p-6 lg:p-8">
       <div className="shrink-0">
         <p className="text-sm text-ink-muted">{t('tool.jsonEscape.desc')}</p>
       </div>
 
-      <div
-        className="grid min-h-0 grid-cols-1 gap-4 w-full lg:grid-cols-2 lg:gap-6"
-        style={{ height: editorHeight }}
-      >
-        <section className="flex min-h-0 flex-col gap-2">
+      <div className="grid min-h-0 grid-cols-1 gap-4 w-full lg:grid-cols-2 lg:gap-6">
+        <section className="flex min-h-0 flex-col gap-2" style={{ height: editorHeight }}>
           <div className="flex flex-wrap items-center justify-between gap-2">
             <div className="flex flex-wrap items-baseline gap-2">
               <span id="json-escape-input-label" className="text-sm font-medium text-ink">
@@ -137,7 +134,7 @@ export function JsonEscapeEditor() {
           </div>
         </section>
 
-        <section className="flex min-h-0 flex-col gap-2">
+        <section className="flex min-h-0 flex-col gap-2" style={{ height: editorHeight }}>
           <div className="flex flex-wrap items-center justify-between gap-2">
             <span id="json-escape-output-label" className="text-sm font-medium text-ink">
               {t('tool.jsonEscape.output')}

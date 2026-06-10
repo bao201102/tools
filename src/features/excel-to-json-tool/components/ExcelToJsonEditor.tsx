@@ -133,7 +133,7 @@ export function ExcelToJsonEditor() {
     copyState === 'copied' ? t('common.copied') : copyState === 'failed' ? t('common.failed') : t('common.copy')
 
   return (
-    <div className="mx-auto flex min-h-0 w-full max-w-[1300px] flex-1 flex-col gap-4 p-6 lg:p-8">
+    <div className="mx-auto flex min-h-0 w-full max-w-[1300px] flex-1 flex-col gap-4 p-4 sm:p-6 lg:p-8">
       <div className="shrink-0">
         <p className="text-sm text-ink-muted">{t('tool.excelToJson.desc')}</p>
       </div>
@@ -149,10 +149,9 @@ export function ExcelToJsonEditor() {
 
       <div
         className="grid min-h-0 grid-cols-1 gap-4 w-full lg:grid-cols-2 lg:gap-6"
-        style={{ height: editorHeight }}
       >
         {/* Left Column - Excel Upload & Paste */}
-        <div className="flex min-h-0 flex-1 flex-col gap-4">
+        <div className="flex min-h-0 flex-1 flex-col gap-4" style={{ height: editorHeight }}>
           <span className="shrink-0 text-sm font-medium text-ink">
             {isVi ? 'Tải lên hoặc Dán dữ liệu' : 'Upload or Paste Data'}
           </span>
@@ -204,7 +203,7 @@ export function ExcelToJsonEditor() {
           </div>
 
           {/* Paste Text Area */}
-          <div className="flex min-h-0 flex-1 flex-col gap-2">
+          <div className="flex min-h-0 flex-1 flex-col gap-2" style={{ height: editorHeight }}>
             <textarea
               value={pastedText}
               onChange={(e) => setPastedText(e.target.value)}

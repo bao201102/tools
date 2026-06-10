@@ -82,7 +82,7 @@ export function JwtDecoderEditor() {
         : t('tool.jwt.copyPayload')
 
   return (
-    <div className="mx-auto flex w-full max-w-[1300px] flex-col gap-4 p-6 lg:p-8">
+    <div className="mx-auto flex w-full max-w-[1300px] flex-col gap-4 p-4 sm:p-6 lg:p-8">
       <div className="shrink-0">
         <p className="text-sm text-ink-muted">{t('tool.jwt.desc')}</p>
       </div>

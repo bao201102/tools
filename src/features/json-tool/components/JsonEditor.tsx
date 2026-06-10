@@ -606,7 +606,7 @@ export function JsonEditor() {
   }
 
   return (
-    <div className="mx-auto flex min-h-0 w-full max-w-[1300px] flex-1 flex-col gap-4 p-6 lg:p-8">
+    <div className="mx-auto flex min-h-0 w-full max-w-[1300px] flex-1 flex-col gap-4 p-4 sm:p-6 lg:p-8">
       <div className="shrink-0">
         <p className="text-sm text-ink-muted">
           {t('tool.json.pastePrompt')}
@@ -616,10 +616,9 @@ export function JsonEditor() {
       {/* Two Editors Side by Side */}
       <div
         className="grid min-h-0 shrink-0 grid-cols-1 gap-4 w-full lg:grid-cols-2 lg:gap-6"
-        style={{ height: editorHeight }}
       >
         {/* Left Editor - Input (Original) */}
-        <div className="flex min-h-0 flex-col gap-2">
+        <div className="flex min-h-0 flex-col gap-2" style={{ height: editorHeight }}>
           <div className="flex shrink-0 items-center justify-between">
             <h3 className="text-sm font-medium text-ink">{t('tool.json.original')}</h3>
             <Button
@@ -653,7 +652,7 @@ export function JsonEditor() {
         </div>
 
         {/* Right Panel - Output (Formatted or Tree View) */}
-        <div className="flex min-h-0 flex-col gap-2">
+        <div className="flex min-h-0 flex-col gap-2" style={{ height: editorHeight }}>
           <div className="flex shrink-0 items-center justify-between">
             <div className="flex items-center gap-2">
               <Button

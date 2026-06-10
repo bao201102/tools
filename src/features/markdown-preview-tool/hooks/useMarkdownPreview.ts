@@ -229,7 +229,7 @@ function getMermaid(): Promise<any> {
     }
 
     const script = document.createElement('script')
-    script.src = 'https://cdn.jsdelivr.net/npm/mermaid@11.4.0/dist/mermaid.min.js'
+    script.src = '/mermaid/mermaid.min.js'
     script.async = true
     script.onload = () => {
       const m = (window as any).mermaid

@@ -5,6 +5,8 @@ import { useLocale } from '../../../lib/i18n'
 import { useAdaptiveEditorHeightWithOptions } from '../../../lib/useAdaptiveEditorHeight'
 import { useMonacoEditorTheme } from '../../../lib/useMonacoEditorTheme'
 import { useDiffChecker } from '../hooks/useDiffChecker'
+import { Button, Input } from '../../../components/ui'
+
 type DiffLanguage =
   | 'json'
   | 'plaintext'
@@ -48,8 +50,6 @@ function detectLanguageFromText(text: string): DiffLanguage {
 
   return 'plaintext'
 }
-
-import { Button, Input } from '../../../components/ui'
 
 export function DiffCheckerEditor() {
   const { t } = useLocale()
@@ -155,7 +155,7 @@ export function DiffCheckerEditor() {
   }, [])
 
   return (
-    <div className="mx-auto flex min-h-0 w-full max-w-[1300px] flex-1 flex-col gap-4 p-6 lg:p-8">
+    <div className="mx-auto flex min-h-0 w-full max-w-[1300px] flex-1 flex-col gap-4 p-4 sm:p-6 lg:p-8">
       <div className="shrink-0">
         <p className="text-sm text-ink-muted">{t('tool.diff.desc')}</p>
       </div>
@@ -211,8 +211,8 @@ export function DiffCheckerEditor() {
           modified={modifiedSnapshot}
           originalLanguage={language}
           modifiedLanguage={language}
-          originalModelPath={`inmemory://model/${originalLabel.trim() || 'original'}.txt`}
-          modifiedModelPath={`inmemory://model/${modifiedLabel.trim() || 'modified'}.txt`}
+          originalModelPath="inmemory://model/original.txt"
+          modifiedModelPath="inmemory://model/modified.txt"
           onMount={(editor) => {
             const originalEditor = editor.getOriginalEditor()
             const modifiedEditor = editor.getModifiedEditor()

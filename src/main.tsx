@@ -6,6 +6,13 @@ import './index.css'
 import { LocaleProvider } from './lib/LocaleProvider'
 import { ThemeProvider } from './lib/ThemeProvider'
 import { startVersionCheck } from './lib/versionCheck'
+import { loader } from '@monaco-editor/react'
+
+loader.config({
+  paths: {
+    vs: '/monaco/vs'
+  }
+})
 
 if (import.meta.env.PROD) {
   startVersionCheck()
