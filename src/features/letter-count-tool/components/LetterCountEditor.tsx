@@ -225,7 +225,7 @@ export function LetterCountEditor() {
   }, [input, setInput])
 
   return (
-    <div className="mx-auto flex min-h-0 w-full max-w-[1300px] flex-1 flex-col gap-4 p-4 sm:p-6 lg:p-8 relative">
+    <div className="mx-auto flex min-h-0 w-full max-w-[1300px] flex-1 flex-col gap-4 px-4 pt-4 pb-20 sm:p-6 lg:p-8 relative">
       {/* Ambient decorative glow */}
       <div className="ambient-glow -left-10 -top-10 opacity-30 dark:opacity-40" />
 
@@ -233,7 +233,7 @@ export function LetterCountEditor() {
         <p className="text-sm text-ink-muted">{t('tool.letterCount.desc')}</p>
       </div>
 
-      <div className="grid min-h-0 grid-cols-1 gap-4 w-full lg:grid-cols-2 lg:gap-6 relative z-10">
+      <div className="grid min-h-0 shrink-0 grid-cols-1 gap-4 w-full lg:grid-cols-2 lg:gap-6 relative z-10">
         {/* Left Column: Input Textarea */}
         <div className="flex min-h-0 flex-1 flex-col gap-2">
           {/* Toolbar: label + action buttons */}
@@ -425,6 +425,7 @@ export function LetterCountEditor() {
 
       {/* Extra layout spacing */}
       <div className="h-8 w-full shrink-0" aria-hidden="true" />
+      <div className="h-16 w-full shrink-0 lg:hidden" aria-hidden="true" />
     </div>
   )
 }

@@ -242,7 +242,7 @@ export default function MainLayout() {
   const showBanner = updateAvailable && !bannerDismissed
 
   return (
-    <div className={cn("flex h-screen w-full flex-col overflow-hidden bg-canvas text-ink", isFullWidth && "layout-full-width")}>
+    <div className={cn("flex h-dvh w-full flex-col overflow-hidden bg-canvas text-ink", isFullWidth && "layout-full-width")}>
       {/* Top navigation bar - JSONLint style */}
       <header className="sticky top-0 z-30 grid h-16 shrink-0 grid-cols-[1fr_auto_1fr] items-center border-b border-hairline bg-surface-1/85 backdrop-blur-md px-4 shadow-sm lg:px-6" style={{ paddingTop: 'env(safe-area-inset-top)' }}>
         {/* Logo */}

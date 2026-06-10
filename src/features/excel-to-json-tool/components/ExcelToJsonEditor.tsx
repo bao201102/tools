@@ -133,7 +133,7 @@ export function ExcelToJsonEditor() {
     copyState === 'copied' ? t('common.copied') : copyState === 'failed' ? t('common.failed') : t('common.copy')
 
   return (
-    <div className="mx-auto flex min-h-0 w-full max-w-[1300px] flex-1 flex-col gap-4 p-4 sm:p-6 lg:p-8">
+    <div className="mx-auto flex min-h-0 w-full max-w-[1300px] flex-1 flex-col gap-4 px-4 pt-4 pb-20 sm:p-6 lg:p-8">
       <div className="shrink-0">
         <p className="text-sm text-ink-muted">{t('tool.excelToJson.desc')}</p>
       </div>
@@ -148,7 +148,7 @@ export function ExcelToJsonEditor() {
       ) : null}
 
       <div
-        className="grid min-h-0 grid-cols-1 gap-4 w-full lg:grid-cols-2 lg:gap-6"
+        className="grid min-h-0 shrink-0 grid-cols-1 gap-4 w-full lg:grid-cols-2 lg:gap-6"
       >
         {/* Left Column - Excel Upload & Paste */}
         <div className="flex min-h-0 flex-1 flex-col gap-4" style={{ height: editorHeight }}>
@@ -272,6 +272,7 @@ export function ExcelToJsonEditor() {
           {t('common.clear')}
         </Button>
       </div>
+      <div className="h-16 w-full shrink-0 lg:hidden" aria-hidden="true" />
     </div>
   )
 }
