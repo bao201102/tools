@@ -21,6 +21,7 @@ const PocoGeneratorPage = lazy(() => import('./pages/PocoGeneratorPage'))
 const SqlToPocoPage = lazy(() => import('./pages/SqlToPocoPage'))
 const JwtDecoderPage = lazy(() => import('./pages/JwtDecoderPage'))
 const MarkdownPreviewPage = lazy(() => import('./pages/MarkdownPreviewPage'))
+const LetterCountPage = lazy(() => import('./pages/LetterCountPage'))
 
 export default function App() {
   return (
@@ -51,6 +52,7 @@ export default function App() {
           <Route path="sql-to-csharp" element={<SqlToPocoPage />} />
           <Route path="jwt-decoder" element={<JwtDecoderPage />} />
           <Route path="markdown-preview" element={<MarkdownPreviewPage />} />
+          <Route path="letter-count" element={<LetterCountPage />} />
         </Route>
       </Routes>
     </Suspense>

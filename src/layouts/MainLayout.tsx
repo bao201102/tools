@@ -27,6 +27,7 @@ const navGroups: NavGroup[] = [
       { kind: 'internal', to: '/json-escape', labelKey: 'nav.item.jsonEscape' },
       { kind: 'internal', to: '/json-unescape', labelKey: 'nav.item.jsonUnescape' },
       { kind: 'internal', to: '/markdown-preview', labelKey: 'nav.item.markdownPreview' },
+      { kind: 'internal', to: '/letter-count', labelKey: 'nav.item.letterCount' },
     ],
   },
   {
