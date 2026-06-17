@@ -134,7 +134,7 @@ export function DiffCheckerEditor() {
 
   // Display options (persisted)
   const [hideUnchanged, setHideUnchanged] = useLocalStorageState('diff-checker:hideUnchanged', true)
-  const [ignoreWhitespace, setIgnoreWhitespace] = useLocalStorageState('diff-checker:ignoreWhitespace', false)
+  const [ignoreWhitespace, setIgnoreWhitespace] = useLocalStorageState('diff-checker:ignoreWhitespace', true)
 
   // For adaptive height: track content lengths without causing Monaco model resets.
   // This state may update every keystroke, but it ONLY changes the container height —
