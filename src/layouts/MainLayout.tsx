@@ -179,9 +179,10 @@ export default function MainLayout() {
   const lastPathRef = useRef(location.pathname)
   const [isFullWidth, setIsFullWidth] = useState(() => {
     try {
-      return localStorage.getItem('isFullWidth') === 'true'
+      const saved = localStorage.getItem('isFullWidth')
+      return saved !== 'false'
     } catch {
-      return false
+      return true
     }
   })
 
