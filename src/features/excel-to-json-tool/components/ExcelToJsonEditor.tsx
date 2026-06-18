@@ -5,7 +5,7 @@ import { useLocale } from '../../../lib/i18n'
 import { useAdaptiveEditorHeight } from '../../../lib/useAdaptiveEditorHeight'
 import { useMonacoEditorTheme } from '../../../lib/useMonacoEditorTheme'
 import { useExcelToJson } from '../hooks/useExcelToJson'
-import { Button } from '../../../components/ui'
+import { Button, CopyButton } from '../../../components/ui'
 
 const editorOptions = {
   minimap: { enabled: false },
@@ -80,21 +80,9 @@ export function ExcelToJsonEditor() {
   } = useExcelToJson()
 
   const fileInputRef = useRef<HTMLInputElement>(null)
-  const [copyState, setCopyState] = useState<'idle' | 'copied' | 'failed'>('idle')
   const [isDragOver, setIsDragOver] = useState(false)
 
   const editorHeight = useAdaptiveEditorHeight(pastedText, output)
-
-  const handleCopy = useCallback(async () => {
-    if (!output) return
-    try {
-      await navigator.clipboard.writeText(output)
-      setCopyState('copied')
-    } catch {
-      setCopyState('failed')
-    }
-    window.setTimeout(() => setCopyState('idle'), 2000)
-  }, [output])
 
   const handleDownload = useCallback(() => {
     if (!output) return
@@ -126,9 +114,6 @@ export function ExcelToJsonEditor() {
       handleFileUpload(file)
     }
   }, [handleFileUpload])
-
-  const copyLabel =
-    copyState === 'copied' ? t('common.copied') : copyState === 'failed' ? t('common.failed') : t('common.copy')
 
   return (
     <div className="mx-auto flex min-h-0 w-full max-w-[1300px] flex-1 flex-col gap-4 px-4 pt-4 pb-20 sm:p-6 lg:p-8">
@@ -225,9 +210,7 @@ export function ExcelToJsonEditor() {
               {t('tool.excelToJson.jsonOutput')}
             </span>
             <div className="flex gap-2">
-              <Button onClick={handleCopy} disabled={!output} size="sm">
-                {copyLabel}
-              </Button>
+              <CopyButton value={() => output} disabled={!output} />
               <Button onClick={handleDownload} disabled={!output} size="sm">
                 {t('tool.excelToJson.download')}
               </Button>

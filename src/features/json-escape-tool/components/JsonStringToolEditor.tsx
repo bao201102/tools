@@ -1,10 +1,10 @@
 import Editor from '@monaco-editor/react'
-import { useCallback, useMemo, useState } from 'react'
+import { useMemo } from 'react'
 import { useLocale, type TranslationKey } from '../../../lib/i18n'
 import { useAdaptiveEditorHeight } from '../../../lib/useAdaptiveEditorHeight'
 import { useMonacoEditorTheme } from '../../../lib/useMonacoEditorTheme'
 import { ERROR_PANEL_PREFIX } from '../constants'
-import { Button } from '../../../components/ui'
+import { Button, CopyButton } from '../../../components/ui'
 
 const editorOptions = {
   minimap: { enabled: false },
@@ -82,7 +82,6 @@ export function JsonStringToolEditor({
   outputLanguage,
 }: JsonStringToolEditorProps) {
   const { t } = useLocale()
-  const [copyState, setCopyState] = useState<'idle' | 'copied' | 'failed'>('idle')
   const editorHeight = useAdaptiveEditorHeight(input, output)
 
   const resolvedOutputLanguage: MonacoLang = useMemo(() => {
@@ -90,24 +89,7 @@ export function JsonStringToolEditor({
     return outputLanguage
   }, [output, outputLanguage])
 
-  const copyOutput = useCallback(async () => {
-    if (!output || output.startsWith(ERROR_PANEL_PREFIX)) return
-    try {
-      await navigator.clipboard.writeText(output)
-      setCopyState('copied')
-    } catch {
-      setCopyState('failed')
-    }
-    window.setTimeout(() => setCopyState('idle'), 2000)
-  }, [output])
-
-  const copyLabel =
-    copyState === 'copied'
-      ? t('common.copied')
-      : copyState === 'failed'
-        ? t('common.failed')
-        : t(copyOutputKey)
-
+  const canCopy = Boolean(output) && !output.startsWith(ERROR_PANEL_PREFIX)
   const outputPlaceholder = outputPlaceholderKey ? t(outputPlaceholderKey) : undefined
   const showOutputEditor = Boolean(output) || !outputPlaceholder
 
@@ -140,9 +122,7 @@ export function JsonStringToolEditor({
             <span id="json-tool-output-label" className="text-sm font-medium text-ink">
               {t(outputLabelKey)}
             </span>
-            <Button onClick={copyOutput} disabled={!output || output.startsWith(ERROR_PANEL_PREFIX)} size="sm">
-              {copyLabel}
-            </Button>
+            <CopyButton value={() => output} label={t(copyOutputKey)} disabled={!canCopy} />
           </div>
           <div className="relative h-full overflow-hidden rounded-lg border border-hairline shadow-sm">
             {showOutputEditor ? (

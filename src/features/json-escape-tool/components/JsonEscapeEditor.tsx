@@ -1,10 +1,9 @@
 import Editor from '@monaco-editor/react'
-import { useCallback, useState } from 'react'
 import { useLocale } from '../../../lib/i18n'
 import { useAdaptiveEditorHeight } from '../../../lib/useAdaptiveEditorHeight'
 import { useMonacoEditorTheme } from '../../../lib/useMonacoEditorTheme'
 import { useTextEscape } from '../hooks/useTextEscape'
-import { Button } from '../../../components/ui'
+import { Button, CopyButton } from '../../../components/ui'
 
 const editorOptions = {
   minimap: { enabled: false },
@@ -75,27 +74,8 @@ export function JsonEscapeEditor() {
   } = useTextEscape()
 
   const editorHeight = useAdaptiveEditorHeight(input, output)
-  const [copyOutputState, setCopyOutputState] = useState<'idle' | 'copied' | 'failed'>('idle')
 
   const charCount = input.length
-
-  const copyText = useCallback(async (text: string, setState: (s: 'idle' | 'copied' | 'failed') => void) => {
-    if (!text) return
-    try {
-      await navigator.clipboard.writeText(text)
-      setState('copied')
-    } catch {
-      setState('failed')
-    }
-    window.setTimeout(() => setState('idle'), 2000)
-  }, [])
-
-  const copyOutputLabel =
-    copyOutputState === 'copied'
-      ? t('common.copied')
-      : copyOutputState === 'failed'
-        ? t('common.failed')
-        : t('tool.jsonEscape.copyOutput')
 
   const statsText =
     stats &&
@@ -139,9 +119,7 @@ export function JsonEscapeEditor() {
             <span id="json-escape-output-label" className="text-sm font-medium text-ink">
               {t('tool.jsonEscape.output')}
             </span>
-            <Button onClick={() => copyText(output, setCopyOutputState)} disabled={!output} size="sm">
-              {copyOutputLabel}
-            </Button>
+            <CopyButton value={() => output} label={t('tool.jsonEscape.copyOutput')} disabled={!output} />
           </div>
           <div className="relative h-full overflow-hidden rounded-lg border border-hairline shadow-sm">
             <EscapeMonacoPane labelId="json-escape-output-label" value={output} readOnly />

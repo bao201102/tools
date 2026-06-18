@@ -1,10 +1,10 @@
 import Editor from '@monaco-editor/react'
-import { useCallback, useState } from 'react'
+import { useCallback } from 'react'
 import { useLocale } from '../../../lib/i18n'
 import { useAdaptiveEditorHeight } from '../../../lib/useAdaptiveEditorHeight'
 import { useMonacoEditorTheme } from '../../../lib/useMonacoEditorTheme'
 import { useJsonToYaml } from '../hooks/useJsonToYaml'
-import { Button } from '../../../components/ui'
+import { Button, CopyButton } from '../../../components/ui'
 
 const editorOptions = {
   minimap: { enabled: false },
@@ -70,18 +70,6 @@ export function JsonToYamlEditor() {
   const { t } = useLocale()
   const { input, output, error, onInputChange, clear } = useJsonToYaml()
   const editorHeight = useAdaptiveEditorHeight(input, output)
-  const [copyState, setCopyState] = useState<'idle' | 'copied' | 'failed'>('idle')
-
-  const handleCopy = useCallback(async () => {
-    if (!output) return
-    try {
-      await navigator.clipboard.writeText(output)
-      setCopyState('copied')
-    } catch {
-      setCopyState('failed')
-    }
-    window.setTimeout(() => setCopyState('idle'), 2000)
-  }, [output])
 
   const handleLoadExample = useCallback(() => {
     const exampleJson = {
@@ -97,9 +85,6 @@ export function JsonToYamlEditor() {
     }
     onInputChange(JSON.stringify(exampleJson, null, 2))
   }, [onInputChange])
-
-  const copyLabel =
-    copyState === 'copied' ? t('common.copied') : copyState === 'failed' ? t('common.failed') : t('common.copy')
 
   return (
     <div className="mx-auto flex min-h-0 w-full max-w-[1300px] flex-1 flex-col gap-4 px-4 pt-4 pb-20 sm:p-6 lg:p-8">
@@ -147,13 +132,7 @@ export function JsonToYamlEditor() {
             <span id="yaml-output-label" className="shrink-0 text-sm font-medium text-ink">
               {t('common.output')}
             </span>
-            <Button
-              onClick={handleCopy}
-              disabled={!output}
-              size="sm"
-            >
-              {copyLabel}
-            </Button>
+            <CopyButton value={() => output} disabled={!output} />
           </div>
           <div className="relative h-full overflow-hidden rounded-lg border border-hairline shadow-sm">
             <YamlMonacoPane labelId="yaml-output-label" value={output} readOnly />

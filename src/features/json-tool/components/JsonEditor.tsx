@@ -1,5 +1,6 @@
 import Editor from '@monaco-editor/react'
 import { useCallback, useEffect, useMemo, useState, useRef } from 'react'
+import { ChevronDown, ChevronRight, AlertCircle, CheckCircle2, Info } from 'lucide-react'
 import { useLocalStorageState } from '../../../lib/useLocalStorageState'
 import { useLocale } from '../../../lib/i18n'
 import {
@@ -7,7 +8,7 @@ import {
   useAdaptiveEditorHeight,
 } from '../../../lib/useAdaptiveEditorHeight'
 import { useMonacoEditorTheme } from '../../../lib/useMonacoEditorTheme'
-import { Button, Input } from '../../../components/ui'
+import { Button, Input, CopyButton } from '../../../components/ui'
 import { usePageTitle } from '../../../lib/usePageTitle'
 
 const editorOptions = {
@@ -168,9 +169,15 @@ function JsonTreeView({ data }: { data: any }) {
             {!isEmpty && (
               <button
                 onClick={() => togglePath(path)}
+                aria-expanded={isExpanded}
+                aria-label={isExpanded ? t('tool.json.tree.collapse') : t('tool.json.tree.expand')}
                 className="flex-shrink-0 w-4 h-4 flex items-center justify-center text-ink-muted hover:text-ink outline-none focus-visible:ds-focus-ring rounded-sm"
               >
-                {isExpanded ? '▼' : '▶'}
+                {isExpanded ? (
+                  <ChevronDown className="h-3.5 w-3.5" aria-hidden />
+                ) : (
+                  <ChevronRight className="h-3.5 w-3.5" aria-hidden />
+                )}
               </button>
             )}
             {isEmpty && <span className="w-4" />}
@@ -258,7 +265,6 @@ export function JsonEditor() {
   const [output, setOutput] = useState('')
   const [error, setError] = useState<string | null>(null)
   const [stats, setStats] = useState<JsonStats>({ size: 0, keys: 0, depth: 0, objects: 0, arrays: 0 })
-  const [copyState, setCopyState] = useState<'idle' | 'copied'>('idle')
   const [viewMode, setViewMode] = useState<ViewMode>('editor')
   const [parsedData, setParsedData] = useState<any>(null)
 
@@ -441,17 +447,6 @@ export function JsonEditor() {
       // Already has error
     }
   }, [])
-
-  const handleCopy = useCallback(async () => {
-    if (!output) return
-    try {
-      await navigator.clipboard.writeText(output)
-      setCopyState('copied')
-      setTimeout(() => setCopyState('idle'), 2000)
-    } catch {
-      // Ignore
-    }
-  }, [output])
 
   const handleLoadSample = useCallback(() => {
     const sample = {
@@ -674,14 +669,7 @@ export function JsonEditor() {
               </Button>
             </div>
             {viewMode === 'editor' && (
-              <Button
-                variant="secondary"
-                size="sm"
-                onClick={handleCopy}
-                disabled={!output}
-              >
-                {copyState === 'copied' ? t('common.copied') + '!' : t('common.copy')}
-              </Button>
+              <CopyButton value={() => output} disabled={!output} />
             )}
           </div>
           <div
@@ -757,17 +745,13 @@ export function JsonEditor() {
           }`}
       >
         {error ? (
-          <div className="flex items-center gap-2">
-            <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
-            <span>Error: {error}</span>
+          <div className="flex items-center gap-2" role="alert">
+            <AlertCircle className="h-5 w-5 shrink-0" aria-hidden />
+            <span>{t('common.error')}: {error}</span>
           </div>
         ) : output ? (
           <div className="flex items-center gap-2">
-            <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
+            <CheckCircle2 className="h-5 w-5 shrink-0" aria-hidden />
             <span>
               {t('tool.json.stats', {
                 size: formatBytes(stats.size),
@@ -780,9 +764,7 @@ export function JsonEditor() {
           </div>
         ) : (
           <div className="flex items-center gap-2">
-            <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
+            <Info className="h-5 w-5 shrink-0" aria-hidden />
             <span>{t('tool.json.pasteToStart')}</span>
           </div>
         )}
@@ -867,19 +849,7 @@ export function JsonEditor() {
         <div className="shrink-0 pb-12">
           <div className="flex items-center justify-between mb-2">
             <h3 className="text-sm font-medium text-ink">{t('tool.json.extractedOutput')}</h3>
-            <Button
-              variant="secondary"
-              size="sm"
-              onClick={async () => {
-                try {
-                  await navigator.clipboard.writeText(extractedOutput)
-                } catch {
-                  // Ignore
-                }
-              }}
-            >
-              {t('common.copy')}
-            </Button>
+            <CopyButton value={() => extractedOutput} />
           </div>
           <div className="relative h-[300px] overflow-hidden rounded-lg border border-hairline shadow-sm">
             <Editor

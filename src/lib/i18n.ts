@@ -64,7 +64,13 @@ export const translations = {
     'common.input': 'Input',
     'common.output': 'Output',
     'common.swap': 'Swap',
+    'common.error': 'Error',
+    'common.download': 'Download',
+    'common.jsonOutput': 'JSON Output',
+    'common.csvOutput': 'CSV Output',
     'common.loadingEditor': 'Loading editor…',
+    'tool.json.tree.expand': 'Expand',
+    'tool.json.tree.collapse': 'Collapse',
 
     // Home page
     'home.title': 'NUB Portal',
@@ -415,7 +421,13 @@ export const translations = {
     'common.input': 'Dữ liệu nguồn',
     'common.output': 'Kết quả đầu ra',
     'common.swap': 'Hoán đổi',
+    'common.error': 'Lỗi',
+    'common.download': 'Tải xuống',
+    'common.jsonOutput': 'Kết quả JSON',
+    'common.csvOutput': 'Kết quả CSV',
     'common.loadingEditor': 'Đang tải trình soạn thảo…',
+    'tool.json.tree.expand': 'Mở rộng',
+    'tool.json.tree.collapse': 'Thu gọn',
 
     // Home page
     'home.title': 'NUB Portal',

@@ -1,10 +1,10 @@
 import Editor from '@monaco-editor/react'
-import { useCallback, useState } from 'react'
+import { useCallback } from 'react'
 import { useLocale } from '../../../lib/i18n'
 import { useAdaptiveEditorHeight } from '../../../lib/useAdaptiveEditorHeight'
 import { useMonacoEditorTheme } from '../../../lib/useMonacoEditorTheme'
 import { useJsonToCsv } from '../hooks/useJsonToCsv'
-import { Button } from '../../../components/ui'
+import { Button, CopyButton } from '../../../components/ui'
 
 const editorOptions = {
   minimap: { enabled: false },
@@ -83,19 +83,6 @@ export function JsonToCsvEditor() {
   } = useJsonToCsv()
   
   const editorHeight = useAdaptiveEditorHeight(input, output)
-  const [copyState, setCopyState] = useState<'idle' | 'copied' | 'failed'>('idle')
-
-  const handleCopy = useCallback(async () => {
-    if (!output) return
-    try {
-      await navigator.clipboard.writeText(output)
-      setCopyState('copied')
-    } catch {
-      setCopyState('failed')
-    }
-    window.setTimeout(() => setCopyState('idle'), 2000)
-  }, [output])
-
   const handleDownload = useCallback(() => {
     if (!output) return
     const blob = new Blob([output], { type: 'text/csv;charset=utf-8;' })
@@ -118,8 +105,6 @@ export function JsonToCsvEditor() {
     onInputChange(JSON.stringify(exampleJson, null, 2))
   }, [onInputChange])
 
-  const copyLabel =
-    copyState === 'copied' ? t('common.copied') : copyState === 'failed' ? t('common.failed') : t('common.copy')
 
   return (
     <div className="mx-auto flex min-h-0 w-full max-w-[1300px] flex-1 flex-col gap-4 px-4 pt-4 pb-20 sm:p-6 lg:p-8">
@@ -196,22 +181,16 @@ export function JsonToCsvEditor() {
         <div className="flex min-h-0 flex-1 flex-col gap-2" style={{ height: editorHeight }}>
           <div className="flex items-center justify-between">
             <span id="csv-output-label" className="shrink-0 text-sm font-medium text-ink">
-              CSV Output
+              {t('common.csvOutput')}
             </span>
             <div className="flex gap-2">
-              <Button
-                onClick={handleCopy}
-                disabled={!output}
-                size="sm"
-              >
-                {copyLabel}
-              </Button>
+              <CopyButton value={() => output} disabled={!output} />
               <Button
                 onClick={handleDownload}
                 disabled={!output}
                 size="sm"
               >
-                Download
+                {t('common.download')}
               </Button>
             </div>
           </div>

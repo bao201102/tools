@@ -1,8 +1,7 @@
-import { useCallback, useState } from 'react'
 import { useAdaptiveEditorHeight } from '../../../lib/useAdaptiveEditorHeight'
 import { useLocale } from '../../../lib/i18n'
 import { useEncoder } from '../hooks/useEncoder'
-import { Button, Textarea } from '../../../components/ui'
+import { Button, Textarea, CopyButton } from '../../../components/ui'
 import { usePageTitle } from '../../../lib/usePageTitle'
 
 export function EncoderEditor() {
@@ -10,18 +9,6 @@ export function EncoderEditor() {
   usePageTitle('tool.encoder.title')
   const { input, output, error, mode, direction, setInput, setMode, setDirection, clear, swap } = useEncoder()
   const editorHeight = useAdaptiveEditorHeight(input, output)
-  const [copyState, setCopyState] = useState<'idle' | 'copied'>('idle')
-
-  const handleCopy = useCallback(async () => {
-    if (!output) return
-    try {
-      await navigator.clipboard.writeText(output)
-      setCopyState('copied')
-      setTimeout(() => setCopyState('idle'), 2000)
-    } catch {
-      // Ignore
-    }
-  }, [output])
 
   return (
     <div className="mx-auto flex min-h-0 w-full max-w-[1300px] flex-1 flex-col gap-4 px-4 pt-4 pb-20 sm:p-6 lg:p-8">
@@ -89,14 +76,7 @@ export function EncoderEditor() {
             <label htmlFor="encoder-output" className="text-sm font-medium text-ink">
               {t('common.output')}
             </label>
-            <Button
-              variant="secondary"
-              size="sm"
-              onClick={handleCopy}
-              disabled={!output}
-            >
-              {copyState === 'copied' ? t('common.copied') + '!' : t('common.copy')}
-            </Button>
+            <CopyButton value={() => output} disabled={!output} />
           </div>
           <Textarea
             id="encoder-output"

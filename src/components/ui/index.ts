@@ -1,4 +1,5 @@
 export { Button, type ButtonVariant } from './Button'
 export { Card } from './Card'
+export { CopyButton } from './CopyButton'
 export { Input } from './Input'
 export { Textarea } from './Textarea'

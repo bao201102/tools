@@ -1,10 +1,9 @@
 import Editor from '@monaco-editor/react'
-import { useCallback, useState } from 'react'
 import { useLocale } from '../../../lib/i18n'
 import { useAdaptiveEditorHeight } from '../../../lib/useAdaptiveEditorHeight'
 import { useMonacoEditorTheme } from '../../../lib/useMonacoEditorTheme'
 import { useCsharpProto } from '../hooks/useCsharpProto'
-import { Button, Input } from '../../../components/ui'
+import { Button, Input, CopyButton } from '../../../components/ui'
 
 const editorOptions = {
   minimap: { enabled: false },
@@ -64,18 +63,6 @@ export function CsharpProtoEditor() {
   const { t } = useLocale()
   const { input, setInput, output, startNumber, setStartNumber, clear } = useCsharpProto()
   const editorHeight = useAdaptiveEditorHeight(input, output)
-  const [copyState, setCopyState] = useState<'idle' | 'copied' | 'failed'>('idle')
-
-  const handleCopyOutput = useCallback(async () => {
-    if (!output) return
-    try {
-      await navigator.clipboard.writeText(output)
-      setCopyState('copied')
-    } catch {
-      setCopyState('failed')
-    }
-    window.setTimeout(() => setCopyState('idle'), 2000)
-  }, [output])
 
   return (
     <div className="mx-auto flex min-h-0 w-full max-w-[1300px] flex-1 flex-col gap-4 px-4 pt-4 pb-20 sm:p-6 lg:p-8">
@@ -128,14 +115,7 @@ export function CsharpProtoEditor() {
             <span id="csharp-proto-output-label" className="text-sm font-medium text-ink">
               {t('common.output')}
             </span>
-            <Button
-              variant="secondary"
-              size="sm"
-              onClick={handleCopyOutput}
-              disabled={!output}
-            >
-              {copyState === 'copied' ? t('common.copied') + '!' : copyState === 'failed' ? t('common.failed') : t('common.copy')}
-            </Button>
+            <CopyButton value={() => output} disabled={!output} />
           </div>
           <div className="relative h-full overflow-hidden rounded-lg border border-hairline shadow-sm bg-surface-1">
             <CsharpMonacoPane labelId="csharp-proto-output-label" value={output} readOnly />

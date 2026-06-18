@@ -1,10 +1,9 @@
 import Editor from '@monaco-editor/react'
-import { useCallback, useState } from 'react'
 import { useLocale } from '../../../lib/i18n'
 import { useAdaptiveEditorHeight } from '../../../lib/useAdaptiveEditorHeight'
 import { useMonacoEditorTheme } from '../../../lib/useMonacoEditorTheme'
 import { usePocoGenerator } from '../hooks/usePocoGenerator'
-import { Button, Input } from '../../../components/ui'
+import { Button, Input, CopyButton } from '../../../components/ui'
 
 const editorOptions = {
   minimap: { enabled: false },
@@ -72,18 +71,6 @@ export function PocoGeneratorEditor() {
   const { t } = useLocale()
   const { input, setInput, output, error, rootClassName, setRootClassName, clear } = usePocoGenerator()
   const editorHeight = useAdaptiveEditorHeight(input, output)
-  const [copyState, setCopyState] = useState<'idle' | 'copied' | 'failed'>('idle')
-
-  const handleCopy = useCallback(async () => {
-    if (!output) return
-    try {
-      await navigator.clipboard.writeText(output)
-      setCopyState('copied')
-    } catch {
-      setCopyState('failed')
-    }
-    window.setTimeout(() => setCopyState('idle'), 2000)
-  }, [output])
 
   return (
     <div className="mx-auto flex min-h-0 w-full max-w-[1300px] flex-1 flex-col gap-4 px-4 pt-4 pb-20 sm:p-6 lg:p-8">
@@ -144,14 +131,7 @@ export function PocoGeneratorEditor() {
             <span id="poco-output-label" className="text-sm font-medium text-ink">
               {t('tool.poco.generatedCsharp')}
             </span>
-            <Button
-              variant="secondary"
-              size="sm"
-              onClick={handleCopy}
-              disabled={!output}
-            >
-              {copyState === 'copied' ? t('common.copied') + '!' : copyState === 'failed' ? t('common.failed') : t('common.copy')}
-            </Button>
+            <CopyButton value={() => output} disabled={!output} />
           </div>
           <div className="relative h-full overflow-hidden rounded-lg border border-hairline shadow-sm bg-surface-1">
             <EditorPane labelId="poco-output-label" language="csharp" value={output} readOnly />

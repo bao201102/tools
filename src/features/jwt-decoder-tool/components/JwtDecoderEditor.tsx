@@ -1,8 +1,7 @@
-import { useCallback, useState } from 'react'
 import { useAdaptiveEditorHeight } from '../../../lib/useAdaptiveEditorHeight'
 import { useLocale } from '../../../lib/i18n'
 import { useJwtDecoder } from '../hooks/useJwtDecoder'
-import { Button, Textarea } from '../../../components/ui'
+import { Button, Textarea, CopyButton } from '../../../components/ui'
 import { usePageTitle } from '../../../lib/usePageTitle'
 import { CheckCircle, AlertCircle, Clock, Calendar } from 'lucide-react'
 
@@ -11,10 +10,9 @@ type OutputPaneProps = {
   label: string
   value: string
   copyLabel: string
-  onCopy: () => void
 }
 
-function OutputPane({ id, label, value, copyLabel, onCopy }: OutputPaneProps) {
+function OutputPane({ id, label, value, copyLabel }: OutputPaneProps) {
   const { t } = useLocale()
   return (
     <div className="flex min-h-0 flex-1 flex-col gap-2">
@@ -22,9 +20,7 @@ function OutputPane({ id, label, value, copyLabel, onCopy }: OutputPaneProps) {
         <label htmlFor={id} className="text-sm font-medium text-ink">
           {label}
         </label>
-        <Button onClick={onCopy} disabled={!value} size="sm">
-          {copyLabel}
-        </Button>
+        <CopyButton value={() => value} label={copyLabel} disabled={!value} />
       </div>
       <Textarea
         id={id}
@@ -38,8 +34,6 @@ function OutputPane({ id, label, value, copyLabel, onCopy }: OutputPaneProps) {
   )
 }
 
-type CopyState = 'idle' | 'copied' | 'failed'
-
 function formatDate(date: Date): string {
   return date.toLocaleString(undefined, {
     year: 'numeric', month: 'short', day: 'numeric',
@@ -52,44 +46,6 @@ export function JwtDecoderEditor() {
   usePageTitle('tool.jwt.title')
   const { input, setInput, headerOutput, payloadOutput, error, tokenInfo, clear } = useJwtDecoder()
   const editorHeight = useAdaptiveEditorHeight(headerOutput, payloadOutput)
-  const [copyHeaderState, setCopyHeaderState] = useState<CopyState>('idle')
-  const [copyPayloadState, setCopyPayloadState] = useState<CopyState>('idle')
-
-  const handleCopyHeader = useCallback(async () => {
-    if (!headerOutput) return
-    try {
-      await navigator.clipboard.writeText(headerOutput)
-      setCopyHeaderState('copied')
-    } catch {
-      setCopyHeaderState('failed')
-    }
-    window.setTimeout(() => setCopyHeaderState('idle'), 2000)
-  }, [headerOutput])
-
-  const handleCopyPayload = useCallback(async () => {
-    if (!payloadOutput) return
-    try {
-      await navigator.clipboard.writeText(payloadOutput)
-      setCopyPayloadState('copied')
-    } catch {
-      setCopyPayloadState('failed')
-    }
-    window.setTimeout(() => setCopyPayloadState('idle'), 2000)
-  }, [payloadOutput])
-
-  const copyHeaderLabel =
-    copyHeaderState === 'copied'
-      ? t('common.copied')
-      : copyHeaderState === 'failed'
-        ? t('common.failed')
-        : t('tool.jwt.copyHeader')
-
-  const copyPayloadLabel =
-    copyPayloadState === 'copied'
-      ? t('common.copied')
-      : copyPayloadState === 'failed'
-        ? t('common.failed')
-        : t('tool.jwt.copyPayload')
 
   return (
     <div className="mx-auto flex w-full max-w-[1300px] flex-col gap-4 px-4 pt-4 pb-20 sm:p-6 lg:p-8">
@@ -175,15 +131,13 @@ export function JwtDecoderEditor() {
           id="jwt-header-output"
           label={t('tool.jwt.header')}
           value={headerOutput}
-          copyLabel={copyHeaderLabel}
-          onCopy={handleCopyHeader}
+          copyLabel={t('tool.jwt.copyHeader')}
         />
         <OutputPane
           id="jwt-payload-output"
           label={t('tool.jwt.payload')}
           value={payloadOutput}
-          copyLabel={copyPayloadLabel}
-          onCopy={handleCopyPayload}
+          copyLabel={t('tool.jwt.copyPayload')}
         />
       </div>
 
