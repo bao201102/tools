@@ -69,7 +69,7 @@ function MonacoPane({
 }
 
 export function JsonToExcelEditor() {
-  const { t, locale } = useLocale()
+  const { t } = useLocale()
   const {
     input,
     setInput,
@@ -86,7 +86,6 @@ export function JsonToExcelEditor() {
     clear,
   } = useJsonToExcel()
 
-  const isVi = locale === 'vi'
   const editorHeight = useAdaptiveEditorHeight(input, previewRows.length > 0 ? 'rows' : '')
 
   const handleLoadExample = useCallback(() => {
@@ -143,14 +142,12 @@ export function JsonToExcelEditor() {
         </p>
       ) : null}
 
-      <div
-        className="grid min-h-0 shrink-0 grid-cols-1 gap-4 w-full lg:grid-cols-2 lg:gap-6"
-      >
+      <div className="grid min-h-0 shrink-0 grid-cols-1 gap-4 w-full lg:grid-cols-2 lg:gap-6">
         {/* Left column - JSON Input */}
         <div className="flex min-h-0 flex-1 flex-col gap-2" style={{ height: editorHeight }}>
           <div className="flex items-center justify-between">
             <span id="json-input-label" className="shrink-0 text-sm font-medium text-ink">
-              JSON Input (array of objects)
+              {t('tool.jsonToExcel.jsonInputLabel')}
             </span>
             <Button
               onClick={handleLoadExample}
@@ -176,7 +173,7 @@ export function JsonToExcelEditor() {
         <div className="flex min-h-0 flex-1 flex-col gap-2" style={{ height: editorHeight }}>
           <div className="flex items-center justify-between">
             <span id="excel-preview-label" className="shrink-0 text-sm font-medium text-ink">
-              {isVi ? 'Xem trước (5 dòng đầu)' : 'Preview (first 5 rows)'}
+              {t('tool.jsonToExcel.previewLabel')}
             </span>
           </div>
           <div className="relative h-full overflow-hidden rounded-lg border border-hairline shadow-sm bg-surface-1">
@@ -223,7 +220,7 @@ export function JsonToExcelEditor() {
               </div>
             ) : (
               <div className="flex h-full items-center justify-center text-sm text-ink-muted">
-                {isVi ? 'Nhấp vào "Xem trước" để cấu trúc bảng' : 'Click "Preview" to see table structure'}
+                {t('tool.jsonToExcel.previewPlaceholder')}
               </div>
             )}
           </div>
@@ -234,7 +231,7 @@ export function JsonToExcelEditor() {
       <div className="flex shrink-0 flex-wrap items-center gap-4 rounded-lg border border-hairline bg-surface-2 p-3 px-4 text-sm text-ink">
         <div className="flex items-center gap-2">
           <label htmlFor="sheet-name" className="font-medium text-ink-muted">
-            {isVi ? 'Tên sheet:' : 'Sheet name:'}
+            {t('tool.jsonToExcel.sheetName')}
           </label>
           <input
             id="sheet-name"
@@ -252,7 +249,7 @@ export function JsonToExcelEditor() {
             onChange={(e) => setFlatten(e.target.checked)}
             className="h-4 w-4 rounded border-hairline text-primary focus:ring-primary/30 cursor-pointer"
           />
-          {isVi ? 'Làm phẳng các đối tượng lồng nhau' : 'Flatten nested objects'}
+          {t('tool.jsonToExcel.flattenNested')}
         </label>
 
         <div className="flex gap-2 sm:ml-auto">
@@ -261,14 +258,14 @@ export function JsonToExcelEditor() {
             onClick={generatePreview}
             disabled={!input}
           >
-            {isVi ? 'Xem trước' : 'Preview'}
+            {t('tool.jsonToExcel.preview')}
           </Button>
           <Button
             variant="primary"
             onClick={downloadExcel}
             disabled={!input}
           >
-            {isVi ? 'Tải xuống Excel' : 'Download Excel'}
+            {t('tool.jsonToExcel.downloadExcel')}
           </Button>
         </div>
       </div>
@@ -276,11 +273,7 @@ export function JsonToExcelEditor() {
       {/* Tip box */}
       <div className="rounded-lg border border-hairline bg-surface-2 p-3 px-4 flex items-start gap-2 text-xs text-ink-muted shrink-0">
         <span>💡</span>
-        <p>
-          {isVi
-            ? 'Gợi ý: JSON của bạn nên là một mảng các đối tượng trong đó mỗi đối tượng sẽ trở thành một dòng. Các đối tượng lồng nhau sẽ được làm phẳng thành ký hiệu dấu chấm (ví dụ: address.city).'
-            : 'Tip: Your JSON should be an array of objects where each object becomes a row. Nested objects will be flattened to dot notation (e.g., address.city).'}
-        </p>
+        <p>{t('tool.jsonToExcel.tip')}</p>
       </div>
 
       <div className="flex shrink-0 flex-wrap gap-2">

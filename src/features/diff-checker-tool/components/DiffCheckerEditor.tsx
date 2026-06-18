@@ -1,11 +1,12 @@
 import { DiffEditor } from '@monaco-editor/react'
-import { useCallback, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { useLocalStorageState } from '../../../lib/useLocalStorageState'
 import { useLocale } from '../../../lib/i18n'
 import { useAdaptiveEditorHeightWithOptions } from '../../../lib/useAdaptiveEditorHeight'
 import { useMonacoEditorTheme } from '../../../lib/useMonacoEditorTheme'
 import { useDiffChecker } from '../hooks/useDiffChecker'
 import { Button, Input } from '../../../components/ui'
+import { usePageTitle } from '../../../lib/usePageTitle'
 
 type DiffLanguage =
   | 'json'
@@ -78,6 +79,7 @@ function persistLS(key: string, value: string) {
 
 export function DiffCheckerEditor() {
   const { t } = useLocale()
+  usePageTitle('tool.diff.title')
   const editorTheme = useMonacoEditorTheme()
   const { renderSideBySide, toggleView } = useDiffChecker()
 
@@ -126,6 +128,16 @@ export function DiffCheckerEditor() {
   const [splitWidths, setSplitWidths] = useState({ left: 1, right: 1 })
   const [copyOriginalState, setCopyOriginalState] = useState<'idle' | 'copied'>('idle')
   const [copyModifiedState, setCopyModifiedState] = useState<'idle' | 'copied'>('idle')
+  const copyOriginalTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const copyModifiedTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  // Cleanup copy timers on unmount
+  useEffect(() => {
+    return () => {
+      if (copyOriginalTimerRef.current) clearTimeout(copyOriginalTimerRef.current)
+      if (copyModifiedTimerRef.current) clearTimeout(copyModifiedTimerRef.current)
+    }
+  }, [])
 
   // Diff navigation
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -157,10 +169,12 @@ export function DiffCheckerEditor() {
       await navigator.clipboard.writeText(text)
       if (pane === 'original') {
         setCopyOriginalState('copied')
-        setTimeout(() => setCopyOriginalState('idle'), 2000)
+        if (copyOriginalTimerRef.current) clearTimeout(copyOriginalTimerRef.current)
+        copyOriginalTimerRef.current = setTimeout(() => setCopyOriginalState('idle'), 2000)
       } else {
         setCopyModifiedState('copied')
-        setTimeout(() => setCopyModifiedState('idle'), 2000)
+        if (copyModifiedTimerRef.current) clearTimeout(copyModifiedTimerRef.current)
+        copyModifiedTimerRef.current = setTimeout(() => setCopyModifiedState('idle'), 2000)
       }
     } catch { /* ignore */ }
   }, [])

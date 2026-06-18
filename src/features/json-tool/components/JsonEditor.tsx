@@ -8,6 +8,7 @@ import {
 } from '../../../lib/useAdaptiveEditorHeight'
 import { useMonacoEditorTheme } from '../../../lib/useMonacoEditorTheme'
 import { Button, Input } from '../../../components/ui'
+import { usePageTitle } from '../../../lib/usePageTitle'
 
 const editorOptions = {
   minimap: { enabled: false },
@@ -249,6 +250,7 @@ function JsonTreeView({ data }: { data: any }) {
 
 export function JsonEditor() {
   const { t } = useLocale()
+  usePageTitle('tool.json.title')
   const editorTheme = useMonacoEditorTheme()
 
   const [editorValue, setEditorValue] = useLocalStorageState('json:editorValue', '')

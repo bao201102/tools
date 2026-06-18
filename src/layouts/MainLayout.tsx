@@ -208,7 +208,7 @@ export default function MainLayout() {
     }
   }, [navOpen])
 
-  // Close dropdown when clicking outside
+  // Close dropdown when clicking outside or pressing Escape
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       const target = event.target as HTMLElement
@@ -217,9 +217,19 @@ export default function MainLayout() {
       }
     }
 
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        setOpenDropdown(null)
+      }
+    }
+
     if (openDropdown) {
       document.addEventListener('click', handleClickOutside)
-      return () => document.removeEventListener('click', handleClickOutside)
+      document.addEventListener('keydown', handleKeyDown)
+      return () => {
+        document.removeEventListener('click', handleClickOutside)
+        document.removeEventListener('keydown', handleKeyDown)
+      }
     }
   }, [openDropdown])
 
@@ -553,6 +563,41 @@ export default function MainLayout() {
         <main className="flex min-h-0 min-w-0 flex-1 flex-col pb-[env(safe-area-inset-bottom)]">
           <div className="flex min-h-0 h-full flex-1 flex-col overflow-y-auto bg-canvas">
             <Outlet context={{ navOpen }} />
+            <footer className="mt-auto shrink-0 border-t border-hairline/60 bg-surface-1/40 py-8 px-4 text-center backdrop-blur-md">
+              <div className="mx-auto max-w-[1300px] flex flex-col items-center justify-between gap-4 sm:flex-row text-xs text-ink-subtle">
+                <p className="font-medium">
+                  {t('footer.text')}
+                </p>
+                <div className="flex items-center gap-4">
+                  <a
+                    href="https://github.com/bao201102/tools"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="hover:text-primary transition-colors duration-250 font-medium"
+                  >
+                    GitHub
+                  </a>
+                  <span className="text-hairline" aria-hidden="true">•</span>
+                  <a
+                    href="https://gold.nub.io.vn/"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="hover:text-primary transition-colors duration-250 font-medium"
+                  >
+                    Gold Price
+                  </a>
+                  <span className="text-hairline" aria-hidden="true">•</span>
+                  <a
+                    href="https://vps-monitoring.nub.io.vn/"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="hover:text-primary transition-colors duration-250 font-medium"
+                  >
+                    VPS Monitor
+                  </a>
+                </div>
+              </div>
+            </footer>
           </div>
         </main>
       </div>

@@ -22,6 +22,7 @@ const SqlToPocoPage = lazy(() => import('./pages/SqlToPocoPage'))
 const JwtDecoderPage = lazy(() => import('./pages/JwtDecoderPage'))
 const MarkdownPreviewPage = lazy(() => import('./pages/MarkdownPreviewPage'))
 const LetterCountPage = lazy(() => import('./pages/LetterCountPage'))
+const NotFoundPage = lazy(() => import('./pages/NotFoundPage'))
 
 export default function App() {
   return (
@@ -53,6 +54,7 @@ export default function App() {
           <Route path="jwt-decoder" element={<JwtDecoderPage />} />
           <Route path="markdown-preview" element={<MarkdownPreviewPage />} />
           <Route path="letter-count" element={<LetterCountPage />} />
+          <Route path="*" element={<NotFoundPage />} />
         </Route>
       </Routes>
     </Suspense>

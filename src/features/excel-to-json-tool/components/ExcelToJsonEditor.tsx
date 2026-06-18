@@ -67,7 +67,7 @@ function MonacoPane({
 }
 
 export function ExcelToJsonEditor() {
-  const { t, locale } = useLocale()
+  const { t } = useLocale()
   const {
     output,
     error,
@@ -79,7 +79,6 @@ export function ExcelToJsonEditor() {
     clear,
   } = useExcelToJson()
 
-  const isVi = locale === 'vi'
   const fileInputRef = useRef<HTMLInputElement>(null)
   const [copyState, setCopyState] = useState<'idle' | 'copied' | 'failed'>('idle')
   const [isDragOver, setIsDragOver] = useState(false)
@@ -110,7 +109,6 @@ export function ExcelToJsonEditor() {
     document.body.removeChild(link)
   }, [output])
 
-  // Drag and drop handlers
   const handleDragOver = useCallback((e: React.DragEvent) => {
     e.preventDefault()
     setIsDragOver(true)
@@ -147,15 +145,13 @@ export function ExcelToJsonEditor() {
         </p>
       ) : null}
 
-      <div
-        className="grid min-h-0 shrink-0 grid-cols-1 gap-4 w-full lg:grid-cols-2 lg:gap-6"
-      >
+      <div className="grid min-h-0 shrink-0 grid-cols-1 gap-4 w-full lg:grid-cols-2 lg:gap-6">
         {/* Left Column - Excel Upload & Paste */}
         <div className="flex min-h-0 flex-1 flex-col gap-4" style={{ height: editorHeight }}>
           <span className="shrink-0 text-sm font-medium text-ink">
-            {isVi ? 'Tải lên hoặc Dán dữ liệu' : 'Upload or Paste Data'}
+            {t('tool.excelToJson.uploadOrPaste')}
           </span>
-          
+
           {/* File Upload Zone */}
           <div
             onDragOver={handleDragOver}
@@ -184,10 +180,10 @@ export function ExcelToJsonEditor() {
             </div>
             <div>
               <p className="text-sm font-medium text-ink">
-                {fileName ? fileName : (isVi ? 'Nhấp để tải lên tệp Excel' : 'Click to upload Excel file')}
+                {fileName ? fileName : t('tool.excelToJson.clickToUpload')}
               </p>
               <p className="text-xs text-ink-muted mt-1">
-                {fileName ? (isVi ? 'Tệp đã tải lên thành công' : 'File uploaded successfully') : 'Supports .xlsx, .xls, .csv, .tsv files'}
+                {fileName ? t('tool.excelToJson.fileUploaded') : t('tool.excelToJson.fileSupports')}
               </p>
             </div>
           </div>
@@ -198,7 +194,7 @@ export function ExcelToJsonEditor() {
               <div className="w-full border-t border-hairline"></div>
             </div>
             <div className="relative bg-canvas px-3 text-xs font-medium uppercase tracking-wider text-ink-subtle">
-              {isVi ? '— hoặc dán trực tiếp dữ liệu từ Excel —' : '— or paste data directly from Excel —'}
+              {t('tool.excelToJson.orPasteDivider')}
             </div>
           </div>
 
@@ -207,7 +203,7 @@ export function ExcelToJsonEditor() {
             <textarea
               value={pastedText}
               onChange={(e) => setPastedText(e.target.value)}
-              placeholder={isVi ? 'Sao chép các ô từ Excel và dán vào đây (Ctrl+V / Cmd+V)' : 'Copy cells from Excel and paste here (Ctrl+V / Cmd+V)'}
+              placeholder={t('tool.excelToJson.pastePlaceholder')}
               className="w-full flex-1 min-h-[120px] rounded-lg border border-hairline bg-surface-1 px-3 py-2 text-sm text-ink outline-none transition-colors hover:border-hairline-strong focus:border-hairline-strong focus:ds-focus-ring placeholder:text-ink-tertiary font-mono resize-none"
             />
             <div className="flex shrink-0">
@@ -216,7 +212,7 @@ export function ExcelToJsonEditor() {
                 disabled={!pastedText}
                 size="sm"
               >
-                {isVi ? 'Chuyển đổi dữ liệu đã dán' : 'Convert Pasted Data'}
+                {t('tool.excelToJson.convertPasted')}
               </Button>
             </div>
           </div>
@@ -226,22 +222,14 @@ export function ExcelToJsonEditor() {
         <div className="flex min-h-0 flex-1 flex-col gap-2">
           <div className="flex items-center justify-between">
             <span id="json-output-label" className="shrink-0 text-sm font-medium text-ink">
-              JSON Output
+              {t('tool.excelToJson.jsonOutput')}
             </span>
             <div className="flex gap-2">
-              <Button
-                onClick={handleCopy}
-                disabled={!output}
-                size="sm"
-              >
+              <Button onClick={handleCopy} disabled={!output} size="sm">
                 {copyLabel}
               </Button>
-              <Button
-                onClick={handleDownload}
-                disabled={!output}
-                size="sm"
-              >
-                Download
+              <Button onClick={handleDownload} disabled={!output} size="sm">
+                {t('tool.excelToJson.download')}
               </Button>
             </div>
           </div>
@@ -250,7 +238,7 @@ export function ExcelToJsonEditor() {
               <MonacoPane labelId="json-output-label" language="json" value={output} readOnly />
             ) : (
               <div className="flex h-full items-center justify-center text-sm text-ink-muted">
-                JSON output will appear here...
+                {t('tool.excelToJson.jsonOutputPlaceholder')}
               </div>
             )}
           </div>
@@ -260,11 +248,7 @@ export function ExcelToJsonEditor() {
       {/* Privacy note */}
       <div className="rounded-lg border border-hairline bg-surface-2 p-3 px-4 flex items-start gap-2 text-xs text-ink-muted shrink-0">
         <span>💡</span>
-        <p>
-          {isVi
-            ? 'Bảo mật: Tệp của bạn được xử lý hoàn toàn trong trình duyệt của bạn. Không có dữ liệu nào được tải lên máy chủ.'
-            : 'Privacy: Your file is processed entirely in your browser. No data is uploaded to any server.'}
-        </p>
+        <p>{t('tool.excelToJson.privacy')}</p>
       </div>
 
       <div className="flex shrink-0 flex-wrap gap-2">

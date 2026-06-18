@@ -3,6 +3,8 @@ import { useAdaptiveEditorHeight } from '../../../lib/useAdaptiveEditorHeight'
 import { useLocale } from '../../../lib/i18n'
 import { useJwtDecoder } from '../hooks/useJwtDecoder'
 import { Button, Textarea } from '../../../components/ui'
+import { usePageTitle } from '../../../lib/usePageTitle'
+import { CheckCircle, AlertCircle, Clock, Calendar } from 'lucide-react'
 
 type OutputPaneProps = {
   id: string
@@ -38,9 +40,17 @@ function OutputPane({ id, label, value, copyLabel, onCopy }: OutputPaneProps) {
 
 type CopyState = 'idle' | 'copied' | 'failed'
 
+function formatDate(date: Date): string {
+  return date.toLocaleString(undefined, {
+    year: 'numeric', month: 'short', day: 'numeric',
+    hour: '2-digit', minute: '2-digit', second: '2-digit',
+  })
+}
+
 export function JwtDecoderEditor() {
   const { t } = useLocale()
-  const { input, setInput, headerOutput, payloadOutput, error, clear } = useJwtDecoder()
+  usePageTitle('tool.jwt.title')
+  const { input, setInput, headerOutput, payloadOutput, error, tokenInfo, clear } = useJwtDecoder()
   const editorHeight = useAdaptiveEditorHeight(headerOutput, payloadOutput)
   const [copyHeaderState, setCopyHeaderState] = useState<CopyState>('idle')
   const [copyPayloadState, setCopyPayloadState] = useState<CopyState>('idle')
@@ -110,6 +120,52 @@ export function JwtDecoderEditor() {
           error={!!error}
         />
       </div>
+
+      {/* Token timing info panel */}
+      {tokenInfo && (
+        <div className="shrink-0 rounded-lg border border-hairline bg-surface-1 p-4 shadow-sm animate-slide-up-fade">
+          <div className="flex flex-wrap items-center gap-3">
+            {/* Expiry status badge */}
+            {tokenInfo.isExpired !== undefined && (
+              <span
+                className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold ${
+                  tokenInfo.isExpired
+                    ? 'bg-error-surface text-error-fg border border-error-border'
+                    : 'border text-semantic-success'
+                }`}
+                style={tokenInfo.isExpired ? {} : {
+                  background: 'color-mix(in srgb, var(--ds-color-semantic-success) 12%, transparent)',
+                  borderColor: 'color-mix(in srgb, var(--ds-color-semantic-success) 30%, transparent)',
+                }}
+              >
+                {tokenInfo.isExpired
+                  ? <AlertCircle className="h-3.5 w-3.5" />
+                  : <CheckCircle className="h-3.5 w-3.5" />
+                }
+                {tokenInfo.isExpired ? t('tool.jwt.expired') : t('tool.jwt.valid')}
+              </span>
+            )}
+
+            {/* Expiry date */}
+            {tokenInfo.expiresAt && (
+              <span className="inline-flex items-center gap-1.5 text-xs text-ink-muted">
+                <Clock className="h-3.5 w-3.5 shrink-0 text-ink-tertiary" />
+                <span className="font-medium text-ink-subtle">{t('tool.jwt.expiresAt')}:</span>
+                <span className="font-mono">{formatDate(tokenInfo.expiresAt)}</span>
+              </span>
+            )}
+
+            {/* Issued at */}
+            {tokenInfo.issuedAt && (
+              <span className="inline-flex items-center gap-1.5 text-xs text-ink-muted">
+                <Calendar className="h-3.5 w-3.5 shrink-0 text-ink-tertiary" />
+                <span className="font-medium text-ink-subtle">{t('tool.jwt.issuedAt')}:</span>
+                <span className="font-mono">{formatDate(tokenInfo.issuedAt)}</span>
+              </span>
+            )}
+          </div>
+        </div>
+      )}
 
       <div
         className="grid min-h-0 shrink-0 grid-cols-1 gap-4 w-full lg:grid-cols-2 lg:gap-6"

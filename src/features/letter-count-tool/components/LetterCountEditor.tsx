@@ -4,6 +4,7 @@ import { useLocale } from '../../../lib/i18n'
 import { useLocalStorageState } from '../../../lib/useLocalStorageState'
 import { Button, Textarea } from '../../../components/ui'
 import { Copy, Trash2, Sparkles, FileText, CaseSensitive, BookOpen, Volume2 } from 'lucide-react'
+import { usePageTitle } from '../../../lib/usePageTitle'
 
 // Helper functions for statistics
 const getWordCount = (str: string) => {
@@ -113,12 +114,13 @@ function DensityTable({
   data: { item: string; count: number; percentage: string }[]
   headers: { item: string; count: string; percent: string }
 }) {
+  const { t } = useLocale()
   return (
     <div className="flex-1 rounded-lg border border-hairline bg-surface-1 p-4 shadow-sm">
       <h4 className="mb-3 text-sm font-semibold text-ink">{title}</h4>
       {data.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-12 text-center">
-          <p className="text-xs text-ink-muted">No data analyzed yet</p>
+          <p className="text-xs text-ink-muted">{t('tool.letterCount.density.noData')}</p>
         </div>
       ) : (
         <div className="overflow-x-auto">
@@ -151,7 +153,8 @@ function DensityTable({
 }
 
 export function LetterCountEditor() {
-  const { t, locale } = useLocale()
+  const { t } = useLocale()
+  usePageTitle('tool.letterCount.title')
   const [input, setInput] = useLocalStorageState<string>('letter-count:input', '')
   const [copyState, setCopyState] = useState<'idle' | 'copied'>('idle')
 
@@ -330,7 +333,7 @@ export function LetterCountEditor() {
         {/* Right Column: Statistics Grid */}
         <div className="flex min-h-0 flex-1 flex-col gap-2">
           <div className="flex shrink-0 items-center h-9">
-            <h3 className="text-sm font-medium text-ink">{t('nav.group.tools')}</h3>
+            <h3 className="text-sm font-medium text-ink">{t('tool.letterCount.statsTitle')}</h3>
           </div>
           {/* Stats panel — auto height (no fixed), scrollable on overflow */}
           <div className="w-full overflow-y-auto rounded-lg border border-hairline bg-surface-2 p-3 sm:p-4 shadow-sm flex flex-col gap-4">
@@ -376,7 +379,7 @@ export function LetterCountEditor() {
                 </div>
                 <div className="min-w-0">
                   <div className="text-sm font-bold text-ink">
-                    {stats.readingTime} {locale === 'vi' ? 'phút' : 'min'}
+                    {stats.readingTime} {t('tool.letterCount.timeUnit')}
                   </div>
                   <div className="text-[10px] sm:text-xs text-ink-muted leading-tight">
                     {t('tool.letterCount.stats.readingTime')}
@@ -389,7 +392,7 @@ export function LetterCountEditor() {
                 </div>
                 <div className="min-w-0">
                   <div className="text-sm font-bold text-ink">
-                    {stats.speakingTime} {locale === 'vi' ? 'phút' : 'min'}
+                    {stats.speakingTime} {t('tool.letterCount.timeUnit')}
                   </div>
                   <div className="text-[10px] sm:text-xs text-ink-muted leading-tight">
                     {t('tool.letterCount.stats.speakingTime')}
