@@ -562,42 +562,46 @@ export default function MainLayout() {
       <div className="relative flex min-h-0 flex-1 flex-col">
         <main className="flex min-h-0 min-w-0 flex-1 flex-col pb-[env(safe-area-inset-bottom)]">
           <div className="flex min-h-0 h-full flex-1 flex-col overflow-y-auto bg-canvas">
-            <Outlet context={{ navOpen }} />
-            <footer className="mt-auto shrink-0 border-t border-hairline/60 bg-surface-1/40 py-8 px-4 text-center backdrop-blur-md">
-              <div className="mx-auto max-w-[1300px] flex flex-col items-center justify-between gap-4 sm:flex-row text-xs text-ink-subtle">
-                <p className="font-medium">
-                  {t('footer.text')}
-                </p>
-                <div className="flex items-center gap-4">
-                  <a
-                    href="https://github.com/bao201102/tools"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="hover:text-primary transition-colors duration-250 font-medium"
-                  >
-                    GitHub
-                  </a>
-                  <span className="text-hairline" aria-hidden="true">•</span>
-                  <a
-                    href="https://gold.nub.io.vn/"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="hover:text-primary transition-colors duration-250 font-medium"
-                  >
-                    Gold Price
-                  </a>
-                  <span className="text-hairline" aria-hidden="true">•</span>
-                  <a
-                    href="https://vps-monitoring.nub.io.vn/"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="hover:text-primary transition-colors duration-250 font-medium"
-                  >
-                    VPS Monitor
-                  </a>
-                </div>
+            <div className="flex flex-col min-h-full w-full">
+              <div className="flex-1 flex flex-col min-h-0 page-content-wrapper">
+                <Outlet context={{ navOpen }} />
               </div>
-            </footer>
+              <footer className="shrink-0 border-t border-hairline/60 bg-surface-1/40 py-8 px-4 text-center backdrop-blur-md">
+                <div className="mx-auto max-w-[1300px] flex flex-col items-center justify-between gap-4 sm:flex-row text-xs text-ink-subtle">
+                  <p className="font-medium">
+                    {t('footer.text')}
+                  </p>
+                  <div className="flex items-center gap-4">
+                    <a
+                      href="https://github.com/bao201102/tools"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="hover:text-primary transition-colors duration-250 font-medium"
+                    >
+                      GitHub
+                    </a>
+                    <span className="text-hairline" aria-hidden="true">•</span>
+                    <a
+                      href="https://gold.nub.io.vn/"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="hover:text-primary transition-colors duration-250 font-medium"
+                    >
+                      Gold Price
+                    </a>
+                    <span className="text-hairline" aria-hidden="true">•</span>
+                    <a
+                      href="https://vps-monitoring.nub.io.vn/"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="hover:text-primary transition-colors duration-250 font-medium"
+                    >
+                      VPS Monitor
+                    </a>
+                  </div>
+                </div>
+              </footer>
+            </div>
           </div>
         </main>
       </div>
