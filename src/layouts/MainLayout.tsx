@@ -3,7 +3,7 @@ import { NavLink, Outlet, useLocation } from 'react-router-dom'
 import {
   Maximize2, Minimize2, Braces, GitCompare, KeyRound, Code2, FileText, AlignLeft, Sigma,
   ArrowLeftRight, FileCode2, Table2, Sheet, Lock, Cpu, Database, Wrench,
-  Coins, Monitor, Workflow, ExternalLink, ChevronRight,
+  Coins, Monitor, Workflow, ExternalLink, ChevronRight, Search,
 } from 'lucide-react'
 import { cn } from '../lib/cn'
 import { useLocale, type Locale, type TranslationKey } from '../lib/i18n'
@@ -13,6 +13,7 @@ import {
   subscribeToUpdates,
 } from '../lib/versionCheck'
 import { ThemeSwitcher } from '../components/ThemeSwitcher'
+import CommandPalette, { type PaletteItem } from '../components/CommandPalette'
 
 type NavInternalItem = { kind: 'internal'; to: string; labelKey: TranslationKey; end?: boolean }
 type NavExternalItem = { kind: 'external'; href: string; labelKey: TranslationKey }
@@ -63,6 +64,18 @@ const navGroups: NavGroupWithIcon[] = [
     ],
   },
 ]
+
+const paletteItems: PaletteItem[] = navGroups.flatMap(group =>
+  group.items.map(item => ({
+    id: item.kind === 'internal' ? item.to : item.href,
+    labelKey: item.labelKey,
+    categoryKey: group.labelKey!,
+    icon: item.icon,
+    kind: item.kind,
+    to: item.kind === 'internal' ? item.to : undefined,
+    href: item.kind === 'external' ? item.href : undefined,
+  }))
+)
 
 function LogoMark() {
   return (
@@ -185,6 +198,7 @@ export default function MainLayout() {
       return true
     }
   })
+  const [paletteOpen, setPaletteOpen] = useState(false)
 
   useEffect(() => {
     try {
@@ -238,6 +252,17 @@ export default function MainLayout() {
       setUpdateAvailable(isUpdateAvailable())
       setBannerDismissed(false)
     })
+  }, [])
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+        e.preventDefault()
+        setPaletteOpen(o => !o)
+      }
+    }
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
   }, [])
 
   // Auto-reload on route change when a new build is pending. Route change is
@@ -305,6 +330,7 @@ export default function MainLayout() {
                   <div className="absolute left-1/2 top-full z-50 mt-1 max-h-[min(70vh,24rem)] w-56 -translate-x-1/2 overflow-y-auto rounded-md border border-hairline bg-surface-1 shadow-lg animate-slide-up-fade-center">
                     <div className="py-1">
                       {group.items.map((item) => {
+                        const Icon = item.icon
                         if (item.kind === 'external') {
                           return (
                             <a
@@ -312,10 +338,12 @@ export default function MainLayout() {
                               href={item.href}
                               target="_blank"
                               rel="noopener noreferrer"
-                              className="block px-4 py-2 text-sm text-ink-subtle hover:bg-surface-2 hover:text-ink"
+                              className="flex items-center gap-2.5 px-4 py-2 text-sm text-ink-subtle hover:bg-surface-2 hover:text-ink"
                               onClick={() => setOpenDropdown(null)}
                             >
-                              {t(item.labelKey)}
+                              <Icon className="h-3.5 w-3.5 shrink-0 opacity-60" />
+                              <span className="flex-1">{t(item.labelKey)}</span>
+                              <ExternalLink className="h-3 w-3 shrink-0 opacity-40" />
                             </a>
                           )
                         }
@@ -327,7 +355,7 @@ export default function MainLayout() {
                             end={item.end}
                             className={({ isActive }) =>
                               cn(
-                                'block px-4 py-2 text-sm',
+                                'flex items-center gap-2.5 px-4 py-2 text-sm',
                                 isActive
                                   ? 'bg-primary/10 text-primary font-medium'
                                   : 'text-ink-subtle hover:bg-surface-2 hover:text-ink'
@@ -335,7 +363,12 @@ export default function MainLayout() {
                             }
                             onClick={() => setOpenDropdown(null)}
                           >
-                            {t(item.labelKey)}
+                            {({ isActive }) => (
+                              <>
+                                <Icon className={cn('h-3.5 w-3.5 shrink-0', isActive ? 'opacity-80' : 'opacity-60')} />
+                                {t(item.labelKey)}
+                              </>
+                            )}
                           </NavLink>
                         )
                       })}
@@ -349,6 +382,24 @@ export default function MainLayout() {
         {/* Right side - Theme, language, GitHub & mobile menu */}
         <div className="absolute right-4 top-1/2 -translate-y-1/2 flex items-center gap-2 lg:relative lg:right-auto lg:top-auto lg:translate-y-0 lg:justify-self-end">
         <div className="hidden items-center gap-2 lg:flex">
+          {/* Command palette trigger */}
+          <button
+            type="button"
+            onClick={() => setPaletteOpen(true)}
+            aria-label={t('command.trigger')}
+            className={cn(
+              'flex h-9 items-center gap-2 rounded-md border border-hairline bg-surface-2',
+              'px-3 text-sm text-ink-subtle transition-colors',
+              'hover:bg-surface-1 hover:text-ink',
+              'outline-none focus-visible:ds-focus-ring'
+            )}
+          >
+            <Search className="h-3.5 w-3.5 shrink-0" />
+            <span className="hidden text-xs xl:inline">{t('command.trigger')}</span>
+            <kbd className="hidden items-center rounded border border-hairline bg-surface-3 px-1.5 py-0.5 font-mono text-[10px] text-ink-tertiary xl:flex">
+              ⌘K
+            </kbd>
+          </button>
           <button
             type="button"
             onClick={() => setIsFullWidth((f) => !f)}
@@ -414,6 +465,19 @@ export default function MainLayout() {
           </a>
         </div>
 
+        {/* Mobile search button */}
+        <button
+          type="button"
+          onClick={() => setPaletteOpen(true)}
+          aria-label={t('command.trigger')}
+          className={cn(
+            'flex h-10 w-10 shrink-0 items-center justify-center rounded-md border border-hairline bg-surface-1 lg:hidden',
+            'text-ink transition-colors hover:border-hairline-strong hover:bg-surface-2',
+            'outline-none focus-visible:ds-focus-ring'
+          )}
+        >
+          <Search className="h-4 w-4" />
+        </button>
         <button
           type="button"
           className={cn(
@@ -607,6 +671,12 @@ export default function MainLayout() {
       </div>
 
 
+
+      <CommandPalette
+        open={paletteOpen}
+        onClose={() => setPaletteOpen(false)}
+        items={paletteItems}
+      />
 
       {showBanner ? (
         <div

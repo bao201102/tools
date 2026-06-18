@@ -346,6 +346,15 @@ export const translations = {
     'tool.letterCount.statsTitle': 'Statistics',
     'tool.letterCount.density.noData': 'No data analyzed yet',
     'tool.letterCount.timeUnit': 'min',
+
+    // Command palette
+    'command.placeholder': 'Search tools…',
+    'command.noResults': 'No tools found',
+    'command.hint.navigate': 'navigate',
+    'command.hint.open': 'open',
+    'command.hint.close': 'close',
+    'command.trigger': 'Search',
+    'command.recent': 'Recent',
   },
   vi: {
     // Shell / navigation
@@ -690,6 +699,15 @@ export const translations = {
     'tool.letterCount.statsTitle': 'Thống kê',
     'tool.letterCount.density.noData': 'Chưa có dữ liệu để phân tích',
     'tool.letterCount.timeUnit': 'phút',
+
+    // Command palette
+    'command.placeholder': 'Tìm kiếm công cụ…',
+    'command.noResults': 'Không tìm thấy công cụ nào',
+    'command.hint.navigate': 'di chuyển',
+    'command.hint.open': 'mở',
+    'command.hint.close': 'đóng',
+    'command.trigger': 'Tìm kiếm',
+    'command.recent': 'Gần đây',
   },
 } as const satisfies Record<Locale, Record<string, string>>
 
