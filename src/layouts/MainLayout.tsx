@@ -3,7 +3,7 @@ import { NavLink, Outlet, useLocation } from 'react-router-dom'
 import {
   Maximize2, Minimize2, Braces, GitCompare, KeyRound, Code2, FileText, AlignLeft, Sigma,
   ArrowLeftRight, FileCode2, Table2, Sheet, Lock, Cpu, Database, Wrench,
-  Coins, Monitor, Workflow, ExternalLink, ChevronRight, Search,
+  Coins, Monitor, Workflow, Clipboard, ExternalLink, ChevronRight, Search,
 } from 'lucide-react'
 import { cn } from '../lib/cn'
 import { useLocale, type Locale, type TranslationKey } from '../lib/i18n'
@@ -61,6 +61,7 @@ const navGroups: NavGroupWithIcon[] = [
       { kind: 'external', href: 'https://gold.nub.io.vn/', labelKey: 'nav.item.goldPrice', icon: Coins },
       { kind: 'external', href: 'https://vps-monitoring.nub.io.vn/', labelKey: 'nav.item.vpsMonitoring', icon: Monitor },
       { kind: 'external', href: 'https://n8n.nub.io.vn/', labelKey: 'nav.item.n8n', icon: Workflow },
+      { kind: 'external', href: 'https://pastebin.nub.io.vn/', labelKey: 'nav.item.pastebin', icon: Clipboard },
     ],
   },
 ]
@@ -661,6 +662,15 @@ export default function MainLayout() {
                       className="hover:text-primary transition-colors duration-250 font-medium"
                     >
                       VPS Monitor
+                    </a>
+                    <span className="text-hairline" aria-hidden="true">•</span>
+                    <a
+                      href="https://pastebin.nub.io.vn/"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="hover:text-primary transition-colors duration-250 font-medium"
+                    >
+                      Pastebin
                     </a>
                   </div>
                 </div>

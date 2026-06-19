@@ -36,6 +36,7 @@ export const translations = {
     'nav.item.goldPrice': 'Gold Price Tracker',
     'nav.item.vpsMonitoring': 'VPS Monitoring',
     'nav.item.n8n': 'n8n Automation',
+    'nav.item.pastebin': 'Pastebin',
     'nav.item.markdownPreview': 'Markdown Preview',
     'nav.fullWidth': 'Toggle Full Width',
     'footer.text': '© 2026 NUB Portal. Made with speed & simplicity. All tools run 100% locally.',
@@ -149,6 +150,8 @@ export const translations = {
     'home.dash.vps.desc': 'Monitor VPS resources and status in real-time.',
     'home.dash.n8n.title': 'n8n Automation',
     'home.dash.n8n.desc': 'Opens the external n8n automation tool in a new tab.',
+    'home.dash.pastebin.title': 'Pastebin',
+    'home.dash.pastebin.desc': 'Share code snippets and text quickly with a private pastebin.',
     'home.tool.markdownPreview.title': 'Markdown Preview',
     'home.tool.markdownPreview.desc': 'Compile and preview markdown documents with custom styles.',
 
@@ -393,6 +396,7 @@ export const translations = {
     'nav.item.goldPrice': 'Theo dõi giá vàng',
     'nav.item.vpsMonitoring': 'Giám sát VPS',
     'nav.item.n8n': 'Tự động hoá n8n',
+    'nav.item.pastebin': 'Pastebin',
     'nav.item.markdownPreview': 'Xem trước Markdown',
     'nav.fullWidth': 'Bật/Tắt tràn màn hình',
     'footer.text': '© 2026 NUB Portal. Thiết kế tối giản & tốc độ. Mọi công cụ chạy 100% trên trình duyệt.',
@@ -506,6 +510,8 @@ export const translations = {
     'home.dash.vps.desc': 'Theo dõi trạng thái và hiệu năng máy chủ VPS thời gian thực.',
     'home.dash.n8n.title': 'Tự động hoá n8n',
     'home.dash.n8n.desc': 'Truy cập công cụ tự động hóa quy trình (workflow automation) n8n ở tab mới.',
+    'home.dash.pastebin.title': 'Pastebin',
+    'home.dash.pastebin.desc': 'Chia sẻ đoạn code và văn bản nhanh chóng với pastebin riêng tư.',
     'home.tool.markdownPreview.title': 'Xem trước Markdown',
     'home.tool.markdownPreview.desc': 'Biên dịch và xem trước tài liệu Markdown với định dạng đẹp mắt.',
 

@@ -20,6 +20,7 @@ import {
   FileText,
   Server,
   CaseSensitive,
+  Clipboard,
   type LucideIcon,
 } from 'lucide-react'
 import { Card } from '../components/ui'
@@ -85,6 +86,7 @@ const sections: readonly Section[] = [
       { kind: 'external', titleKey: 'home.dash.gold.title', descKey: 'home.dash.gold.desc', href: 'https://gold.nub.io.vn/', icon: Coins },
       { kind: 'external', titleKey: 'home.dash.vps.title', descKey: 'home.dash.vps.desc', href: 'https://vps-monitoring.nub.io.vn/', icon: Server },
       { kind: 'external', titleKey: 'home.dash.n8n.title', descKey: 'home.dash.n8n.desc', href: 'https://n8n.nub.io.vn/', icon: Workflow },
+      { kind: 'external', titleKey: 'home.dash.pastebin.title', descKey: 'home.dash.pastebin.desc', href: 'https://pastebin.nub.io.vn/', icon: Clipboard },
     ],
   },
 ]
