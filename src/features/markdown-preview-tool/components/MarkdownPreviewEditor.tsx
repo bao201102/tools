@@ -328,7 +328,6 @@ export function MarkdownPreviewEditor() {
   useEffect(() => {
     const editor = editorInstance
     const previewContainer = previewScrollContainerRef.current
-    const editorContainer = editorContainerRef.current
 
     if (!editor || !previewContainer || !syncScroll) return
 
@@ -339,6 +338,18 @@ export function MarkdownPreviewEditor() {
       scrollAnchorsRef.current = null
     }
     window.addEventListener('resize', handleResize)
+
+    // ─── Scroll-source lock ───
+    // Whichever pane the user actively scrolls becomes the "owner" for a short
+    // window. Programmatic scrolls triggered on the other pane are ignored so
+    // they don't bounce back and fight the user. This replaces the fragile
+    // hover/focus heuristics and makes sync work reliably while typing too.
+    let lockedBy: 'editor' | 'preview' | null = null
+    let unlockTimer: number | undefined
+    const unlockSoon = () => {
+      if (unlockTimer !== undefined) clearTimeout(unlockTimer)
+      unlockTimer = window.setTimeout(() => { lockedBy = null }, 80)
+    }
 
     // Generates mapping anchors between Editor lines and Preview elements
     const getScrollAnchors = () => {
@@ -411,13 +422,10 @@ export function MarkdownPreviewEditor() {
     }
 
     const handleEditorScroll = () => {
-      // If editor does NOT have focus, and the preview is being hovered,
-      // it means this scroll event is a synced reaction from preview scrolling.
-      const isEditorFocused = editor.hasWidgetFocus()
-      const isPreviewHovered = previewContainer.matches(':hover')
-      if (!isEditorFocused && isPreviewHovered) {
-        return
-      }
+      // Ignore scrolls that are the programmatic reaction to preview scrolling.
+      if (lockedBy === 'preview') { unlockSoon(); return }
+      lockedBy = 'editor'
+      unlockSoon()
 
       const editorScrollTop = editor.getScrollTop()
       const { anchors, editorMaxScroll, previewMaxScroll } = getScrollAnchors()
@@ -474,13 +482,10 @@ export function MarkdownPreviewEditor() {
     }
 
     const handlePreviewScroll = () => {
-      // If editor has focus, or the editor container is being hovered,
-      // it means this scroll event is a synced reaction from editor scrolling.
-      const isEditorFocused = editor.hasWidgetFocus()
-      const isEditorHovered = editorContainer?.matches(':hover')
-      if (isEditorFocused || isEditorHovered) {
-        return
-      }
+      // Ignore scrolls that are the programmatic reaction to editor scrolling.
+      if (lockedBy === 'editor') { unlockSoon(); return }
+      lockedBy = 'preview'
+      unlockSoon()
 
       const previewScrollTop = previewContainer.scrollTop
       const { anchors, editorMaxScroll, previewMaxScroll } = getScrollAnchors()
@@ -543,6 +548,7 @@ export function MarkdownPreviewEditor() {
       disposable.dispose()
       previewContainer.removeEventListener('scroll', handlePreviewScroll)
       window.removeEventListener('resize', handleResize)
+      if (unlockTimer !== undefined) clearTimeout(unlockTimer)
     }
   }, [editorInstance, isExpanded, syncScroll, output])
 
@@ -588,8 +594,8 @@ export function MarkdownPreviewEditor() {
       </div>
 
       {isExpanded ? (
-        <div className="flex flex-col gap-4 flex-1 min-h-0 shrink-0">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 h-[500px] sm:h-[700px] lg:h-[680px] min-h-0 flex-1">
+        <div className="flex flex-col gap-4 flex-1 min-h-0">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 flex-1 min-h-[400px] max-h-[calc(100dvh-200px)]">
             {/* Left Pane: Editor */}
             <div className="flex flex-col h-full gap-2 min-h-0">
               <div className="flex shrink-0 items-center justify-between">
