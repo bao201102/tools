@@ -156,6 +156,157 @@ export function escapedPayloadToStructuredJson(
   }
 }
 
+/**
+ * Re-indent already-valid JSON text with a 2-space indent while copying every
+ * literal token (numbers, strings, `true`/`false`/`null`) **verbatim**.
+ *
+ * Unlike `JSON.parse` + `JSON.stringify`, this never routes numbers through the
+ * JS number type, so source literals such as `0.0`, `290000.0`, or trailing
+ * zeros are preserved exactly as written.
+ *
+ * The input is expected to be syntactically valid JSON (validate it separately
+ * with `JSON.parse` first); this routine only adjusts insignificant whitespace.
+ */
+export function formatJsonPreservingNumbers(input: string): string {
+  const INDENT = '  '
+  let out = ''
+  let depth = 0
+  let i = 0
+  const n = input.length
+
+  const isWhitespace = (ch: string) =>
+    ch === ' ' || ch === '\t' || ch === '\n' || ch === '\r'
+
+  while (i < n) {
+    const ch = input[i]!
+
+    // Copy string tokens (including escapes) verbatim.
+    if (ch === '"') {
+      out += ch
+      i += 1
+      while (i < n) {
+        const c = input[i]!
+        out += c
+        if (c === '\\') {
+          // Copy the escaped char too, then continue.
+          if (i + 1 < n) out += input[i + 1]
+          i += 2
+          continue
+        }
+        i += 1
+        if (c === '"') break
+      }
+      continue
+    }
+
+    if (ch === '{' || ch === '[') {
+      const close = ch === '{' ? '}' : ']'
+      let j = i + 1
+      while (j < n && isWhitespace(input[j]!)) j += 1
+      if (input[j] === close) {
+        // Empty object/array stays on one line.
+        out += ch + close
+        i = j + 1
+      } else {
+        depth += 1
+        out += ch + '\n' + INDENT.repeat(depth)
+        i += 1
+      }
+      continue
+    }
+
+    if (ch === '}' || ch === ']') {
+      depth -= 1
+      out += '\n' + INDENT.repeat(depth) + ch
+      i += 1
+      continue
+    }
+
+    if (ch === ',') {
+      out += ',\n' + INDENT.repeat(depth)
+      i += 1
+      continue
+    }
+
+    if (ch === ':') {
+      out += ': '
+      i += 1
+      continue
+    }
+
+    if (isWhitespace(ch)) {
+      // Drop insignificant whitespace; we emit our own.
+      i += 1
+      continue
+    }
+
+    // Number / true / false / null literal char — copy verbatim.
+    out += ch
+    i += 1
+  }
+
+  return out
+}
+
+/**
+ * Convert a JSON payload whose quotes are *doubled* (`""`) — the form produced
+ * by C# verbatim strings, SQL Server results, and Excel/CSV cells — into clean
+ * structured JSON. The whole payload is usually wrapped in a single outer pair
+ * of quotes too, e.g. `"{ ""key"": ""value"" }"`.
+ *
+ * The function is forgiving: already-clean JSON, outer-wrapped doubled JSON, and
+ * unwrapped doubled JSON are all accepted. Number literals are preserved exactly
+ * as written (e.g. `0.0` stays `0.0`).
+ */
+export function doubledQuotedPayloadToJson(
+  raw: string,
+): { ok: true; json: string } | { ok: false; message: string } {
+  const trimmed = raw.trim()
+  if (trimmed === '') return { ok: true, json: '' }
+
+  // Candidate decodings, tried from least to most transformation so that
+  // already-valid JSON (which may legitimately contain empty strings `""`) is
+  // never corrupted by de-doubling.
+  const candidates: string[] = [trimmed]
+
+  const isOuterWrapped =
+    trimmed.length >= 2 && trimmed.startsWith('"') && trimmed.endsWith('"')
+  if (isOuterWrapped) {
+    candidates.push(trimmed.slice(1, -1).replace(/""/g, '"'))
+  }
+  candidates.push(trimmed.replace(/""/g, '"'))
+
+  let lastParseErrorMessage =
+    'Could not parse the doubled-quote payload as JSON — check the quotes and try again.'
+
+  for (const candidate of candidates) {
+    try {
+      // JSON.parse only validates; formatting runs on the raw text so number
+      // literals keep their original form.
+      const parsed = JSON.parse(candidate)
+      if (isStructuralRoot(parsed)) {
+        return { ok: true, json: formatJsonPreservingNumbers(candidate) }
+      }
+      // A bare JSON string layer (`"\"{...}\""` style) — peel it and retry.
+      if (typeof parsed === 'string') {
+        try {
+          const inner = JSON.parse(parsed)
+          if (isStructuralRoot(inner)) {
+            return { ok: true, json: formatJsonPreservingNumbers(parsed) }
+          }
+        } catch {
+          // fall through to the next candidate
+        }
+      }
+    } catch (err) {
+      lastParseErrorMessage =
+        err instanceof Error ? err.message : lastParseErrorMessage
+    }
+  }
+
+  return { ok: false, message: lastParseErrorMessage }
+}
+
 /** Minify structural JSON root, then escape `\` and `"` for embedding in strings (e.g. C#). */
 export function formattedJsonToEscapedPayload(
   raw: string,

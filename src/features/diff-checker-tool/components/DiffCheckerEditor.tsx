@@ -148,6 +148,14 @@ export function DiffCheckerEditor() {
   const [hideUnchanged, setHideUnchanged] = useLocalStorageState('diff-checker:hideUnchanged', true)
   const [ignoreWhitespace, setIgnoreWhitespace] = useLocalStorageState('diff-checker:ignoreWhitespace', true)
 
+  // Keep latest hideUnchanged available inside the (mount-time) editor listeners
+  const hideUnchangedRef = useRef(hideUnchanged)
+  useEffect(() => { hideUnchangedRef.current = hideUnchanged }, [hideUnchanged])
+  // Tracks whether we've force-collapsed unchanged regions for the current content.
+  // Monaco does not auto-collapse on the first diff computed after content is set
+  // programmatically; we prime it once both panes have content.
+  const collapsePrimedRef = useRef(false)
+
   // For adaptive height: track content lengths without causing Monaco model resets.
   // This state may update every keystroke, but it ONLY changes the container height —
   // it does not affect the DiffEditor's `original`/`modified` props.
@@ -409,9 +417,24 @@ export function DiffCheckerEditor() {
             const modifiedEditor = editor.getModifiedEditor()
             originalEditorRef.current = originalEditor
             modifiedEditorRef.current = modifiedEditor
+            collapsePrimedRef.current = false
             syncSplitWidths()
 
-            editor.onDidUpdateDiff(() => updateLineChanges())
+            editor.onDidUpdateDiff(() => {
+              updateLineChanges()
+              // Force the initial collapse of unchanged regions: Monaco doesn't
+              // apply hideUnchangedRegions on the first diff after content is set,
+              // so it only collapsed after manually toggling Show all → Collapse.
+              if (
+                hideUnchangedRef.current &&
+                !collapsePrimedRef.current &&
+                originalValueRef.current &&
+                modifiedValueRef.current
+              ) {
+                diffEditorRef.current?.collapseAllUnchangedRegions?.()
+                collapsePrimedRef.current = true
+              }
+            })
 
             originalEditor.onDidChangeModelContent(() => {
               const newValue = originalEditor.getValue()

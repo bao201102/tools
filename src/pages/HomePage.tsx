@@ -21,6 +21,7 @@ import {
   Server,
   CaseSensitive,
   Clipboard,
+  TextQuote,
   type LucideIcon,
 } from 'lucide-react'
 import { Card } from '../components/ui'
@@ -58,6 +59,7 @@ const sections: readonly Section[] = [
       { kind: 'internal', titleKey: 'home.tool.jwt.title', descKey: 'home.tool.jwt.desc', route: '/jwt-decoder', icon: Fingerprint },
       { kind: 'internal', titleKey: 'home.tool.jsonEscape.title', descKey: 'home.tool.jsonEscape.desc', route: '/json-escape', icon: Quote },
       { kind: 'internal', titleKey: 'home.tool.jsonUnescape.title', descKey: 'home.tool.jsonUnescape.desc', route: '/json-unescape', icon: Braces },
+      { kind: 'internal', titleKey: 'home.tool.jsonUnquote.title', descKey: 'home.tool.jsonUnquote.desc', route: '/json-unquote', icon: TextQuote },
       { kind: 'internal', titleKey: 'home.tool.markdownPreview.title', descKey: 'home.tool.markdownPreview.desc', route: '/markdown-preview', icon: FileText },
       { kind: 'internal', titleKey: 'home.tool.letterCount.title', descKey: 'home.tool.letterCount.desc', route: '/letter-count', icon: CaseSensitive },
     ],

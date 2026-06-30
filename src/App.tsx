@@ -7,6 +7,7 @@ const HomePage = lazy(() => import('./pages/HomePage'))
 const JsonPage = lazy(() => import('./pages/JsonPage'))
 const JsonEscapePage = lazy(() => import('./pages/JsonEscapePage'))
 const JsonUnescapePage = lazy(() => import('./pages/JsonUnescapePage'))
+const JsonUnquotePage = lazy(() => import('./pages/JsonUnquotePage'))
 const JsonToYamlPage = lazy(() => import('./pages/JsonToYamlPage'))
 const JsonToCsvPage = lazy(() => import('./pages/JsonToCsvPage'))
 const CsvToJsonPage = lazy(() => import('./pages/CsvToJsonPage'))
@@ -39,6 +40,7 @@ export default function App() {
           <Route path="json" element={<JsonPage />} />
           <Route path="json-escape" element={<JsonEscapePage />} />
           <Route path="json-unescape" element={<JsonUnescapePage />} />
+          <Route path="json-unquote" element={<JsonUnquotePage />} />
           <Route path="json-to-yaml" element={<JsonToYamlPage />} />
           <Route path="json-to-csv" element={<JsonToCsvPage />} />
           <Route path="csv-to-json" element={<CsvToJsonPage />} />

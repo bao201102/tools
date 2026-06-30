@@ -3,7 +3,7 @@ import { NavLink, Outlet, useLocation } from 'react-router-dom'
 import {
   Maximize2, Minimize2, Braces, GitCompare, KeyRound, Code2, FileText, AlignLeft, Sigma,
   ArrowLeftRight, FileCode2, Table2, Sheet, Lock, Cpu, Database, Wrench,
-  Coins, Monitor, Workflow, Clipboard, ExternalLink, ChevronRight, Search,
+  Coins, Monitor, Workflow, Clipboard, ExternalLink, ChevronRight, Search, TextQuote,
 } from 'lucide-react'
 import { cn } from '../lib/cn'
 import { useLocale, type Locale, type TranslationKey } from '../lib/i18n'
@@ -33,6 +33,7 @@ const navGroups: NavGroupWithIcon[] = [
       { kind: 'internal', to: '/jwt-decoder', labelKey: 'nav.item.jwtDecoder', icon: KeyRound },
       { kind: 'internal', to: '/json-escape', labelKey: 'nav.item.jsonEscape', icon: Code2 },
       { kind: 'internal', to: '/json-unescape', labelKey: 'nav.item.jsonUnescape', icon: FileCode2 },
+      { kind: 'internal', to: '/json-unquote', labelKey: 'nav.item.jsonUnquote', icon: TextQuote },
       { kind: 'internal', to: '/markdown-preview', labelKey: 'nav.item.markdownPreview', icon: FileText },
       { kind: 'internal', to: '/letter-count', labelKey: 'nav.item.letterCount', icon: Sigma },
     ],

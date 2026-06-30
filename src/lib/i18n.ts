@@ -19,6 +19,7 @@ export const translations = {
     'nav.item.jsonFormatter': 'JSON Formatter',
     'nav.item.jsonEscape': 'JSON Escape',
     'nav.item.jsonUnescape': 'JSON Unescape',
+    'nav.item.jsonUnquote': 'Unquote JSON',
     'nav.item.yamlFormatter': 'JSON to YAML',
     'nav.item.jsonToCsv': 'JSON to CSV',
     'nav.item.csvToJson': 'CSV to JSON',
@@ -89,6 +90,9 @@ export const translations = {
     'home.tool.jsonUnescape.title': 'JSON Unescape',
     'home.tool.jsonUnescape.desc':
       'Convert an escaped JSON string back to readable, formatted JSON.',
+    'home.tool.jsonUnquote.title': 'Unquote JSON',
+    'home.tool.jsonUnquote.desc':
+      'Turn a JSON string with doubled "" quotes (copied from C#, SQL, or Excel) into clean, formatted JSON.',
     'home.tool.yaml.title': 'JSON to YAML',
     'home.tool.yaml.desc': 'Convert JSON to YAML format with syntax validation',
     'home.tool.jsonToCsv.title': 'JSON to CSV',
@@ -215,6 +219,14 @@ export const translations = {
     'tool.jsonUnescape.output': 'Unescaped JSON',
     'tool.jsonUnescape.outputPlaceholder': 'Output will appear here…',
     'tool.jsonUnescape.copyOutput': 'Copy JSON',
+
+    // Unquote JSON
+    'tool.jsonUnquote.desc':
+      'Paste a JSON string that uses doubled "" quotes (e.g. copied from a C# string, SQL result, or Excel cell) to convert it into clean, formatted JSON.',
+    'tool.jsonUnquote.input': 'Doubled-quote JSON string',
+    'tool.jsonUnquote.output': 'Clean JSON',
+    'tool.jsonUnquote.outputPlaceholder': 'Output will appear here…',
+    'tool.jsonUnquote.copyOutput': 'Copy JSON',
 
     // YAML Formatter
     'tool.yaml.title': 'JSON to YAML',
@@ -379,6 +391,7 @@ export const translations = {
     'nav.item.jsonFormatter': 'Định dạng JSON',
     'nav.item.jsonEscape': 'Escape JSON',
     'nav.item.jsonUnescape': 'Unescape JSON',
+    'nav.item.jsonUnquote': 'Gỡ ngoặc kép JSON',
     'nav.item.yamlFormatter': 'JSON sang YAML',
     'nav.item.jsonToCsv': 'JSON sang CSV',
     'nav.item.csvToJson': 'CSV sang JSON',
@@ -449,6 +462,9 @@ export const translations = {
     'home.tool.jsonUnescape.title': 'Unescape JSON',
     'home.tool.jsonUnescape.desc':
       'Giải mã (unescape) chuỗi ký tự JSON đã escape về định dạng JSON chuẩn dễ đọc.',
+    'home.tool.jsonUnquote.title': 'Gỡ ngoặc kép JSON',
+    'home.tool.jsonUnquote.desc':
+      'Chuyển chuỗi JSON có dấu ngoặc kép nhân đôi "" (sao chép từ C#, SQL hoặc Excel) thành JSON chuẩn, dễ đọc.',
     'home.tool.yaml.title': 'JSON sang YAML',
     'home.tool.yaml.desc': 'Chuyển đổi dữ liệu từ định dạng JSON sang YAML với xác thực cú pháp tự động.',
     'home.tool.jsonToCsv.title': 'JSON sang CSV',
@@ -577,6 +593,14 @@ export const translations = {
     'tool.jsonUnescape.output': 'JSON gốc sau giải mã (Unescaped)',
     'tool.jsonUnescape.outputPlaceholder': 'Dữ liệu JSON gốc sẽ xuất hiện tại đây…',
     'tool.jsonUnescape.copyOutput': 'Sao chép JSON',
+
+    // Unquote JSON
+    'tool.jsonUnquote.desc':
+      'Dán chuỗi JSON dùng dấu ngoặc kép nhân đôi "" (ví dụ sao chép từ chuỗi C#, kết quả SQL hoặc ô Excel) để chuyển về JSON chuẩn, đã định dạng.',
+    'tool.jsonUnquote.input': 'Chuỗi JSON dạng ngoặc kép nhân đôi',
+    'tool.jsonUnquote.output': 'JSON chuẩn',
+    'tool.jsonUnquote.outputPlaceholder': 'Dữ liệu JSON sẽ xuất hiện tại đây…',
+    'tool.jsonUnquote.copyOutput': 'Sao chép JSON',
 
     // YAML Formatter
     'tool.yaml.title': 'JSON sang YAML',
