@@ -91,9 +91,21 @@ function toPascalCase(value: string): string {
   return /^[0-9]/.test(merged) ? `_${merged}` : merged
 }
 
+function toSafeIdentifier(value: string): string {
+  const normalized = value
+    .replace(/^\[|\]$/g, '')
+    .replace(/^"|"$/g, '')
+    .replace(/^`|`$/g, '')
+    .trim()
+  if (!normalized) return 'Value'
+  const sanitized = normalized.replace(/[^a-zA-Z0-9_]/g, '_')
+  return /^[0-9]/.test(sanitized) ? `_${sanitized}` : sanitized
+}
+
 function normalizeSqlType(typeText: string): string {
   return typeText
     .replace(/\([^)]+\)/g, '')
+    .replace(/[[\]]/g, '')
     .replace(/\s+/g, ' ')
     .trim()
     .toLowerCase()
@@ -101,7 +113,7 @@ function normalizeSqlType(typeText: string): string {
 
 function extractSqlType(columnRemainder: string): string {
   const match = columnRemainder.match(
-    /^(timestamp\s+(?:with|without)\s+time\s+zone|time\s+(?:with|without)\s+time\s+zone|double\s+precision|character\s+varying|[a-zA-Z]+)(?:\s*\([^)]+\))?/i,
+    /^\[?(timestamp\s+(?:with|without)\s+time\s+zone|time\s+(?:with|without)\s+time\s+zone|double\s+precision|character\s+varying|[a-zA-Z]+)\]?(?:\s*\([^)]+\))?/i,
   )
   return (match?.[0] ?? '').trim()
 }
@@ -115,7 +127,10 @@ function mapSqlTypeToCSharp(sqlType: string): string {
 }
 
 function isTableConstraint(def: string): boolean {
-  return /^(constraint|primary\s+key|foreign\s+key|unique|check|index)\b/i.test(def.trim())
+  const trimmed = def.trim()
+  if (/^(constraint|primary\s+key|foreign\s+key)\b/i.test(trimmed)) return true
+  if (/^(unique|check|index)\b/i.test(trimmed)) return trimmed.includes('(')
+  return false
 }
 
 function parseColumn(definition: string): ParsedColumn | null {
@@ -140,7 +155,7 @@ function parseColumn(definition: string): ParsedColumn | null {
 
   return {
     rawName: rawName.replace(/^\[|\]$/g, '').replace(/^"|"$/g, '').replace(/^`|`$/g, ''),
-    propertyName: toPascalCase(rawName),
+    propertyName: toSafeIdentifier(rawName),
     csharpType,
   }
 }
