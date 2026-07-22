@@ -99,6 +99,13 @@ function normalizeSqlType(typeText: string): string {
     .toLowerCase()
 }
 
+function extractSqlType(columnRemainder: string): string {
+  const match = columnRemainder.match(
+    /^(timestamp\s+(?:with|without)\s+time\s+zone|time\s+(?:with|without)\s+time\s+zone|double\s+precision|character\s+varying|[a-zA-Z]+)(?:\s*\([^)]+\))?/i,
+  )
+  return (match?.[0] ?? '').trim()
+}
+
 function mapSqlTypeToCSharp(sqlType: string): string {
   const normalized = normalizeSqlType(sqlType)
   for (const entry of TYPE_MAP) {
@@ -123,30 +130,7 @@ function parseColumn(definition: string): ParsedColumn | null {
 
   const nullable = !/\bNOT\s+NULL\b/i.test(rest) && !/\bPRIMARY\s+KEY\b/i.test(rest)
 
-  let cleaned = rest
-    // Requested hard cleanup rules for SQL Server-style inline column constraints.
-    .replace(/\bIDENTITY(?:\(\d+\s*,\s*\d+\))?\b/gi, '')
-    .replace(/\bCONSTRAINT\s+\w+\s+PRIMARY\s+KEY\b/gi, '')
-    .replace(/\bCONSTRAINT\s+\w+\s+DEFAULT\s+[^,]+/gi, '')
-    .replace(/\bPRIMARY\s+KEY\b/gi, '')
-    // Keep broader support for bracket/quoted constraint names and generic defaults.
-    .replace(/\bCONSTRAINT\s+[\[\]"`a-zA-Z0-9_.]+\s+PRIMARY\s+KEY\b/gi, '')
-    .replace(
-      /\bCONSTRAINT\s+[\[\]"`a-zA-Z0-9_.]+\s+DEFAULT\s+(?:\([^)]*\)|N?'[^']*'|"[^"]*"|`[^`]*`|[^\s,]+)/gi,
-      ' ',
-    )
-    // Remove standalone DEFAULT expressions when present inline.
-    .replace(/\bDEFAULT\s+(?:\([^)]*\)|N?'[^']*'|"[^"]*"|`[^`]*`|[^\s,]+)/gi, ' ')
-    // Remove remaining trailing keywords that are not part of SQL type name.
-    .replace(/\b(?:NOT\s+NULL|NULL|UNIQUE|REFERENCES|CHECK|COLLATE|GENERATED|ALWAYS|BY|AS|STORED|VIRTUAL)\b.*/gi, ' ')
-
-  cleaned = normalizeInnerWhitespace(cleaned)
-
-  // After cleanup, this should be shape: "<type> [optional extras removed]"
-  const typeMatch = cleaned.match(
-    /^([a-zA-Z]+(?:\s+[a-zA-Z]+)?(?:\s*\([^)]+\))?)/i,
-  )
-  const sqlType = (typeMatch?.[1] ?? '').trim()
+  const sqlType = extractSqlType(rest)
   if (!sqlType) return null
   let csharpType = mapSqlTypeToCSharp(sqlType)
 
