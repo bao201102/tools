@@ -446,6 +446,9 @@ export function DiffCheckerEditor() {
               setContentForHeight([newValue, modifiedValueRef.current])
             })
             originalEditor.onDidLayoutChange(() => syncSplitWidths())
+            // Pasting replaces content the same way an initial load does, so
+            // re-arm the one-shot collapse for the diff that results from it.
+            originalEditor.onDidPaste(() => { collapsePrimedRef.current = false })
 
             modifiedEditor.onDidChangeModelContent(() => {
               const newValue = modifiedEditor.getValue()
@@ -455,6 +458,7 @@ export function DiffCheckerEditor() {
               setContentForHeight([originalValueRef.current, newValue])
             })
             modifiedEditor.onDidLayoutChange(() => syncSplitWidths())
+            modifiedEditor.onDidPaste(() => { collapsePrimedRef.current = false })
           }}
           options={{
             ...BASE_EDITOR_OPTIONS,
