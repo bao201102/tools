@@ -1,6 +1,7 @@
 import yaml from 'js-yaml'
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useMemo } from 'react'
 import { useLocalStorageState } from '../../../lib/useLocalStorageState'
+import { useDebouncedValue } from '../../../lib/useDebouncedValue'
 
 function parseErrorMessage(error: unknown): string {
   return error instanceof Error ? error.message : 'Invalid JSON'
@@ -12,28 +13,24 @@ const dumpOptions: yaml.DumpOptions = {
   noRefs: true,
 }
 
+export function convertJsonToYaml(input: string): { output: string; error: string | null } {
+  if (input.trim() === '') return { output: '', error: null }
+
+  try {
+    return { output: yaml.dump(JSON.parse(input), dumpOptions), error: null }
+  } catch (e) {
+    return { output: '', error: parseErrorMessage(e) }
+  }
+}
+
 export function useJsonToYaml() {
   const [input, setInput] = useLocalStorageState('json-to-yaml:input', '')
-  const [output, setOutput] = useState('')
-  const [error, setError] = useState<string | null>(null)
+  const debouncedInput = useDebouncedValue(input)
 
-  useEffect(() => {
-    if (input.trim() === '') {
-      setOutput('')
-      setError(null)
-      return
-    }
-    try {
-      // Parse as JSON first
-      const data = JSON.parse(input)
-      // Convert to YAML
-      setOutput(yaml.dump(data, dumpOptions))
-      setError(null)
-    } catch (e) {
-      setOutput('')
-      setError(parseErrorMessage(e))
-    }
-  }, [input])
+  // Derived during render rather than pushed into state from an effect: the
+  // output is a pure function of the input, so an effect would only add a
+  // second render pass in which the screen still shows the previous result.
+  const { output, error } = useMemo(() => convertJsonToYaml(debouncedInput), [debouncedInput])
 
   const clear = useCallback(() => {
     setInput('')

@@ -1,107 +1,84 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useMemo } from 'react'
 import { useLocalStorageState } from '../../../lib/useLocalStorageState'
+import { useDebouncedValue } from '../../../lib/useDebouncedValue'
+import { escapeCsvValue } from '../../../lib/csv'
 
 function parseErrorMessage(error: unknown): string {
   return error instanceof Error ? error.message : 'Invalid JSON'
 }
 
-function escapeCSVValue(val: unknown, delimiter: string): string {
-  if (val === null || val === undefined) return ''
-  let str = typeof val === 'object' ? JSON.stringify(val) : String(val)
-  
-  // If it contains the delimiter, double quotes, or newlines, we must wrap in double quotes
-  const needsQuoting = str.includes(delimiter) || str.includes('"') || str.includes('\n') || str.includes('\r')
-  if (needsQuoting) {
-    str = '"' + str.replace(/"/g, '""') + '"'
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null && !Array.isArray(value)
+}
+
+/** Re-exported so the tool's own tests keep a stable entry point. */
+export const escapeCSVValue = escapeCsvValue
+
+/** Find the rows to emit: a top-level array, the first array property, or the object itself. */
+function toRows(parsed: unknown): unknown[] {
+  if (Array.isArray(parsed)) return parsed
+
+  if (isRecord(parsed)) {
+    const arrayProp = Object.values(parsed).find((val): val is unknown[] => Array.isArray(val))
+    return arrayProp ?? [parsed]
   }
-  return str
+
+  throw new Error('JSON input must be an array or an object')
+}
+
+export function convertJsonToCsv(
+  value: string,
+  delimiter: string,
+  includeHeaders: boolean,
+): { output: string; error: string | null } {
+  if (value.trim() === '') return { output: '', error: null }
+
+  try {
+    const items = toRows(JSON.parse(value))
+    if (items.length === 0) return { output: '', error: null }
+
+    // Union of every object's keys, so rows with missing fields still line up.
+    const headers = Array.from(
+      new Set(items.flatMap((item) => (isRecord(item) ? Object.keys(item) : []))),
+    )
+
+    const csvRows: string[] = []
+
+    if (includeHeaders) {
+      csvRows.push(headers.map((h) => escapeCSVValue(h, delimiter)).join(delimiter))
+    }
+
+    for (const item of items) {
+      const row = headers.map((header) =>
+        escapeCSVValue(isRecord(item) ? item[header] : '', delimiter),
+      )
+      csvRows.push(row.join(delimiter))
+    }
+
+    return { output: csvRows.join('\n'), error: null }
+  } catch (e) {
+    return { output: '', error: parseErrorMessage(e) }
+  }
 }
 
 export function useJsonToCsv() {
   const [input, setInput] = useLocalStorageState('json-to-csv:input', '')
-  const [output, setOutput] = useState('')
-  const [error, setError] = useState<string | null>(null)
   const [delimiter, setDelimiter] = useLocalStorageState('json-to-csv:delimiter', ',')
-  const [includeHeaders, setIncludeHeaders] = useLocalStorageState('json-to-csv:includeHeaders', true)
+  const [includeHeaders, setIncludeHeaders] = useLocalStorageState(
+    'json-to-csv:includeHeaders',
+    true,
+  )
+  const debouncedInput = useDebouncedValue(input)
 
-  const convertJsonToCsv = useCallback((value: string, currentDelimiter: string, currentIncludeHeaders: boolean) => {
-    if (value.trim() === '') {
-      setOutput('')
-      setError(null)
-      return
-    }
-
-    try {
-      const parsed = JSON.parse(value)
-      let items: any[] = []
-
-      if (Array.isArray(parsed)) {
-        items = parsed
-      } else if (parsed && typeof parsed === 'object') {
-        // If it's a root object, check if there is an array property
-        const arrayProp = Object.values(parsed).find((val) => Array.isArray(val))
-        if (arrayProp && Array.isArray(arrayProp)) {
-          items = arrayProp
-        } else {
-          // If no array property is found, treat the object itself as a single-row array
-          items = [parsed]
-        }
-      } else {
-        throw new Error('JSON input must be an array or an object')
-      }
-
-      if (items.length === 0) {
-        setOutput('')
-        setError(null)
-        return
-      }
-
-      // Collect all unique keys from all objects to use as headers
-      const headers = Array.from(
-        new Set(
-          items.reduce<string[]>((acc, item) => {
-            if (item && typeof item === 'object') {
-              acc.push(...Object.keys(item))
-            }
-            return acc
-          }, [])
-        )
-      )
-
-      const csvRows: string[] = []
-
-      // Add header row
-      if (currentIncludeHeaders) {
-        csvRows.push(headers.map((h) => escapeCSVValue(h, currentDelimiter)).join(currentDelimiter))
-      }
-
-      // Add data rows
-      for (const item of items) {
-        const row = headers.map((header) => {
-          const val = item && typeof item === 'object' ? item[header] : ''
-          return escapeCSVValue(val, currentDelimiter)
-        })
-        csvRows.push(row.join(currentDelimiter))
-      }
-
-      setOutput(csvRows.join('\n'))
-      setError(null)
-    } catch (e) {
-      setOutput('')
-      setError(parseErrorMessage(e))
-    }
-  }, [])
-
-  useEffect(() => {
-    convertJsonToCsv(input, delimiter, includeHeaders)
-  }, [input, delimiter, includeHeaders, convertJsonToCsv])
+  const { output, error } = useMemo(
+    () => convertJsonToCsv(debouncedInput, delimiter, includeHeaders),
+    [debouncedInput, delimiter, includeHeaders],
+  )
 
   const clear = useCallback(() => {
     setInput('')
     setDelimiter(',')
     setIncludeHeaders(true)
-    setOutput('')
-    setError(null)
   }, [setInput, setDelimiter, setIncludeHeaders])
 
   return {

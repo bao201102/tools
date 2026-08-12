@@ -4,3 +4,8 @@ dist
 public/sitemap.xml
 public/version.json
 *.tsbuildinfo
+
+# Vendor assets copied out of node_modules by scripts/copy-static-deps.js on
+# every predev/prebuild. ~19 MB of generated files that do not belong in git.
+public/monaco/
+public/mermaid/

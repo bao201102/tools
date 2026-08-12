@@ -6,6 +6,7 @@ import './index.css'
 import { LocaleProvider } from './lib/LocaleProvider'
 import { ThemeProvider } from './lib/ThemeProvider'
 import { startVersionCheck } from './lib/versionCheck'
+import { registerServiceWorker } from './lib/registerServiceWorker'
 import { loader } from '@monaco-editor/react'
 
 loader.config({
@@ -16,6 +17,7 @@ loader.config({
 
 if (import.meta.env.PROD) {
   startVersionCheck()
+  registerServiceWorker()
 }
 
 createRoot(document.getElementById('root')!).render(

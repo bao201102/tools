@@ -75,7 +75,6 @@ export function ExcelToJsonEditor() {
     pastedText,
     setPastedText,
     handleFileUpload,
-    handlePasteConvert,
     clear,
   } = useExcelToJson()
 
@@ -191,15 +190,6 @@ export function ExcelToJsonEditor() {
               placeholder={t('tool.excelToJson.pastePlaceholder')}
               className="w-full flex-1 min-h-[120px] rounded-lg border border-hairline bg-surface-1 px-3 py-2 text-sm text-ink outline-none transition-colors hover:border-hairline-strong focus:border-hairline-strong focus:ds-focus-ring placeholder:text-ink-tertiary font-mono resize-none"
             />
-            <div className="flex shrink-0">
-              <Button
-                onClick={() => handlePasteConvert(pastedText)}
-                disabled={!pastedText}
-                size="sm"
-              >
-                {t('tool.excelToJson.convertPasted')}
-              </Button>
-            </div>
           </div>
         </div>
 

@@ -1,4 +1,5 @@
 import Editor from '@monaco-editor/react'
+import type { editor as MonacoEditor } from 'monaco-editor'
 import { useCallback, useState, useRef, useEffect } from 'react'
 import { Maximize2, Minimize2, X } from 'lucide-react'
 import { useLocale } from '../../../lib/i18n'
@@ -303,9 +304,9 @@ export function MarkdownPreviewEditor() {
   const [isPreviewMaximized, setIsPreviewMaximized] = useState(false)
   const [copyState, setCopyState] = useState<'idle' | 'copied' | 'failed'>('idle')
   const [syncScroll, setSyncScroll] = useState(true)
-  const [editorInstance, setEditorInstance] = useState<any>(null)
+  const [editorInstance, setEditorInstance] = useState<MonacoEditor.IStandaloneCodeEditor | null>(null)
 
-  const editorRef = useRef<any>(null)
+  const editorRef = useRef<MonacoEditor.IStandaloneCodeEditor | null>(null)
   const editorContainerRef = useRef<HTMLDivElement>(null)
   const previewScrollContainerRef = useRef<HTMLDivElement>(null)
 
@@ -552,7 +553,7 @@ export function MarkdownPreviewEditor() {
     }
   }, [editorInstance, isExpanded, syncScroll, output])
 
-  const handleEditorDidMount = (editor: any) => {
+  const handleEditorDidMount = (editor: MonacoEditor.IStandaloneCodeEditor) => {
     editorRef.current = editor
     setEditorInstance(editor)
   }

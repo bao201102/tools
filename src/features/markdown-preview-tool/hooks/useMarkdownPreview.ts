@@ -1,4 +1,4 @@
-import { marked } from 'marked'
+import { marked, type RendererThis, type Tokens } from 'marked'
 import { useCallback, useState, useMemo, useEffect, useRef } from 'react'
 import { useLocalStorageState } from '../../../lib/useLocalStorageState'
 import hljs from 'highlight.js/lib/core'
@@ -170,7 +170,7 @@ gantt
 
 ## 🖼️ Media Viewer
 
-![NUB Portal Logo](https://nub.io.vn/favicon.png)
+![NUB Portal Logo](https://nub.io.vn/logo-1024.jpg)
 *(Click on the image above to view it in the full-screen lightbox)*
 
 ---
@@ -217,14 +217,26 @@ This sentence shows **bold text**, *italicized text*, ~~strikethrough text~~, \`
 `
 
 // ─── Mermaid dynamic CDN loader ──────────────────────────────────────────────
-let mermaidPromise: Promise<any> | null = null
+/** Only the slice of the Mermaid API this tool calls. */
+type MermaidApi = {
+  initialize(config: Record<string, unknown>): void
+  render(id: string, definition: string): Promise<{ svg: string }>
+}
 
-function getMermaid(): Promise<any> {
+declare global {
+  interface Window {
+    mermaid?: MermaidApi
+  }
+}
+
+let mermaidPromise: Promise<MermaidApi> | null = null
+
+function getMermaid(): Promise<MermaidApi> {
   if (mermaidPromise) return mermaidPromise
 
   mermaidPromise = new Promise((resolve, reject) => {
-    if ((window as any).mermaid) {
-      resolve((window as any).mermaid)
+    if (window.mermaid) {
+      resolve(window.mermaid)
       return
     }
 
@@ -232,7 +244,7 @@ function getMermaid(): Promise<any> {
     script.src = '/mermaid/mermaid.min.js'
     script.async = true
     script.onload = () => {
-      const m = (window as any).mermaid
+      const m = window.mermaid
       if (m) {
         resolve(m)
       } else {
@@ -258,43 +270,46 @@ async function ensureMermaid(dark: boolean) {
   })
 }
 
+/** A marked token annotated with the source line it started on. */
+type LineToken = Tokens.Generic & { lineStart?: number }
+
 // ─── marked config ───────────────────────────────────────────────────────────
 const lineExtensions = [
   {
     name: 'paragraph',
-    renderer(this: any, token: any) {
-      return `<p data-line="${token.lineStart || ''}">${this.parser.parseInline(token.tokens)}</p>\n`
+    renderer(this: RendererThis, token: LineToken) {
+      return `<p data-line="${token.lineStart || ''}">${this.parser.parseInline(token.tokens ?? [])}</p>\n`
     }
   },
   {
     name: 'heading',
-    renderer(this: any, token: any) {
-      return `<h${token.depth} data-line="${token.lineStart || ''}">${this.parser.parseInline(token.tokens)}</h${token.depth}>\n`
+    renderer(this: RendererThis, token: LineToken) {
+      return `<h${token.depth} data-line="${token.lineStart || ''}">${this.parser.parseInline(token.tokens ?? [])}</h${token.depth}>\n`
     }
   },
   {
     name: 'blockquote',
-    renderer(this: any, token: any) {
-      const body = this.parser.parse(token.tokens)
+    renderer(this: RendererThis, token: LineToken) {
+      const body = this.parser.parse(token.tokens ?? [])
       return `<blockquote data-line="${token.lineStart || ''}">\n${body}</blockquote>\n`
     }
   },
   {
     name: 'hr',
-    renderer(token: any) {
+    renderer(token: LineToken) {
       return `<hr data-line="${token.lineStart || ''}">\n`
     }
   },
   {
     name: 'list',
-    renderer(this: any, token: any) {
+    renderer(this: RendererThis, token: LineToken) {
       const ordered = token.ordered
       const start = token.start
       let body = ''
       for (const item of token.items) {
         let itemBody = ''
         if (item.task) {
-          const checkbox = this.parser.options.renderer.checkbox(!!item.checked)
+          const checkbox = this.parser.options.renderer?.checkbox?.(!!item.checked) ?? ''
           if (token.loose) {
             if (item.tokens.length > 0 && item.tokens[0].type === 'paragraph') {
               item.tokens[0].text = checkbox + ' ' + item.tokens[0].text
@@ -321,8 +336,7 @@ const lineExtensions = [
   },
   {
     name: 'table',
-    renderer(this: any, token: any) {
-      let header = ''
+    renderer(this: RendererThis, token: LineToken) {
       let cellHtml = ''
       for (let i = 0; i < token.header.length; i++) {
         const cell = token.header[i]
@@ -330,7 +344,7 @@ const lineExtensions = [
         const alignAttr = align ? ` align="${align}"` : ''
         cellHtml += `<th${alignAttr}>${this.parser.parseInline(cell.tokens)}</th>`
       }
-      header = `<tr>\n${cellHtml}</tr>\n`
+      const header = `<tr>\n${cellHtml}</tr>\n`
 
       let body = ''
       for (const row of token.rows) {
@@ -356,7 +370,7 @@ const lineExtensions = [
   },
   {
     name: 'html',
-    renderer(token: any) {
+    renderer(token: LineToken) {
       const text = token.text || ''
       if (text.includes('mermaid-placeholder')) {
         return text.replace('class="mermaid-placeholder"', `class="mermaid-placeholder" data-line="${token.lineStart || ''}"`)
@@ -366,7 +380,7 @@ const lineExtensions = [
   },
   {
     name: 'code',
-    renderer(token: any) {
+    renderer(token: LineToken) {
       const text = token.text || ''
       const rawLang = (token.lang ?? '').trim()
 
@@ -438,8 +452,13 @@ function extractMermaid(md: string): { processed: string; graphs: Map<string, st
 
 export function useMarkdownPreview() {
   const [input, setInput] = useLocalStorageState('markdown-preview:input', '')
-  const [output, setOutput] = useState('')
+  const [rendered, setRendered] = useState('')
   const darkRef = useRef(document.documentElement.classList.contains('dark'))
+
+  // Rendering is async (Mermaid loads and draws off the main flow), so unlike
+  // the other tools the result genuinely has to land in state. The empty case
+  // is still resolved during render — see `output` below.
+  const output = input ? rendered : ''
 
   // Track theme changes
   useEffect(() => {
@@ -451,7 +470,14 @@ export function useMarkdownPreview() {
   }, [])
 
   useEffect(() => {
-    if (!input) { setOutput(''); return }
+    if (!input) return
+
+    // Renders can overlap — a large diagram started for an earlier keystroke
+    // must not overwrite the result for the current one.
+    let cancelled = false
+    const setOutput = (html: string) => {
+      if (!cancelled) setRendered(html)
+    }
 
     const run = async () => {
       try {
@@ -459,7 +485,7 @@ export function useMarkdownPreview() {
         
         // Lex processed markdown and map line numbers to tokens recursively
         const tokens = marked.lexer(processed)
-        const assignLineNumbers = (tokensList: any[], startLine = 1) => {
+        const assignLineNumbers = (tokensList: LineToken[], startLine = 1) => {
           let currentLine = startLine;
           for (const token of tokensList) {
             token.lineStart = currentLine;
@@ -559,11 +585,15 @@ export function useMarkdownPreview() {
     }
 
     run()
+
+    return () => {
+      cancelled = true
+    }
   }, [input])
 
-  const onInputChange = useCallback((value: string) => { setInput(value) }, [])
-  const clear = useCallback(() => { setInput('') }, [])
-  const loadSample = useCallback(() => { setInput(DEFAULT_SAMPLE) }, [])
+  const onInputChange = useCallback((value: string) => { setInput(value) }, [setInput])
+  const clear = useCallback(() => { setInput('') }, [setInput])
+  const loadSample = useCallback(() => { setInput(DEFAULT_SAMPLE) }, [setInput])
 
   const stats = useMemo(() => {
     const trimmed = input.trim()

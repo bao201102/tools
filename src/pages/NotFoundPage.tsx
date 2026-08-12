@@ -1,11 +1,9 @@
 import { Link, useLocation } from 'react-router-dom'
 import { useLocale } from '../lib/i18n'
-import { usePageTitle } from '../lib/usePageTitle'
 import { Home, AlertTriangle } from 'lucide-react'
 
 export default function NotFoundPage() {
   const { t } = useLocale()
-  usePageTitle('page.notFound.title')
   const location = useLocation()
   const [prefix, suffix] = t('page.notFound.pathDesc').split('{path}')
 

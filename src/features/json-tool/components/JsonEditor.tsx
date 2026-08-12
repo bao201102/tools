@@ -1,7 +1,14 @@
 import Editor from '@monaco-editor/react'
-import { useCallback, useEffect, useMemo, useState, useRef } from 'react'
+import { useCallback, useMemo, useState } from 'react'
 import { ChevronDown, ChevronRight, AlertCircle, CheckCircle2, Info } from 'lucide-react'
 import { useLocalStorageState } from '../../../lib/useLocalStorageState'
+import { useDebouncedValue } from '../../../lib/useDebouncedValue'
+import {
+  analyseJson,
+  extractFields,
+  sortObjectKeys,
+  type JsonValue,
+} from '../utils/jsonAnalysis'
 import { useLocale } from '../../../lib/i18n'
 import {
   getMonacoPaneHeight,
@@ -9,7 +16,6 @@ import {
 } from '../../../lib/useAdaptiveEditorHeight'
 import { useMonacoEditorTheme } from '../../../lib/useMonacoEditorTheme'
 import { Button, Input, CopyButton } from '../../../components/ui'
-import { usePageTitle } from '../../../lib/usePageTitle'
 
 const editorOptions = {
   minimap: { enabled: false },
@@ -25,76 +31,7 @@ const editorOptions = {
 
 type ViewMode = 'editor' | 'tree'
 
-type JsonStats = {
-  size: number
-  keys: number
-  depth: number
-  objects: number
-  arrays: number
-}
-
-function calculateJsonStats(json: string): JsonStats {
-  try {
-    const parsed = JSON.parse(json)
-
-    const countKeys = (obj: any): number => {
-      if (typeof obj !== 'object' || obj === null) return 0
-      let count = 0
-      for (const key in obj) {
-        count++
-        count += countKeys(obj[key])
-      }
-      return count
-    }
-
-    const countDepth = (obj: any, current = 1): number => {
-      if (typeof obj !== 'object' || obj === null) return current
-      let maxDepth = current
-      for (const key in obj) {
-        const depth = countDepth(obj[key], current + 1)
-        maxDepth = Math.max(maxDepth, depth)
-      }
-      return maxDepth
-    }
-
-    const countTypes = (obj: any): { objects: number; arrays: number } => {
-      let objects = 0
-      let arrays = 0
-
-      if (Array.isArray(obj)) {
-        arrays++
-        obj.forEach(item => {
-          const counts = countTypes(item)
-          objects += counts.objects
-          arrays += counts.arrays
-        })
-      } else if (typeof obj === 'object' && obj !== null) {
-        objects++
-        Object.values(obj).forEach(value => {
-          const counts = countTypes(value)
-          objects += counts.objects
-          arrays += counts.arrays
-        })
-      }
-
-      return { objects, arrays }
-    }
-
-    const types = countTypes(parsed)
-
-    return {
-      size: new Blob([json]).size,
-      keys: countKeys(parsed),
-      depth: countDepth(parsed) - 1,
-      objects: types.objects,
-      arrays: types.arrays,
-    }
-  } catch {
-    return { size: 0, keys: 0, depth: 0, objects: 0, arrays: 0 }
-  }
-}
-
-function JsonTreeView({ data }: { data: any }) {
+function JsonTreeView({ data }: { data: JsonValue }) {
   const { t } = useLocale()
   const [expandedPaths, setExpandedPaths] = useState<Set<string>>(new Set())
   const [allExpanded, setAllExpanded] = useState(false)
@@ -113,7 +50,7 @@ function JsonTreeView({ data }: { data: any }) {
 
   const expandAll = () => {
     const allPaths = new Set<string>()
-    const collectPaths = (obj: any, currentPath: string) => {
+    const collectPaths = (obj: JsonValue, currentPath: string) => {
       if (typeof obj === 'object' && obj !== null) {
         allPaths.add(currentPath)
         if (Array.isArray(obj)) {
@@ -121,8 +58,8 @@ function JsonTreeView({ data }: { data: any }) {
             collectPaths(item, `${currentPath}[${index}]`)
           })
         } else {
-          Object.keys(obj).forEach(key => {
-            collectPaths(obj[key], `${currentPath}.${key}`)
+          Object.entries(obj).forEach(([key, child]) => {
+            collectPaths(child, `${currentPath}.${key}`)
           })
         }
       }
@@ -137,7 +74,7 @@ function JsonTreeView({ data }: { data: any }) {
     setAllExpanded(false)
   }
 
-  const getValueType = (value: any): string => {
+  const getValueType = (value: JsonValue): string => {
     if (value === null) return 'null'
     if (Array.isArray(value)) return 'array'
     return typeof value
@@ -153,14 +90,15 @@ function JsonTreeView({ data }: { data: any }) {
     }
   }
 
-  const renderValue = (value: any, path: string, key?: string, depth: number = 0): React.ReactElement => {
+  const renderValue = (value: JsonValue, path: string, key?: string, depth: number = 0): React.ReactElement => {
     const type = getValueType(value)
     const isExpanded = expandedPaths.has(path)
     const indent = depth * 20
 
     if (type === 'object' || type === 'array') {
-      const isEmpty = type === 'array' ? value.length === 0 : Object.keys(value).length === 0
-      const count = type === 'array' ? value.length : Object.keys(value).length
+      const container = value as JsonValue[] | { [key: string]: JsonValue }
+      const count = Array.isArray(container) ? container.length : Object.keys(container).length
+      const isEmpty = count === 0
       const preview = type === 'array' ? `Array(${count})` : `Object{${count}}`
 
       return (
@@ -195,11 +133,11 @@ function JsonTreeView({ data }: { data: any }) {
           {isExpanded && (
             <>
               <div>
-                {type === 'array'
-                  ? value.map((item: any, index: number) =>
+                {Array.isArray(container)
+                  ? container.map((item, index) =>
                     renderValue(item, `${path}[${index}]`, undefined, depth + 1)
                   )
-                  : Object.entries(value).map(([k, v]) =>
+                  : Object.entries(container).map(([k, v]) =>
                     renderValue(v, `${path}.${k}`, k, depth + 1)
                   )}
               </div>
@@ -255,216 +193,125 @@ function JsonTreeView({ data }: { data: any }) {
   )
 }
 
+const SAMPLE_JSON = JSON.stringify(
+  {
+    name: 'John Doe',
+    age: 30,
+    email: 'john@example.com',
+    address: {
+      street: '123 Main St',
+      city: 'New York',
+      country: 'USA',
+    },
+    hobbies: ['reading', 'coding', 'traveling'],
+  },
+  null,
+  2,
+)
+
+/**
+ * An alternate rendering of the current document (minified, sorted, stringified)
+ * produced by one of the toolbar buttons. Tagged with the input it was made
+ * from so the next edit invalidates it without an effect.
+ */
+type OutputOverride = { forInput: string; value: string } | null
+
 export function JsonEditor() {
   const { t } = useLocale()
-  usePageTitle('tool.json.title')
   const editorTheme = useMonacoEditorTheme()
 
   const [editorValue, setEditorValue] = useLocalStorageState('json:editorValue', '')
-  const [debouncedInput, setDebouncedInput] = useLocalStorageState('json:debouncedInput', '')
-  const [output, setOutput] = useState('')
-  const [error, setError] = useState<string | null>(null)
-  const [stats, setStats] = useState<JsonStats>({ size: 0, keys: 0, depth: 0, objects: 0, arrays: 0 })
+  const debouncedInput = useDebouncedValue(editorValue)
+
   const [viewMode, setViewMode] = useState<ViewMode>('editor')
-  const [parsedData, setParsedData] = useState<any>(null)
-
-  // Optimizing: Calculate height based on debounced input to prevent recalculations on every keystroke
-  const editorHeight = useAdaptiveEditorHeight(debouncedInput, output)
-  const monacoPaneHeight = getMonacoPaneHeight(editorHeight)
-  const [detectedFields, setDetectedFields] = useState<string[]>([])
-  const [selectedFieldsArray, setSelectedFieldsArray] = useLocalStorageState<string[]>('json:selectedFields', [])
-  const selectedFields = useMemo(() => new Set(selectedFieldsArray), [selectedFieldsArray])
-  const [extractedOutput, setExtractedOutput] = useLocalStorageState('json:extractedOutput', '')
   const [fieldSearchQuery, setFieldSearchQuery] = useState('')
+  const [outputOverride, setOutputOverride] = useState<OutputOverride>(null)
+  const [extraction, setExtraction] = useState<OutputOverride>(null)
 
-  const currentValueRef = useRef(editorValue)
-  const debounceTimerRef = useRef<any>(null)
-
-  const filteredFields = detectedFields.filter(field =>
-    field.toLowerCase().includes(fieldSearchQuery.toLowerCase())
+  // Everything about the document is a pure function of its text.
+  const { parsed: parsedData, formatted, error, stats, fields: detectedFields } = useMemo(
+    () => analyseJson(debouncedInput),
+    [debouncedInput],
   )
 
-  const handleEditorChange = useCallback((value: string | undefined) => {
-    const val = value ?? ''
-    currentValueRef.current = val
+  const output = outputOverride?.forInput === debouncedInput ? outputOverride.value : formatted
+  const extractedOutput = extraction?.forInput === debouncedInput ? extraction.value : ''
 
-    if (debounceTimerRef.current) {
-      clearTimeout(debounceTimerRef.current)
-    }
-    debounceTimerRef.current = setTimeout(() => {
-      setDebouncedInput(val)
-      setEditorValue(val)
-    }, 300)
-  }, [setDebouncedInput, setEditorValue])
+  const editorHeight = useAdaptiveEditorHeight(debouncedInput, output)
+  const monacoPaneHeight = getMonacoPaneHeight(editorHeight)
 
-  // Sync editorValue with debouncedInput on mount if they are out of sync
-  useEffect(() => {
-    if (debouncedInput && debouncedInput !== editorValue) {
-      setEditorValue(debouncedInput)
-      currentValueRef.current = debouncedInput
-    }
-  }, [])
+  const [selectedFieldsArray, setSelectedFieldsArray] = useLocalStorageState<string[]>('json:selectedFields', [])
 
-  // Auto-validate and format based on debounced input
-  useEffect(() => {
-    if (!debouncedInput.trim()) {
-      setError(null)
-      setOutput('')
-      setStats({ size: 0, keys: 0, depth: 0, objects: 0, arrays: 0 })
-      setParsedData(null)
-      setDetectedFields([])
-      setSelectedFieldsArray([])
-      setFieldSearchQuery('')
-      setExtractedOutput('')
-      return
-    }
+  // Intersecting with the fields actually present means a selection survives an
+  // edit that keeps the same shape, and silently drops fields that disappear —
+  // no reset-on-change effect required.
+  const selectedFields = useMemo(() => {
+    const available = new Set(detectedFields)
+    return new Set(selectedFieldsArray.filter((field) => available.has(field)))
+  }, [selectedFieldsArray, detectedFields])
 
-    try {
-      const parsed = JSON.parse(debouncedInput)
-      setError(null)
-      setParsedData(parsed)
+  const filteredFields = useMemo(
+    () => detectedFields.filter((field) => field.toLowerCase().includes(fieldSearchQuery.toLowerCase())),
+    [detectedFields, fieldSearchQuery],
+  )
 
-      // Detect all fields (normalize array indices to generic pattern)
-      const fields = new Set<string>()
-      const detectFields = (obj: any, prefix = '') => {
-        if (typeof obj === 'object' && obj !== null) {
-          if (Array.isArray(obj)) {
-            // For arrays, analyze first item to get structure
-            if (obj.length > 0) {
-              detectFields(obj[0], prefix)
-            }
-          } else {
-            Object.keys(obj).forEach(key => {
-              const path = prefix ? `${prefix}.${key}` : key
-              fields.add(path)
-              detectFields(obj[key], path)
-            })
-          }
-        }
-      }
-      detectFields(parsed)
-      setDetectedFields(Array.from(fields).sort())
-
-      const formatted = JSON.stringify(parsed, null, 2)
-      setOutput(formatted)
-      setStats(calculateJsonStats(formatted))
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Invalid JSON')
-      setOutput('')
-      setParsedData(null)
-      setDetectedFields([])
-      setSelectedFieldsArray([])
-      setExtractedOutput('')
-      setStats({ size: new Blob([debouncedInput]).size, keys: 0, depth: 0, objects: 0, arrays: 0 })
-    }
-  }, [debouncedInput, setSelectedFieldsArray, setExtractedOutput])
-
-  // Clear debounce timer on unmount
-  useEffect(() => {
-    return () => {
-      if (debounceTimerRef.current) {
-        clearTimeout(debounceTimerRef.current)
-      }
-    }
-  }, [])
+  const handleEditorChange = useCallback(
+    (value: string | undefined) => {
+      setEditorValue(value ?? '')
+    },
+    [setEditorValue],
+  )
 
   const handleClear = useCallback(() => {
     setEditorValue('')
-    setDebouncedInput('')
-    currentValueRef.current = ''
-    setOutput('')
-    setError(null)
-    setStats({ size: 0, keys: 0, depth: 0, objects: 0, arrays: 0 })
-    setParsedData(null)
-    setDetectedFields([])
     setSelectedFieldsArray([])
-    setExtractedOutput('')
+    setOutputOverride(null)
+    setExtraction(null)
     setFieldSearchQuery('')
-  }, [setEditorValue, setDebouncedInput, setSelectedFieldsArray, setExtractedOutput])
+  }, [setEditorValue, setSelectedFieldsArray])
 
-  const handleCompress = useCallback(() => {
-    const current = currentValueRef.current
-    if (!current) return
-    try {
-      const parsed = JSON.parse(current)
-      const compressed = JSON.stringify(parsed)
-      setOutput(compressed)
-    } catch {
-      // Already has error
-    }
-  }, [])
-
-  const handlePrettify = useCallback(() => {
-    const current = currentValueRef.current
-    if (!current) return
-    try {
-      const parsed = JSON.parse(current)
-      const prettified = JSON.stringify(parsed, null, 2)
-      setEditorValue(prettified)
-      setDebouncedInput(prettified)
-      currentValueRef.current = prettified
-      setOutput(prettified)
-    } catch {
-      // Already has error
-    }
-  }, [])
-
-  const handleSortKeys = useCallback(() => {
-    const current = currentValueRef.current
-    if (!current) return
-    try {
-      const parsed = JSON.parse(current)
-      const sortObject = (obj: any): any => {
-        if (Array.isArray(obj)) {
-          return obj.map(sortObject)
-        }
-        if (typeof obj === 'object' && obj !== null) {
-          return Object.keys(obj)
-            .sort()
-            .reduce((result: any, key) => {
-              result[key] = sortObject(obj[key])
-              return result
-            }, {})
-        }
-        return obj
+  /** Re-render the document a different way without changing the source text. */
+  const overrideOutput = useCallback(
+    (render: (parsed: JsonValue) => string) => {
+      if (!editorValue) return
+      try {
+        setOutputOverride({ forInput: editorValue, value: render(JSON.parse(editorValue) as JsonValue) })
+      } catch {
+        // Invalid JSON already surfaces through `error`.
       }
-      const sorted = sortObject(parsed)
-      setOutput(JSON.stringify(sorted, null, 2))
-    } catch {
-      // Already has error
-    }
-  }, [])
+    },
+    [editorValue],
+  )
 
-  const handleStringify = useCallback(() => {
-    const current = currentValueRef.current
-    if (!current) return
+  const handleCompress = useCallback(
+    () => overrideOutput((parsed) => JSON.stringify(parsed)),
+    [overrideOutput],
+  )
+
+  const handleSortKeys = useCallback(
+    () => overrideOutput((parsed) => JSON.stringify(sortObjectKeys(parsed), null, 2)),
+    [overrideOutput],
+  )
+
+  const handleStringify = useCallback(
+    () => overrideOutput((parsed) => JSON.stringify(JSON.stringify(parsed))),
+    [overrideOutput],
+  )
+
+  // Prettify rewrites the source itself, so the derived output follows along.
+  const handlePrettify = useCallback(() => {
+    if (!editorValue) return
     try {
-      const parsed = JSON.parse(current)
-      const compactJson = JSON.stringify(parsed)
-      const escapedString = JSON.stringify(compactJson)
-      setOutput(escapedString)
+      setEditorValue(JSON.stringify(JSON.parse(editorValue), null, 2))
+      setOutputOverride(null)
     } catch {
-      // Already has error
+      // Invalid JSON already surfaces through `error`.
     }
-  }, [])
+  }, [editorValue, setEditorValue])
 
   const handleLoadSample = useCallback(() => {
-    const sample = {
-      name: "John Doe",
-      age: 30,
-      email: "john@example.com",
-      address: {
-        street: "123 Main St",
-        city: "New York",
-        country: "USA"
-      },
-      hobbies: ["reading", "coding", "traveling"]
-    }
-    const sampleStr = JSON.stringify(sample, null, 2)
-    setEditorValue(sampleStr)
-    setDebouncedInput(sampleStr)
-    currentValueRef.current = sampleStr
-  }, [])
+    setEditorValue(SAMPLE_JSON)
+  }, [setEditorValue])
 
   const toggleFieldSelection = (field: string) => {
     setSelectedFieldsArray(prev => {
@@ -541,59 +388,13 @@ export function JsonEditor() {
   }
 
   const handleExtractFields = useCallback(() => {
-    if (!parsedData || selectedFields.size === 0) return
+    if (parsedData === null || selectedFields.size === 0) return
 
-    // Get only top-level selected fields (not children if parent is selected)
-    const topLevelFields = Array.from(selectedFields).filter(path => {
-      return !Array.from(selectedFields).some(other =>
-        other !== path && path.startsWith(other + '.')
-      )
+    setExtraction({
+      forInput: debouncedInput,
+      value: JSON.stringify(extractFields(parsedData, selectedFields), null, 2),
     })
-
-    // Build a tree of paths from topLevelFields
-    const tree: any = {}
-    topLevelFields.forEach(path => {
-      const parts = path.split('.')
-      let current = tree
-      parts.forEach((part, index) => {
-        if (index === parts.length - 1) {
-          if (!current[part]) {
-            current[part] = true
-          }
-        } else {
-          if (current[part] === true || !current[part]) {
-            current[part] = {}
-          }
-          current = current[part]
-        }
-      })
-    })
-
-    // Recursively extract values based on the tree node structure
-    const extractValue = (val: any, treeNode: any): any => {
-      if (val === null || val === undefined) return val
-      if (treeNode === true) return val
-
-      if (Array.isArray(val)) {
-        return val.map(item => extractValue(item, treeNode))
-      }
-
-      if (typeof val === 'object') {
-        const res: any = {}
-        Object.keys(treeNode).forEach(key => {
-          if (val[key] !== undefined) {
-            res[key] = extractValue(val[key], treeNode[key])
-          }
-        })
-        return res
-      }
-
-      return val
-    }
-
-    const result = extractValue(parsedData, tree)
-    setExtractedOutput(JSON.stringify(result, null, 2))
-  }, [parsedData, selectedFields, setExtractedOutput])
+  }, [parsedData, selectedFields, debouncedInput])
 
   const formatBytes = (bytes: number) => {
     if (bytes === 0) return '0 B'

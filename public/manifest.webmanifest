@@ -1,0 +1,25 @@
+{
+  "name": "NUB Portal — Developer Tools",
+  "short_name": "NUB Portal",
+  "description": "JSON, YAML, CSV, Excel, JWT and C# developer tools that run entirely in your browser.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#010102",
+  "theme_color": "#5e6ad2",
+  "categories": ["developer", "productivity", "utilities"],
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "/logo-1024.jpg",
+      "sizes": "1024x1024",
+      "type": "image/jpeg",
+      "purpose": "any"
+    }
+  ]
+}

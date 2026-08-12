@@ -4,46 +4,62 @@ on:
   push:
     branches: [ "main" ]
 
+# Serialise deploys per branch. `cancel-in-progress: false` lets a running
+# deploy finish rather than being killed halfway; GitHub keeps only the newest
+# queued run, so a burst of pushes still ends with the latest commit deployed.
+concurrency:
+  group: deploy-${{ github.ref }}
+  cancel-in-progress: false
+
 env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
 jobs:
-  checkout:
+  # Gate the pipeline on lint, types and tests. The Docker build runs `tsc -b`
+  # as part of `npm run build`, so type errors would surface there anyway — but
+  # only after a full image build, and lint and the unit tests never ran at all.
+  verify:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
         uses: actions/checkout@v6
-      
-      - name: Upload workspace
-        uses: actions/upload-artifact@v6
-        with:
-          name: workspace
-          path: .
-          retention-days: 1
 
-  setup-docker:
-    needs: checkout
-    runs-on: ubuntu-latest
-    steps:
-      - name: Download workspace
-        uses: actions/download-artifact@v7
+      - name: Set up Node
+        uses: actions/setup-node@v6
         with:
-          name: workspace
-      
-      - name: Set up QEMU
-        uses: docker/setup-qemu-action@v4
+          # Matches the builder stage in Dockerfile.
+          node-version: '20.19'
+          cache: npm
 
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v4
+      # Also reaches cdn.sheetjs.com — `xlsx` is installed from SheetJS's own
+      # CDN because the npm-hosted build is stuck on a version with known CVEs.
+      - name: Install dependencies
+        run: npm ci --no-audit --no-fund
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Typecheck
+        run: npm run typecheck
+
+      - name: Test
+        run: npm test
 
   build-and-push:
-    needs: setup-docker
+    needs: verify
     runs-on: ubuntu-latest
     steps:
-      - name: Download workspace
-        uses: actions/download-artifact@v7
+      - name: Checkout code
+        uses: actions/checkout@v6
+
+      # QEMU has to be set up in *this* job: every job gets a fresh runner, so
+      # registering binfmt elsewhere does nothing here. Without it, building
+      # linux/arm64 on an x86 runner depends on whatever the runner image
+      # happens to ship.
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v4
         with:
-          name: workspace
+          platforms: arm64
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v4
@@ -60,7 +76,11 @@ jobs:
           context: .
           platforms: linux/arm64
           push: true
-          tags: ${{ secrets.DOCKER_USERNAME }}/dev-tools:latest
+          # The commit-pinned tag is what makes a rollback possible; `latest` is
+          # what docker-compose on the VPS pulls.
+          tags: |
+            ${{ secrets.DOCKER_USERNAME }}/dev-tools:latest
+            ${{ secrets.DOCKER_USERNAME }}/dev-tools:${{ github.sha }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
@@ -75,47 +95,72 @@ jobs:
           username: ${{ secrets.VPS_USER }}
           key: ${{ secrets.VPS_SSH_KEY }}
           script: |
+            set -e
             cd /home/ubuntu/dev-tools-docker
             sudo docker compose pull
             sudo docker compose up -d
             sudo docker image prune -f
 
   notify-telegram:
-    needs: [checkout, setup-docker, build-and-push, deploy]
+    needs: [verify, build-and-push, deploy]
     runs-on: ubuntu-latest
     if: always()
     steps:
       - name: Send Telegram notification to topic
+        env:
+          BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          TOPIC_ID: ${{ secrets.TELEGRAM_TOPIC_ID }}
+          VERIFY_RESULT: ${{ needs.verify.result }}
+          BUILD_RESULT: ${{ needs.build-and-push.result }}
+          DEPLOY_RESULT: ${{ needs.deploy.result }}
+          REPO: ${{ github.repository }}
+          RUN_NUMBER: ${{ github.run_number }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          COMMIT_TS: ${{ github.event.head_commit.timestamp }}
         run: |
-          STATUS_EMOJI="✅"
-          if [ "${{ needs.deploy.result }}" != "success" ]; then
-            STATUS_EMOJI="❌"
-          fi
-          
-          STATUS_UPPER=$(echo "${{ job.status }}" | tr '[:lower:]' '[:upper:]')
-          TIMESTAMP=$(TZ='Asia/Ho_Chi_Minh' date +"%Y-%m-%d %H:%M:%S")
-          
-          # Calculate duration
-          START_TIME=$(date -d "${{ github.event.head_commit.timestamp }}" +%s)
-          END_TIME=$(date +%s)
-          DURATION=$((END_TIME - START_TIME))
-          MINUTES=$((DURATION / 60))
-          SECONDS=$((DURATION % 60))
-          
-          MESSAGE="${STATUS_EMOJI} *${STATUS_UPPER}* ${TIMESTAMP}
-          
-          Repository: \`${{ github.repository }}\`
-          Build: #${{ github.run_number }}
-          Duration: ${MINUTES}m ${SECONDS}s
+          set -euo pipefail
 
-          [View Workflow Run](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})"
-          
-          curl -X POST "https://api.telegram.org/bot${{ secrets.TELEGRAM_BOT_TOKEN }}/sendMessage" \
+          # Report the pipeline's outcome, not this job's. `job.status` here is
+          # always "success" — it describes the notification step that is
+          # currently running, so the old message said SUCCESS next to a ❌.
+          if [ "$DEPLOY_RESULT" = "success" ]; then
+            EMOJI="✅"; STATUS="SUCCESS"
+          elif [ "$VERIFY_RESULT" != "success" ]; then
+            EMOJI="❌"; STATUS="FAILED at checks"
+          elif [ "$BUILD_RESULT" != "success" ]; then
+            EMOJI="❌"; STATUS="FAILED at build"
+          else
+            EMOJI="❌"; STATUS="FAILED at deploy"
+          fi
+
+          TIMESTAMP=$(TZ='Asia/Ho_Chi_Minh' date +"%Y-%m-%d %H:%M:%S")
+
+          # Measured from the commit timestamp, matching the previous behaviour.
+          # Note this is time-since-commit, not pure pipeline runtime.
+          ELAPSED=$(( $(date +%s) - $(date -d "$COMMIT_TS" +%s) ))
+          DURATION=$(printf '%dm %ds' $(( ELAPSED / 60 )) $(( ELAPSED % 60 )))
+
+          MESSAGE=$(printf '%s *%s* %s\n\nRepository: `%s`\nBuild: #%s\nDuration: %s\n\n[View Workflow Run](%s)' \
+            "$EMOJI" "$STATUS" "$TIMESTAMP" "$REPO" "$RUN_NUMBER" "$DURATION" "$RUN_URL")
+
+          # Build the payload with jq. Interpolating a multi-line message
+          # straight into a JSON string embeds raw newlines, which is invalid
+          # JSON — Telegram rejected every one of those requests.
+          if [ -n "${TOPIC_ID:-}" ]; then
+            jq -n --arg chat_id "$CHAT_ID" --argjson thread_id "$TOPIC_ID" --arg text "$MESSAGE" \
+              '{chat_id: $chat_id, message_thread_id: $thread_id, text: $text, parse_mode: "Markdown", disable_web_page_preview: true}' \
+              > payload.json
+          else
+            jq -n --arg chat_id "$CHAT_ID" --arg text "$MESSAGE" \
+              '{chat_id: $chat_id, text: $text, parse_mode: "Markdown", disable_web_page_preview: true}' \
+              > payload.json
+          fi
+
+          # --fail-with-body surfaces a rejected notification as a failed step.
+          # Plain curl exits 0 on HTTP 400, which is why the broken payload went
+          # unnoticed for so long.
+          curl --fail-with-body -sS -X POST \
+            "https://api.telegram.org/bot${BOT_TOKEN}/sendMessage" \
             -H "Content-Type: application/json" \
-            -d "{
-              \"chat_id\": \"${{ secrets.TELEGRAM_CHAT_ID }}\",
-              \"message_thread_id\": ${{ secrets.TELEGRAM_TOPIC_ID }},
-              \"text\": \"${MESSAGE}\",
-              \"parse_mode\": \"Markdown\",
-              \"disable_web_page_preview\": true
-            }"
+            -d @payload.json

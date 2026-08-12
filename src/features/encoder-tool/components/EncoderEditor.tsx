@@ -2,11 +2,9 @@ import { useAdaptiveEditorHeight } from '../../../lib/useAdaptiveEditorHeight'
 import { useLocale } from '../../../lib/i18n'
 import { useEncoder } from '../hooks/useEncoder'
 import { Button, Textarea, CopyButton } from '../../../components/ui'
-import { usePageTitle } from '../../../lib/usePageTitle'
 
 export function EncoderEditor() {
   const { t } = useLocale()
-  usePageTitle('tool.encoder.title')
   const { input, output, error, mode, direction, setInput, setMode, setDirection, clear, swap } = useEncoder()
   const editorHeight = useAdaptiveEditorHeight(input, output)
 

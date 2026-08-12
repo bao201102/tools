@@ -81,7 +81,6 @@ export function JsonToExcelEditor() {
     previewHeaders,
     previewRows,
     showPreview,
-    generatePreview,
     downloadExcel,
     clear,
   } = useJsonToExcel()
@@ -252,14 +251,9 @@ export function JsonToExcelEditor() {
           {t('tool.jsonToExcel.flattenNested')}
         </label>
 
+        {/* The preview below is derived from the input, so it is always current —
+            the old "Preview" button here recomputed what was already on screen. */}
         <div className="flex gap-2 sm:ml-auto">
-          <Button
-            variant="secondary"
-            onClick={generatePreview}
-            disabled={!input}
-          >
-            {t('tool.jsonToExcel.preview')}
-          </Button>
           <Button
             variant="primary"
             onClick={downloadExcel}

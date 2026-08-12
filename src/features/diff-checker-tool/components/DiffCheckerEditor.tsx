@@ -1,4 +1,5 @@
 import { DiffEditor } from '@monaco-editor/react'
+import type { editor as MonacoEditor } from 'monaco-editor'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { useLocalStorageState } from '../../../lib/useLocalStorageState'
 import { useLocale } from '../../../lib/i18n'
@@ -6,7 +7,6 @@ import { useAdaptiveEditorHeightWithOptions } from '../../../lib/useAdaptiveEdit
 import { useMonacoEditorTheme } from '../../../lib/useMonacoEditorTheme'
 import { useDiffChecker } from '../hooks/useDiffChecker'
 import { Button, Input } from '../../../components/ui'
-import { usePageTitle } from '../../../lib/usePageTitle'
 
 type DiffLanguage =
   | 'json'
@@ -54,13 +54,22 @@ function detectLanguageFromText(text: string): DiffLanguage {
   if (/^---\s*$|^\s*[\w-]+\s*:\s*.+/m.test(trimmed)) return 'yaml'
   if (/\bnamespace\b|\busing\s+[A-Z][\w.]*\s*;|\bpublic\s+class\b/.test(trimmed)) return 'csharp'
   if (/\bSELECT\b|\bINSERT\b|\bUPDATE\b|\bDELETE\b|\bFROM\b|\bWHERE\b/i.test(trimmed)) return 'sql'
-  if (/\binterface\b|\btype\b|\benum\b|\bimplements\b|:\s*[A-Z][\w<>\[\]\|& ,]*/.test(trimmed)) return 'typescript'
+  if (/\binterface\b|\btype\b|\benum\b|\bimplements\b|:\s*[A-Z][\w<>[\]|& ,]*/.test(trimmed)) return 'typescript'
   if (/\bfunction\b|\bconst\b|\blet\b|\bvar\b|=>/.test(trimmed)) return 'javascript'
   return 'plaintext'
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-function computeStats(changes: any[]) {
+/**
+ * `collapseAllUnchangedRegions` ships in Monaco but is absent from its public
+ * type definitions, so it is declared here as optional and always called with
+ * `?.()` — a future Monaco version dropping it degrades to "show everything"
+ * rather than throwing.
+ */
+type DiffEditorWithCollapse = MonacoEditor.IStandaloneDiffEditor & {
+  collapseAllUnchangedRegions?: () => void
+}
+
+function computeStats(changes: MonacoEditor.ILineChange[]) {
   let added = 0
   let removed = 0
   for (const c of changes) {
@@ -79,13 +88,11 @@ function persistLS(key: string, value: string) {
 
 export function DiffCheckerEditor() {
   const { t } = useLocale()
-  usePageTitle('tool.diff.title')
   const editorTheme = useMonacoEditorTheme()
   const { renderSideBySide, toggleView } = useDiffChecker()
 
   // ── Editor refs ──────────────────────────────────────────────────────────
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const diffEditorRef = useRef<any>(null)
+  const diffEditorRef = useRef<DiffEditorWithCollapse | null>(null)
   const originalEditorRef = useRef<{
     getValue: () => string
     setValue: (value: string) => void
@@ -105,15 +112,21 @@ export function DiffCheckerEditor() {
   // when the user explicitly swaps or clears content.
   const [savedOriginal] = useLocalStorageState('diff-checker:originalSnapshot', '')
   const [savedModified] = useLocalStorageState('diff-checker:modifiedSnapshot', '')
-  const initOriginalRef = useRef(savedOriginal)
-  const initModifiedRef = useRef(savedModified)
 
   // Live value refs — always reflect current editor content without React state
   const originalValueRef = useRef(savedOriginal)
   const modifiedValueRef = useRef(savedModified)
 
-  // Incrementing this forces a DiffEditor remount (swap / clear)
-  const [editorKey, setEditorKey] = useState(0)
+  // The seed content plus a remount counter, in one piece of state. Typing does
+  // not touch this (that would reset Monaco's model and lose undo history) —
+  // only swap and clear do, and bumping `key` alongside the values is what
+  // makes the editor pick them up.
+  const [editorSeed, setEditorSeed] = useState({
+    key: 0,
+    original: savedOriginal,
+    modified: savedModified,
+  })
+  const editorKey = editorSeed.key
 
   // ── Visual state ─────────────────────────────────────────────────────────
   const [language, setLanguage] = useState<DiffLanguage>(() =>
@@ -140,8 +153,7 @@ export function DiffCheckerEditor() {
   }, [])
 
   // Diff navigation
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const [lineChanges, setLineChanges] = useState<any[]>([])
+  const [lineChanges, setLineChanges] = useState<MonacoEditor.ILineChange[]>([])
   const [currentDiffIndex, setCurrentDiffIndex] = useState(-1)
 
   // Display options (persisted)
@@ -223,9 +235,6 @@ export function DiffCheckerEditor() {
     const orig = originalValueRef.current
     const mod = modifiedValueRef.current
 
-    // Update init refs so the remounted DiffEditor gets swapped content
-    initOriginalRef.current = mod
-    initModifiedRef.current = orig
     originalValueRef.current = mod
     modifiedValueRef.current = orig
 
@@ -233,12 +242,11 @@ export function DiffCheckerEditor() {
     persistLS('diff-checker:modifiedSnapshot', orig)
     setContentForHeight([mod, orig])
     updateDetectedLanguage(mod, orig)
-    setEditorKey((k) => k + 1)
+    // Remount the DiffEditor with the swapped content.
+    setEditorSeed((s) => ({ key: s.key + 1, original: mod, modified: orig }))
   }, [updateDetectedLanguage])
 
   const handleClearAll = useCallback(() => {
-    initOriginalRef.current = ''
-    initModifiedRef.current = ''
     originalValueRef.current = ''
     modifiedValueRef.current = ''
 
@@ -248,7 +256,7 @@ export function DiffCheckerEditor() {
     setLanguage('plaintext')
     setLineChanges([])
     setCurrentDiffIndex(-1)
-    setEditorKey((k) => k + 1)
+    setEditorSeed((s) => ({ key: s.key + 1, original: '', modified: '' }))
   }, [])
 
   const syncSplitWidths = useCallback(() => {
@@ -405,8 +413,8 @@ export function DiffCheckerEditor() {
           key={editorKey}
           height="100%"
           width="100%"
-          original={initOriginalRef.current}
-          modified={initModifiedRef.current}
+          original={editorSeed.original}
+          modified={editorSeed.modified}
           originalLanguage={language}
           modifiedLanguage={language}
           originalModelPath="inmemory://model/original.txt"

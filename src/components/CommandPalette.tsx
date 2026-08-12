@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { Search, X, ExternalLink } from 'lucide-react'
 import { cn } from '../lib/cn'
 import { useLocale, type TranslationKey } from '../lib/i18n'
+import { useModalBehaviour } from '../lib/useModalBehaviour'
 
 export type PaletteItem = {
   id: string
@@ -23,7 +24,29 @@ interface CommandPaletteProps {
 const RECENT_KEY = 'commandPalette:recent'
 const MAX_RECENT = 5
 
+/**
+ * Owns the modal behaviour (scroll lock, focus trap, focus restore), which has
+ * to outlive the panel so focus can be handed back after it closes.
+ *
+ * The panel itself is unmounted while closed rather than rendering `null` from
+ * inside, so its query and highlight reset by construction — previously an
+ * effect had to clear them on every open.
+ */
 export default function CommandPalette({ open, onClose, items }: CommandPaletteProps) {
+  const panelRef = useRef<HTMLDivElement>(null)
+  useModalBehaviour(panelRef, open, onClose)
+
+  if (!open) return null
+  return <CommandPalettePanel panelRef={panelRef} onClose={onClose} items={items} />
+}
+
+type PanelProps = {
+  panelRef: React.RefObject<HTMLDivElement | null>
+  onClose: () => void
+  items: PaletteItem[]
+}
+
+function CommandPalettePanel({ panelRef, onClose, items }: PanelProps) {
   const { t } = useLocale()
   const navigate = useNavigate()
   const [query, setQuery] = useState('')
@@ -63,19 +86,14 @@ export default function CommandPalette({ open, onClose, items }: CommandPaletteP
   }, [hasQuery, query, items, recentIds])
 
   useEffect(() => {
-    if (open) {
-      setQuery('')
-      setActiveIndex(0)
-      const timer = setTimeout(() => inputRef.current?.focus(), 50)
-      return () => clearTimeout(timer)
-    }
-  }, [open])
+    const timer = setTimeout(() => inputRef.current?.focus(), 50)
+    return () => clearTimeout(timer)
+  }, [])
 
   useEffect(() => {
-    if (!open) return
     const el = listRef.current?.querySelector<HTMLElement>(`[data-palette-index="${activeIndex}"]`)
     el?.scrollIntoView({ block: 'nearest' })
-  }, [activeIndex, open])
+  }, [activeIndex])
 
   const handleSelect = useCallback(
     (item: PaletteItem) => {
@@ -119,8 +137,6 @@ export default function CommandPalette({ open, onClose, items }: CommandPaletteP
     }
   }
 
-  if (!open) return null
-
   const showRecentHeader = !hasQuery && validRecentCount > 0
 
   return (
@@ -140,6 +156,7 @@ export default function CommandPalette({ open, onClose, items }: CommandPaletteP
 
       {/* Palette panel */}
       <div
+        ref={panelRef}
         className={cn(
           'relative z-10 w-full max-w-xl',
           'rounded-xl border border-hairline bg-surface-1 shadow-2xl',

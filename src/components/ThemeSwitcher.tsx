@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { cn } from '../lib/cn'
 import { useLocale } from '../lib/i18n'
-import { useTheme, type ThemeContextValue } from '../lib/ThemeProvider'
+import { useTheme, type ThemeContextValue } from '../lib/ThemeContext'
 import type { ThemePreference } from '../lib/theme'
 
 function SunIcon({ className }: { className?: string }) {
@@ -76,10 +76,17 @@ function CheckIcon({ className }: { className?: string }) {
   )
 }
 
-function triggerIcon(preference: ThemePreference, resolvedScheme: ThemeContextValue['resolvedScheme']) {
-  if (preference === 'light') return SunIcon
-  if (preference === 'dark') return MoonIcon
-  return resolvedScheme === 'dark' ? MoonIcon : SunIcon
+function TriggerIcon({
+  preference,
+  resolvedScheme,
+  className,
+}: {
+  preference: ThemePreference
+  resolvedScheme: ThemeContextValue['resolvedScheme']
+  className?: string
+}) {
+  const isDark = preference === 'dark' || (preference === 'system' && resolvedScheme === 'dark')
+  return isDark ? <MoonIcon className={className} /> : <SunIcon className={className} />
 }
 
 const options: Array<{ value: ThemePreference; Icon: typeof SunIcon }> = [
@@ -93,8 +100,6 @@ export function ThemeSwitcher() {
   const { preference, resolvedScheme, setPreference } = useTheme()
   const [open, setOpen] = useState(false)
   const rootRef = useRef<HTMLDivElement>(null)
-
-  const TriggerIcon = triggerIcon(preference, resolvedScheme)
 
   useEffect(() => {
     if (!open) return
@@ -126,7 +131,11 @@ export function ThemeSwitcher() {
           'outline-none focus-visible:ds-focus-ring'
         )}
       >
-        <TriggerIcon className="h-4 w-4" />
+        <TriggerIcon
+          preference={preference}
+          resolvedScheme={resolvedScheme}
+          className="h-4 w-4"
+        />
       </button>
 
       {open ? (

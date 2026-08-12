@@ -1,33 +1,30 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useMemo } from 'react'
 import { generatePocoCode } from '../utils/pocoGenerator'
 import { useLocalStorageState } from '../../../lib/useLocalStorageState'
+import { useDebouncedValue } from '../../../lib/useDebouncedValue'
+
+function generate(input: string, rootClassName: string): { output: string; error: string | null } {
+  if (input.trim() === '') return { output: '', error: null }
+
+  try {
+    return { output: generatePocoCode(input, rootClassName.trim() || 'Root'), error: null }
+  } catch (err) {
+    return { output: '', error: err instanceof Error ? err.message : 'Invalid JSON' }
+  }
+}
 
 export function usePocoGenerator() {
   const [input, setInputState] = useLocalStorageState('poco-generator:input', '')
-  const [output, setOutput] = useState('')
-  const [error, setError] = useState<string | null>(null)
-  const [rootClassName, setRootClassName] = useLocalStorageState('poco-generator:rootClassName', 'Root')
+  const [rootClassName, setRootClassName] = useLocalStorageState(
+    'poco-generator:rootClassName',
+    'Root',
+  )
+  const debouncedInput = useDebouncedValue(input)
 
-  const applyGenerate = useCallback((nextInput: string, nextRootClassName: string) => {
-    if (nextInput.trim() === '') {
-      setOutput('')
-      setError(null)
-      return
-    }
-
-    try {
-      const result = generatePocoCode(nextInput, nextRootClassName.trim() || 'Root')
-      setOutput(result)
-      setError(null)
-    } catch (err) {
-      setOutput('')
-      setError(err instanceof Error ? err.message : 'Invalid JSON')
-    }
-  }, [])
-
-  useEffect(() => {
-    applyGenerate(input, rootClassName)
-  }, [input, rootClassName, applyGenerate])
+  const { output, error } = useMemo(
+    () => generate(debouncedInput, rootClassName),
+    [debouncedInput, rootClassName],
+  )
 
   const clear = useCallback(() => {
     setInputState('')

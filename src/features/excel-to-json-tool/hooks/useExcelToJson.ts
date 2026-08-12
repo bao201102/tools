@@ -1,169 +1,91 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useMemo, useState } from 'react'
 import * as XLSX from 'xlsx'
+import { useLocalStorageState } from '../../../lib/useLocalStorageState'
+import { useDebouncedValue } from '../../../lib/useDebouncedValue'
+import { parseDelimitedText, rowsToObjects } from '../../../lib/csv'
 
 function parseErrorMessage(error: unknown): string {
   return error instanceof Error ? error.message : 'Error processing spreadsheet'
 }
 
-function parseCSV(text: string, delimiter: string): string[][] {
-  const rows: string[][] = []
-  let row: string[] = []
-  let field = ''
-  let inQuotes = false
+type Converted = { output: string; error: string | null }
 
-  for (let i = 0; i < text.length; i++) {
-    const char = text[i]
-    const nextChar = text[i + 1]
+const EMPTY: Converted = { output: '', error: null }
 
-    if (inQuotes) {
-      if (char === '"') {
-        if (nextChar === '"') {
-          field += '"'
-          i++
-        } else {
-          inQuotes = false
-        }
-      } else {
-        field += char
-      }
-    } else {
-      if (char === '"') {
-        inQuotes = true
-      } else if (char === delimiter) {
-        row.push(field)
-        field = ''
-      } else if (char === '\r' || char === '\n') {
-        row.push(field)
-        field = ''
-        if (row.length > 0 || (row.length === 1 && row[0] !== '')) {
-          rows.push(row)
-        }
-        row = []
-        if (char === '\r' && nextChar === '\n') {
-          i++
-        }
-      } else {
-        field += char
-      }
-    }
+/** Spreadsheet apps put tab-separated text on the clipboard. */
+export function convertPastedTable(text: string): Converted {
+  if (text.trim() === '') return EMPTY
+
+  try {
+    const rows = parseDelimitedText(text, '\t')
+    if (rows.length === 0) return EMPTY
+
+    return { output: JSON.stringify(rowsToObjects(rows), null, 2), error: null }
+  } catch (e) {
+    return { output: '', error: parseErrorMessage(e) }
   }
-
-  if (field !== '' || row.length > 0) {
-    row.push(field)
-    rows.push(row)
-  }
-
-  return rows.filter((r) => r.length > 0)
 }
-
-function parseValue(val: string): unknown {
-  const trimmed = val.trim()
-  if (trimmed === 'true') return true
-  if (trimmed === 'false') return false
-  if (trimmed === 'null') return null
-  if (trimmed === '') return ''
-  
-  if (/^-?\d+(\.\d+)?$/.test(trimmed)) {
-    if (trimmed.length > 1 && trimmed.startsWith('0') && !trimmed.startsWith('0.')) {
-      return trimmed
-    }
-    const num = Number(trimmed)
-    if (!isNaN(num)) return num
-  }
-  
-  return val
-}
-
-import { useLocalStorageState } from '../../../lib/useLocalStorageState'
 
 export function useExcelToJson() {
-  const [output, setOutput] = useState('')
-  const [error, setError] = useState<string | null>(null)
-  const [fileName, setFileName] = useState<string | null>(null)
   const [pastedText, setPastedText] = useLocalStorageState('excel-to-json:pastedText', '')
+  const [fileName, setFileName] = useState<string | null>(null)
+  // A parsed workbook has no text input to derive from, so it is the one result
+  // that genuinely has to be stored.
+  const [fileResult, setFileResult] = useState<Converted | null>(null)
+
+  const debouncedPastedText = useDebouncedValue(pastedText)
+
+  const pasteResult = useMemo(
+    () => convertPastedTable(debouncedPastedText),
+    [debouncedPastedText],
+  )
+
+  // Whichever source the user last supplied wins; pasting clears the file result.
+  const { output, error } = fileResult ?? pasteResult
 
   const handleFileUpload = useCallback((file: File) => {
     setFileName(file.name)
     const reader = new FileReader()
+
     reader.onload = (e) => {
       try {
         const data = new Uint8Array(e.target?.result as ArrayBuffer)
         const workbook = XLSX.read(data, { type: 'array' })
-        
-        const result: Record<string, any[]> = {}
-        workbook.SheetNames.forEach((sheetName) => {
-          const worksheet = workbook.Sheets[sheetName]
-          const json = XLSX.utils.sheet_to_json(worksheet, { defval: "" })
-          result[sheetName] = json
-        })
 
-        if (workbook.SheetNames.length === 1) {
-          setOutput(JSON.stringify(result[workbook.SheetNames[0]], null, 2))
-        } else {
-          setOutput(JSON.stringify(result, null, 2))
+        const sheets: Record<string, unknown[]> = {}
+        for (const sheetName of workbook.SheetNames) {
+          sheets[sheetName] = XLSX.utils.sheet_to_json(workbook.Sheets[sheetName], { defval: '' })
         }
-        setError(null)
+
+        // A single-sheet workbook is returned as a bare array — nesting it under
+        // its sheet name would just be noise.
+        const payload =
+          workbook.SheetNames.length === 1 ? sheets[workbook.SheetNames[0]] : sheets
+
+        setFileResult({ output: JSON.stringify(payload, null, 2), error: null })
       } catch (err) {
-        setOutput('')
-        setError(parseErrorMessage(err))
+        setFileResult({ output: '', error: parseErrorMessage(err) })
       }
     }
+
     reader.onerror = () => {
-      setOutput('')
-      setError('Error reading file')
+      setFileResult({ output: '', error: 'Error reading file' })
     }
+
     reader.readAsArrayBuffer(file)
   }, [])
 
-  const handlePasteConvert = useCallback((text: string) => {
-    if (text.trim() === '') {
-      setOutput('')
-      setError(null)
-      return
-    }
-
-    try {
-      const rows = parseCSV(text, '\t')
-      if (rows.length === 0) {
-        setOutput('')
-        setError(null)
-        return
-      }
-
-      const headers = rows[0].map(h => h.trim())
-      const dataRows = rows.slice(1)
-
-      const result = dataRows.map(row => {
-        const obj: Record<string, any> = {}
-        headers.forEach((header, index) => {
-          if (header) {
-            const cellValue = index < row.length ? row[index] : ''
-            obj[header] = parseValue(cellValue)
-          }
-        })
-        return obj
-      })
-
-      setOutput(JSON.stringify(result, null, 2))
-      setError(null)
-    } catch (e) {
-      setOutput('')
-      setError(parseErrorMessage(e))
-    }
-  }, [])
-
-  useEffect(() => {
-    if (pastedText.trim() !== '') {
-      handlePasteConvert(pastedText)
-    } else {
-      setOutput('')
-      setError(null)
-    }
-  }, [pastedText, handlePasteConvert])
+  const handlePastedTextChange = useCallback(
+    (value: React.SetStateAction<string>) => {
+      setFileResult(null)
+      setFileName(null)
+      setPastedText(value)
+    },
+    [setPastedText],
+  )
 
   const clear = useCallback(() => {
-    setOutput('')
-    setError(null)
+    setFileResult(null)
     setFileName(null)
     setPastedText('')
   }, [setPastedText])
@@ -173,9 +95,8 @@ export function useExcelToJson() {
     error,
     fileName,
     pastedText,
-    setPastedText,
+    setPastedText: handlePastedTextChange,
     handleFileUpload,
-    handlePasteConvert,
     clear,
   }
 }

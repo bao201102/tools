@@ -1,5 +1,6 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useMemo } from 'react'
 import { useLocalStorageState } from '../../../lib/useLocalStorageState'
+import { useDebouncedValue } from '../../../lib/useDebouncedValue'
 
 const PROTO_MEMBER_ATTR_RE = /\[ProtoMember\s*\(\s*\d*\s*\)\s*\]\s*/g
 
@@ -12,11 +13,9 @@ export function processCsharpProtoRemoveSource(input: string): string {
 
 export function useCsharpProtoRemove() {
   const [input, setInput] = useLocalStorageState('csharp-proto-remove:input', '')
-  const [output, setOutput] = useState('')
+  const debouncedInput = useDebouncedValue(input)
 
-  useEffect(() => {
-    setOutput(processCsharpProtoRemoveSource(input))
-  }, [input])
+  const output = useMemo(() => processCsharpProtoRemoveSource(debouncedInput), [debouncedInput])
 
   const clear = useCallback(() => {
     setInput('')

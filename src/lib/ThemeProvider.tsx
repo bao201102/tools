@@ -1,4 +1,5 @@
-import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from 'react'
+import { useEffect, useMemo, useState, type ReactNode } from 'react'
+import { ThemeContext, type ThemeContextValue } from './ThemeContext'
 import {
   applyThemeToDocument,
   detectThemePreference,
@@ -8,32 +9,21 @@ import {
   type ThemePreference,
 } from './theme'
 
-export type ThemeContextValue = {
-  preference: ThemePreference
-  resolvedScheme: 'light' | 'dark'
-  setPreference: (preference: ThemePreference) => void
-}
-
-export const ThemeContext = createContext<ThemeContextValue | null>(null)
-
-export function useTheme(): ThemeContextValue {
-  const ctx = useContext(ThemeContext)
-  if (!ctx) throw new Error('useTheme must be used within ThemeProvider')
-  return ctx
-}
-
 export function ThemeProvider({ children }: { children: ReactNode }) {
   const [preference, setPreferenceState] = useState<ThemePreference>(detectThemePreference)
   const [systemScheme, setSystemScheme] = useState<'light' | 'dark'>(getSystemColorScheme)
 
+  // Writing the class onto <html> is a genuine external side effect, so it
+  // belongs in an effect — unlike the derived values below.
   useEffect(() => {
-    applyThemeToDocument(preference)
+    applyThemeToDocument(preference, systemScheme)
   }, [preference, systemScheme])
 
   useEffect(() => {
     const media = window.matchMedia('(prefers-color-scheme: dark)')
-    const onChange = () => setSystemScheme(media.matches ? 'dark' : 'light')
-    onChange()
+    const onChange = (event: MediaQueryListEvent) => {
+      setSystemScheme(event.matches ? 'dark' : 'light')
+    }
     media.addEventListener('change', onChange)
     return () => media.removeEventListener('change', onChange)
   }, [])
@@ -41,7 +31,7 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
   const value = useMemo<ThemeContextValue>(
     () => ({
       preference,
-      resolvedScheme: resolveColorScheme(preference),
+      resolvedScheme: resolveColorScheme(preference, systemScheme),
       setPreference: (next) => {
         try {
           window.localStorage.setItem(THEME_STORAGE_KEY, next)
@@ -51,7 +41,7 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
         setPreferenceState(next)
       },
     }),
-    [preference, systemScheme]
+    [preference, systemScheme],
   )
 
   return <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>

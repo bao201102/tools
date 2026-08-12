@@ -22,12 +22,22 @@ export function getSystemColorScheme(): 'light' | 'dark' {
   return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
 }
 
-export function resolveColorScheme(preference: ThemePreference): 'light' | 'dark' {
-  if (preference === 'system') return getSystemColorScheme()
-  return preference
+/**
+ * `systemScheme` is passed in rather than read here so this stays a pure
+ * function of its arguments — callers that memoise on it then have a dependency
+ * that actually reflects what the result depends on.
+ */
+export function resolveColorScheme(
+  preference: ThemePreference,
+  systemScheme: 'light' | 'dark' = getSystemColorScheme(),
+): 'light' | 'dark' {
+  return preference === 'system' ? systemScheme : preference
 }
 
-export function applyThemeToDocument(preference: ThemePreference): void {
-  const resolved = resolveColorScheme(preference)
+export function applyThemeToDocument(
+  preference: ThemePreference,
+  systemScheme?: 'light' | 'dark',
+): void {
+  const resolved = resolveColorScheme(preference, systemScheme)
   document.documentElement.classList.toggle('dark', resolved === 'dark')
 }

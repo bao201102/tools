@@ -3,9 +3,15 @@ dist
 .git
 .github
 .cursor
+.claude
 *.md
 .env
 .env.*
 prompt-plan.txt
 tsconfig.tsbuildinfo
 *.log
+
+# Regenerated inside the image by `prebuild` (copy-static-deps) — no need to
+# ship ~17 MB of vendor assets through the build context.
+public/monaco
+public/mermaid

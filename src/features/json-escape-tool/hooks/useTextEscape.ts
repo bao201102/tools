@@ -1,5 +1,6 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useMemo, useState } from 'react'
 import { useLocalStorageState } from '../../../lib/useLocalStorageState'
+import { useDebouncedValue } from '../../../lib/useDebouncedValue'
 import {
   countEscapeableChars,
   escapePlainText,
@@ -38,24 +39,24 @@ const INITIAL_ESCAPE_STATE = initialState()
 
 export function useTextEscape() {
   const [input, setInput] = useLocalStorageState('json-escape:input', INITIAL_ESCAPE_STATE.input)
-  const [output, setOutput] = useState(INITIAL_ESCAPE_STATE.output)
   const [wrapInQuotes, setWrapInQuotes] = useLocalStorageState('json-escape:wrapInQuotes', INITIAL_ESCAPE_STATE.wrapInQuotes)
   const [escapeUnicode, setEscapeUnicode] = useLocalStorageState('json-escape:escapeUnicode', INITIAL_ESCAPE_STATE.escapeUnicode)
-  const [stats, setStats] = useState<EscapeStats | null>(INITIAL_ESCAPE_STATE.stats)
+  const debouncedInput = useDebouncedValue(input)
+
+  // The Escape button skips the debounce. Storing the value it was pressed on
+  // (rather than a flag) means the next keystroke makes it stale on its own,
+  // and the live preview takes over again — no effect needed to reset it.
+  const [escapedNow, setEscapedNow] = useState<string | null>(null)
+  const source = escapedNow === input ? input : debouncedInput
+
+  const { output, stats } = useMemo(
+    () => computeEscapeState(source, { wrapInQuotes, escapeUnicode }),
+    [source, wrapInQuotes, escapeUnicode],
+  )
 
   const escape = useCallback(() => {
-    const options = { wrapInQuotes, escapeUnicode }
-    const { output: nextOutput, stats: nextStats } = computeEscapeState(input, options)
-    setOutput(nextOutput)
-    setStats(nextStats)
-  }, [input, wrapInQuotes, escapeUnicode])
-
-  useEffect(() => {
-    const options = { wrapInQuotes, escapeUnicode }
-    const { output: nextOutput, stats: nextStats } = computeEscapeState(input, options)
-    setOutput(nextOutput)
-    setStats(nextStats)
-  }, [input, wrapInQuotes, escapeUnicode])
+    setEscapedNow(input)
+  }, [input])
 
   const clear = useCallback(() => {
     setInput('')

@@ -2,7 +2,6 @@ import { useAdaptiveEditorHeight } from '../../../lib/useAdaptiveEditorHeight'
 import { useLocale } from '../../../lib/i18n'
 import { useJwtDecoder } from '../hooks/useJwtDecoder'
 import { Button, Textarea, CopyButton } from '../../../components/ui'
-import { usePageTitle } from '../../../lib/usePageTitle'
 import { CheckCircle, AlertCircle, Clock, Calendar } from 'lucide-react'
 
 type OutputPaneProps = {
@@ -43,7 +42,6 @@ function formatDate(date: Date): string {
 
 export function JwtDecoderEditor() {
   const { t } = useLocale()
-  usePageTitle('tool.jwt.title')
   const { input, setInput, headerOutput, payloadOutput, error, tokenInfo, clear } = useJwtDecoder()
   const editorHeight = useAdaptiveEditorHeight(headerOutput, payloadOutput)
 

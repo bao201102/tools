@@ -1,0 +1,149 @@
+{
+  "siteName": "NUB Portal",
+  "baseUrl": "https://nub.io.vn",
+  "locale": "en",
+  "twitterCard": "summary",
+  "image": "/logo-1024.jpg",
+  "routes": [
+    {
+      "path": "/",
+      "title": "NUB Portal — Free Online Developer Tools",
+      "description": "A fast, private toolbox for developers: JSON formatter, diff checker, JWT decoder, Base64 encoder, YAML/CSV/Excel converters and C# POCO generators. Everything runs in your browser — nothing is uploaded.",
+      "priority": "1.0",
+      "changefreq": "weekly"
+    },
+    {
+      "path": "/json",
+      "title": "JSON Formatter & Validator",
+      "description": "Format, validate and minify JSON in your browser. Pretty-print as you type, sort keys, inspect structure in a tree view and extract fields — with instant error messages and no upload.",
+      "priority": "0.9",
+      "changefreq": "monthly"
+    },
+    {
+      "path": "/diff-checker",
+      "title": "Text & Code Diff Checker",
+      "description": "Compare two texts or code files side-by-side or inline. Syntax-aware highlighting for JSON, XML, YAML, SQL, C#, JavaScript and TypeScript, with whitespace-insensitive matching and diff navigation.",
+      "priority": "0.9",
+      "changefreq": "monthly"
+    },
+    {
+      "path": "/jwt-decoder",
+      "title": "JWT Decoder",
+      "description": "Decode JSON Web Token header and payload instantly. Inspect claims, issued-at and expiry times entirely offline — your token never leaves the browser.",
+      "priority": "0.9",
+      "changefreq": "monthly"
+    },
+    {
+      "path": "/json-escape",
+      "title": "JSON Escape",
+      "description": "Escape text into a valid JSON string literal. Handles quotes, backslashes, newlines, tabs and Unicode so the result can be embedded safely in JSON.",
+      "priority": "0.8",
+      "changefreq": "monthly"
+    },
+    {
+      "path": "/json-unescape",
+      "title": "JSON Unescape",
+      "description": "Turn an escaped JSON string back into readable text. Resolves \\n, \\t, \\\", \\\\ and \\uXXXX sequences in one step.",
+      "priority": "0.8",
+      "changefreq": "monthly"
+    },
+    {
+      "path": "/json-unquote",
+      "title": "Unquote JSON",
+      "description": "Strip the surrounding quotes and escaping from a stringified JSON payload to get the raw JSON object back — useful for logs and API traces.",
+      "priority": "0.8",
+      "changefreq": "monthly"
+    },
+    {
+      "path": "/markdown-preview",
+      "title": "Markdown Preview",
+      "description": "Write Markdown and see it rendered live, with syntax-highlighted code blocks, Mermaid diagrams, image lightbox and synchronised scrolling.",
+      "priority": "0.8",
+      "changefreq": "monthly"
+    },
+    {
+      "path": "/letter-count",
+      "title": "Letter & Word Counter",
+      "description": "Count characters, words, sentences and paragraphs in real time. Includes reading time, character frequency analysis and keyword density.",
+      "priority": "0.8",
+      "changefreq": "monthly"
+    },
+    {
+      "path": "/json-to-yaml",
+      "title": "JSON to YAML Converter",
+      "description": "Convert JSON into clean, readable YAML with validation as you type. Handles nested objects, arrays and multi-line strings.",
+      "priority": "0.8",
+      "changefreq": "monthly"
+    },
+    {
+      "path": "/yaml-to-json",
+      "title": "YAML to JSON Converter",
+      "description": "Convert YAML into formatted JSON with syntax validation. Supports anchors, multi-document files and comments.",
+      "priority": "0.8",
+      "changefreq": "monthly"
+    },
+    {
+      "path": "/json-to-csv",
+      "title": "JSON to CSV Converter",
+      "description": "Turn a JSON array into CSV with a configurable delimiter and optional header row. Nested values are serialised and quoting follows RFC 4180.",
+      "priority": "0.8",
+      "changefreq": "monthly"
+    },
+    {
+      "path": "/csv-to-json",
+      "title": "CSV to JSON Converter",
+      "description": "Convert CSV or TSV into a structured JSON array. Handles quoted fields, embedded delimiters and newlines, with automatic type detection.",
+      "priority": "0.8",
+      "changefreq": "monthly"
+    },
+    {
+      "path": "/json-to-excel",
+      "title": "JSON to Excel (XLSX) Converter",
+      "description": "Export JSON data to a downloadable Excel .xlsx workbook. Nested objects are flattened into columns automatically — conversion happens locally.",
+      "priority": "0.8",
+      "changefreq": "monthly"
+    },
+    {
+      "path": "/excel-to-json",
+      "title": "Excel to JSON Converter",
+      "description": "Convert an .xlsx or .xls spreadsheet — or pasted table data — into JSON. Drag and drop a file; parsing runs entirely in your browser.",
+      "priority": "0.8",
+      "changefreq": "monthly"
+    },
+    {
+      "path": "/encoder",
+      "title": "Base64 & URL Encoder / Decoder",
+      "description": "Encode and decode Base64 and URL-encoded text in both directions, with full Unicode support and instant results.",
+      "priority": "0.8",
+      "changefreq": "monthly"
+    },
+    {
+      "path": "/json-to-csharp",
+      "title": "JSON to C# POCO Generator",
+      "description": "Generate C# class definitions from a JSON sample. Infers types, handles nested objects and arrays, and can emit [JsonPropertyName] attributes.",
+      "priority": "0.8",
+      "changefreq": "monthly"
+    },
+    {
+      "path": "/sql-to-csharp",
+      "title": "SQL Table to C# POCO Generator",
+      "description": "Paste a CREATE TABLE statement and get a matching C# POCO class. Maps SQL column types to CLR types and preserves nullability.",
+      "priority": "0.8",
+      "changefreq": "monthly"
+    },
+    {
+      "path": "/csharp-proto",
+      "title": "C# ProtoMember Reindex",
+      "description": "Re-sequence [ProtoMember(n)] attributes across C# properties so protobuf-net tags stay contiguous after edits.",
+      "priority": "0.7",
+      "changefreq": "monthly"
+    },
+    {
+      "path": "/csharp-proto-remove",
+      "title": "C# Remove ProtoMember",
+      "description": "Strip every [ProtoMember] attribute from a C# class in one pass, leaving the rest of the code untouched.",
+      "priority": "0.7",
+      "changefreq": "monthly"
+    }
+  ]
+}

@@ -1,148 +1,62 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useMemo } from 'react'
 import { useLocalStorageState } from '../../../lib/useLocalStorageState'
+import { useDebouncedValue } from '../../../lib/useDebouncedValue'
+
+import { parseCellValue, parseDelimitedText, rowsToObjects } from '../../../lib/csv'
 
 function parseErrorMessage(error: unknown): string {
   return error instanceof Error ? error.message : 'Invalid CSV format'
 }
 
-function parseCSV(text: string, delimiter: string): string[][] {
-  const rows: string[][] = []
-  let row: string[] = []
-  let field = ''
-  let inQuotes = false
+/** Re-exported so the tool's own tests keep a stable entry point. */
+export const parseCSV = parseDelimitedText
+export const parseValue = parseCellValue
 
-  for (let i = 0; i < text.length; i++) {
-    const char = text[i]
-    const nextChar = text[i + 1]
+export function convertCsvToJson(
+  value: string,
+  delimiter: string,
+  firstRowIsHeaders: boolean,
+): { output: string; error: string | null } {
+  if (value.trim() === '') return { output: '', error: null }
 
-    if (inQuotes) {
-      if (char === '"') {
-        if (nextChar === '"') {
-          // Escaped double quote
-          field += '"'
-          i++ // skip next quote
-        } else {
-          // Closing quote
-          inQuotes = false
-        }
-      } else {
-        field += char
-      }
-    } else {
-      if (char === '"') {
-        inQuotes = true
-      } else if (char === delimiter) {
-        row.push(field)
-        field = ''
-      } else if (char === '\r' || char === '\n') {
-        row.push(field)
-        field = ''
-        if (row.length > 0 || (row.length === 1 && row[0] !== '')) {
-          rows.push(row)
-        }
-        row = []
-        if (char === '\r' && nextChar === '\n') {
-          i++ // skip \n
-        }
-      } else {
-        field += char
-      }
-    }
-  }
+  try {
+    const parsedRows = parseCSV(value, delimiter)
+    if (parsedRows.length === 0) return { output: '', error: null }
 
-  if (field !== '' || row.length > 0) {
-    row.push(field)
-    rows.push(row)
-  }
-
-  return rows.filter((r) => r.length > 0)
-}
-
-function parseValue(val: string): unknown {
-  const trimmed = val.trim()
-  if (trimmed === 'true') return true
-  if (trimmed === 'false') return false
-  if (trimmed === 'null') return null
-  if (trimmed === '') return ''
-  
-  // If it's a number, convert it. Avoid converting strings with leading zeros (except '0' itself)
-  if (/^-?\d+(\.\d+)?$/.test(trimmed)) {
-    if (trimmed.length > 1 && trimmed.startsWith('0') && !trimmed.startsWith('0.')) {
-      return trimmed // phone number or zip code
-    }
-    const num = Number(trimmed)
-    if (!isNaN(num)) return num
-  }
-  
-  return val
-}
-
-export function useCsvToJson() {
-  const [input, setInput] = useLocalStorageState('csv-to-json:input', '')
-  const [output, setOutput] = useState('')
-  const [error, setError] = useState<string | null>(null)
-  const [delimiter, setDelimiter] = useLocalStorageState('csv-to-json:delimiter', ',')
-  const [firstRowIsHeaders, setFirstRowIsHeaders] = useLocalStorageState('csv-to-json:firstRowIsHeaders', true)
-
-  const convertCsvToJson = useCallback((value: string, currentDelimiter: string, currentFirstRowIsHeaders: boolean) => {
-    if (value.trim() === '') {
-      setOutput('')
-      setError(null)
-      return
-    }
-
-    try {
-      const parsedRows = parseCSV(value, currentDelimiter)
-      if (parsedRows.length === 0) {
-        setOutput('')
-        setError(null)
-        return
-      }
-
-      let result: any
-
-      if (currentFirstRowIsHeaders) {
-        const headers = parsedRows[0].map((h) => h.trim())
-        const dataRows = parsedRows.slice(1)
-
-        result = dataRows.map((row) => {
-          const obj: Record<string, any> = {}
-          headers.forEach((header, index) => {
-            if (header) {
-              const cellValue = index < row.length ? row[index] : ''
-              obj[header] = parseValue(cellValue)
-            }
-          })
-          return obj
-        })
-      } else {
-        result = parsedRows.map((row) => {
-          const obj: Record<string, any> = {}
+    const result: Record<string, unknown>[] = firstRowIsHeaders
+      ? rowsToObjects(parsedRows)
+      : parsedRows.map((row) => {
+          const obj: Record<string, unknown> = {}
           row.forEach((cell, index) => {
             obj[`column${index + 1}`] = parseValue(cell)
           })
           return obj
         })
-      }
 
-      setOutput(JSON.stringify(result, null, 2))
-      setError(null)
-    } catch (e) {
-      setOutput('')
-      setError(parseErrorMessage(e))
-    }
-  }, [])
+    return { output: JSON.stringify(result, null, 2), error: null }
+  } catch (e) {
+    return { output: '', error: parseErrorMessage(e) }
+  }
+}
 
-  useEffect(() => {
-    convertCsvToJson(input, delimiter, firstRowIsHeaders)
-  }, [input, delimiter, firstRowIsHeaders, convertCsvToJson])
+export function useCsvToJson() {
+  const [input, setInput] = useLocalStorageState('csv-to-json:input', '')
+  const [delimiter, setDelimiter] = useLocalStorageState('csv-to-json:delimiter', ',')
+  const [firstRowIsHeaders, setFirstRowIsHeaders] = useLocalStorageState(
+    'csv-to-json:firstRowIsHeaders',
+    true,
+  )
+  const debouncedInput = useDebouncedValue(input)
+
+  const { output, error } = useMemo(
+    () => convertCsvToJson(debouncedInput, delimiter, firstRowIsHeaders),
+    [debouncedInput, delimiter, firstRowIsHeaders],
+  )
 
   const clear = useCallback(() => {
     setInput('')
     setDelimiter(',')
     setFirstRowIsHeaders(true)
-    setOutput('')
-    setError(null)
   }, [setInput, setDelimiter, setFirstRowIsHeaders])
 
   return {

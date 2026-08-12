@@ -3,8 +3,16 @@ import { useAdaptiveEditorHeight } from '../../../lib/useAdaptiveEditorHeight'
 import { useLocale } from '../../../lib/i18n'
 import { useLocalStorageState } from '../../../lib/useLocalStorageState'
 import { Button, Textarea } from '../../../components/ui'
-import { Copy, Trash2, Sparkles, FileText, CaseSensitive, BookOpen, Volume2 } from 'lucide-react'
-import { usePageTitle } from '../../../lib/usePageTitle'
+import {
+  Copy,
+  Trash2,
+  Sparkles,
+  FileText,
+  CaseSensitive,
+  BookOpen,
+  Volume2,
+  type LucideIcon,
+} from 'lucide-react'
 
 // Helper functions for statistics
 const getWordCount = (str: string) => {
@@ -73,7 +81,7 @@ const getWordDensity = (str: string) => {
 
 // Case transformations
 const toTitleCase = (str: string) => {
-  return str.replace(/([^\s:\-]+)/g, (match) => {
+  return str.replace(/([^\s:-]+)/g, (match) => {
     return match.charAt(0).toUpperCase() + match.slice(1).toLowerCase()
   })
 }
@@ -92,7 +100,7 @@ function StatCard({
 }: {
   label: string
   value: number | string
-  icon: any
+  icon: LucideIcon
 }) {
   return (
     <div className="flex flex-col items-center justify-center rounded-lg border border-hairline bg-surface-1 p-2 sm:p-4 text-center transition-all duration-300 hover:border-hairline-strong hover:shadow-md hover:-translate-y-0.5 group">
@@ -154,7 +162,6 @@ function DensityTable({
 
 export function LetterCountEditor() {
   const { t } = useLocale()
-  usePageTitle('tool.letterCount.title')
   const [input, setInput] = useLocalStorageState<string>('letter-count:input', '')
   const [copyState, setCopyState] = useState<'idle' | 'copied'>('idle')
 

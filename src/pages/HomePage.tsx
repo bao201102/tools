@@ -26,6 +26,7 @@ import {
 } from 'lucide-react'
 import { Card } from '../components/ui'
 import { useLocale, type TranslationKey } from '../lib/i18n'
+import { prefetchMonaco, prefetchMonacoWhenIdle } from '../lib/prefetchMonaco'
 
 type InternalTool = {
   kind: 'internal'
@@ -100,6 +101,12 @@ export default function HomePage() {
   const context = useOutletContext<{ navOpen?: boolean }>()
   const isNavOpen = context?.navOpen ?? false
 
+  // Warm Monaco while the user is still scanning the tool list — almost every
+  // tool they can pick from here needs it.
+  useEffect(() => {
+    prefetchMonacoWhenIdle()
+  }, [])
+
   useEffect(() => {
     const handleScroll = (e: Event) => {
       const target = e.target as HTMLElement
@@ -157,7 +164,7 @@ export default function HomePage() {
 
       <div className="relative z-10 mx-auto max-w-content px-4 py-10 sm:px-[var(--ds-spacing-xl)] sm:py-[var(--ds-spacing-section)]">
         <header className="mb-8 sm:mb-[var(--ds-spacing-xxl)] max-w-3xl">
-          <h1 className="mt-2 font-display text-headline sm:text-display-md font-semibold tracking-tight text-ink sm:text-display-lg bg-gradient-to-r from-ink via-ink to-ink-subtle bg-clip-text text-transparent">
+          <h1 className="gradient-heading mt-2 font-display text-headline font-semibold tracking-tight text-ink sm:text-display-md lg:text-display-lg">
             {t('home.title')}
           </h1>
           <p className="mt-[var(--ds-spacing-md)] text-body-lg text-ink-muted">
@@ -184,18 +191,21 @@ export default function HomePage() {
                         <Card interactive className="relative h-full flex flex-col justify-between min-h-[120px] sm:min-h-[160px]">
                           <div>
                             <div className="flex items-center gap-3">
-                              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-hairline bg-surface-2 text-primary group-hover:bg-primary group-hover:text-on-primary group-hover:border-transparent transition-all duration-300">
+                              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-hairline bg-surface-2 text-primary transition-all duration-300 group-hover:border-transparent group-hover:bg-primary group-hover:text-on-primary sm:h-10 sm:w-10">
                                 <tool.icon className="h-5 w-5" />
                               </div>
-                              <h3 className="font-display text-card-title font-medium text-ink transition-colors group-hover:text-primary">
+                              <h3 className="font-display text-body font-medium text-ink transition-colors group-hover:text-primary sm:text-card-title">
                                 {t(tool.titleKey)}
                               </h3>
                             </div>
-                            <p className="mt-[var(--ds-spacing-md)] text-body-sm leading-relaxed text-ink-muted">
+                            {/* Clamped on narrow screens so the two-column grid
+                                stays even — descriptions vary enough in length
+                                to swing card height by ~70px otherwise. */}
+                            <p className="mt-[var(--ds-spacing-md)] line-clamp-3 text-body-sm leading-relaxed text-ink-muted sm:line-clamp-none">
                               {t(tool.descKey)}
                             </p>
                           </div>
-                          <p className="mt-[var(--ds-spacing-lg)] inline-flex items-center gap-1.5 text-button font-medium text-primary">
+                          <p className="mt-[var(--ds-spacing-md)] inline-flex items-center gap-1.5 text-button font-medium text-primary sm:mt-[var(--ds-spacing-lg)]">
                             {t('home.openInNewTab')}
                             <ArrowUpRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" aria-hidden />
                           </p>
@@ -204,23 +214,28 @@ export default function HomePage() {
                     ) : (
                       <Link
                         to={tool.route}
+                        onMouseEnter={prefetchMonaco}
+                        onFocus={prefetchMonaco}
                         className="group block rounded-lg outline-none focus-visible:ds-focus-ring h-full"
                       >
                         <Card interactive className="relative h-full flex flex-col justify-between min-h-[120px] sm:min-h-[160px]">
                           <div>
                             <div className="flex items-center gap-3">
-                              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-hairline bg-surface-2 text-primary group-hover:bg-primary group-hover:text-on-primary group-hover:border-transparent transition-all duration-300">
+                              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-hairline bg-surface-2 text-primary transition-all duration-300 group-hover:border-transparent group-hover:bg-primary group-hover:text-on-primary sm:h-10 sm:w-10">
                                 <tool.icon className="h-5 w-5" />
                               </div>
-                              <h3 className="font-display text-card-title font-medium text-ink transition-colors group-hover:text-primary">
+                              <h3 className="font-display text-body font-medium text-ink transition-colors group-hover:text-primary sm:text-card-title">
                                 {t(tool.titleKey)}
                               </h3>
                             </div>
-                            <p className="mt-[var(--ds-spacing-md)] text-body-sm leading-relaxed text-ink-muted">
+                            {/* Clamped on narrow screens so the two-column grid
+                                stays even — descriptions vary enough in length
+                                to swing card height by ~70px otherwise. */}
+                            <p className="mt-[var(--ds-spacing-md)] line-clamp-3 text-body-sm leading-relaxed text-ink-muted sm:line-clamp-none">
                               {t(tool.descKey)}
                             </p>
                           </div>
-                          <p className="mt-[var(--ds-spacing-lg)] inline-flex items-center gap-1.5 text-button font-medium text-primary">
+                          <p className="mt-[var(--ds-spacing-md)] inline-flex items-center gap-1.5 text-button font-medium text-primary sm:mt-[var(--ds-spacing-lg)]">
                             {t('home.useTool')}
                             <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" aria-hidden />
                           </p>
@@ -238,7 +253,7 @@ export default function HomePage() {
       {/* Scroll to Top Button */}
       <button
         onClick={scrollToTop}
-        className={`fixed bottom-6 right-6 z-40 flex h-11 w-11 items-center justify-center rounded-full border border-hairline bg-surface-1/80 text-ink shadow-lg backdrop-blur-md transition-all duration-300 hover:bg-primary hover:text-white hover:border-transparent hover:scale-110 active:scale-95 ${
+        className={`fixed bottom-6 right-6 z-40 flex h-11 w-11 items-center justify-center rounded-full border border-hairline bg-surface-1/80 text-ink shadow-lg backdrop-blur-md transition-all duration-300 outline-none focus-visible:ds-focus-ring hover:bg-primary hover:text-on-primary hover:border-transparent hover:scale-110 active:scale-95 ${
           showScrollTop && !isNavOpen
             ? 'pointer-events-auto opacity-100 translate-y-0'
             : 'pointer-events-none opacity-0 translate-y-4'

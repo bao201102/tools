@@ -1,5 +1,6 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useMemo } from 'react'
 import { useLocalStorageState } from '../../../lib/useLocalStorageState'
+import { useDebouncedValue } from '../../../lib/useDebouncedValue'
 
 type Mode = 'base64' | 'url'
 type Direction = 'encode' | 'decode'
@@ -45,25 +46,20 @@ function processValue(input: string, mode: Mode, direction: Direction): { output
 
 export function useEncoder() {
   const [input, setInputState] = useLocalStorageState('encoder:input', '')
-  const [output, setOutput] = useState('')
-  const [error, setError] = useState<string | null>(null)
   const [mode, setModeState] = useLocalStorageState<Mode>('encoder:mode', 'base64')
-  const [direction, setDirectionState] = useLocalStorageState<Direction>('encoder:direction', 'encode')
+  const [direction, setDirectionState] = useLocalStorageState<Direction>(
+    'encoder:direction',
+    'encode',
+  )
+  const debouncedInput = useDebouncedValue(input)
 
-  const applyProcessing = useCallback((nextInput: string, nextMode: Mode, nextDirection: Direction) => {
-    const result = processValue(nextInput, nextMode, nextDirection)
-    setOutput(result.output)
-    setError(result.error)
-  }, [])
-
-  useEffect(() => {
-    applyProcessing(input, mode, direction)
-  }, [input, mode, direction, applyProcessing])
+  const { output, error } = useMemo(
+    () => processValue(debouncedInput, mode, direction),
+    [debouncedInput, mode, direction],
+  )
 
   const clear = useCallback(() => {
     setInputState('')
-    setOutput('')
-    setError(null)
   }, [setInputState])
 
   const swap = useCallback(() => {

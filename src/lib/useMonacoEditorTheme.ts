@@ -1,4 +1,4 @@
-import { useTheme } from './ThemeProvider'
+import { useTheme } from './ThemeContext'
 
 export type MonacoEditorTheme = 'vs-dark' | 'vs-light'
 

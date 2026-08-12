@@ -376,6 +376,16 @@ export const translations = {
     'command.hint.close': 'close',
     'command.trigger': 'Search',
     'command.recent': 'Recent',
+
+    // Error boundary
+    'error.title': 'Something went wrong',
+    'error.body': 'This tool hit an unexpected error. Your other tools are unaffected — try reloading, or go back to the home page.',
+    'error.retry': 'Try again',
+    'error.home': 'Back to home',
+    'error.details': 'Technical details',
+
+    // Accessibility
+    'a11y.skipToContent': 'Skip to main content',
   },
   vi: {
     // Shell / navigation
@@ -750,6 +760,16 @@ export const translations = {
     'command.hint.close': 'đóng',
     'command.trigger': 'Tìm kiếm',
     'command.recent': 'Gần đây',
+
+    // Error boundary
+    'error.title': 'Đã xảy ra lỗi',
+    'error.body': 'Công cụ này gặp lỗi ngoài dự kiến. Các công cụ khác vẫn hoạt động bình thường — hãy thử tải lại hoặc quay về trang chủ.',
+    'error.retry': 'Thử lại',
+    'error.home': 'Về trang chủ',
+    'error.details': 'Chi tiết kỹ thuật',
+
+    // Accessibility
+    'a11y.skipToContent': 'Bỏ qua, tới nội dung chính',
   },
 } as const satisfies Record<Locale, Record<string, string>>
 

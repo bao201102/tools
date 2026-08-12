@@ -13,6 +13,12 @@
   --ds-color-primary: #5e6ad2;
   --ds-color-primary-hover: #7983df;
   --ds-color-primary-focus: #4d59c2;
+  /*
+   * Brand colour used as *text*. The base primary is only 4.01:1 on the dark
+   * surfaces, so links and CTA labels use this lighter variant instead. On
+   * light surfaces the base colour already passes (5.1:1), so it stays put.
+   */
+  --ds-color-primary-text: #4b57c4;
   --ds-color-brand-secure: #7a7fad;
   --ds-color-on-primary: #ffffff;
 
@@ -35,10 +41,20 @@
   /* -------------------------------------------------------------------------
    * Text (dark text on light background)
    * ------------------------------------------------------------------------- */
+  /*
+   * Contrast (WCAG 2.1 AA). Calibrated against surface-3 (#f0f0f0) — the
+   * darkest surface text sits on — not white, so the ratios hold on every
+   * light surface rather than only the best case:
+   *   ink          #212121 → 13.9:1
+   *   ink-muted    #616161 →  5.4:1
+   *   ink-subtle   #5f5f5f →  5.6:1
+   *   ink-tertiary #6b6b6b →  4.6:1  ← minimum for body text
+   * Anything lighter than #6d6d6d drops below 4.5:1 on #f0f0f0.
+   */
   --ds-color-ink: #212121;
-  --ds-color-ink-muted: #616161;
-  --ds-color-ink-subtle: #757575;
-  --ds-color-ink-tertiary: #9e9e9e;
+  --ds-color-ink-muted: #5a5a5a;
+  --ds-color-ink-subtle: #5f5f5f;
+  --ds-color-ink-tertiary: #6b6b6b;
 
   /* -------------------------------------------------------------------------
    * Inverse (dark surfaces for special cases)
@@ -117,10 +133,14 @@
   --ds-color-hairline-strong: #3f434c;
   --ds-color-hairline-tertiary: #1d1f24;
 
+  /* Measured against surface-1 #111114: subtle 7.4:1, tertiary 4.6:1. */
   --ds-color-ink: #f7f8f8;
   --ds-color-ink-muted: #d0d6e0;
-  --ds-color-ink-subtle: #8a8f98;
-  --ds-color-ink-tertiary: #62666d;
+  --ds-color-ink-subtle: #a8aeb8;
+  --ds-color-ink-tertiary: #8b9098;
+
+  /* #8b95e8 on #111114 → 6.0:1 (base primary is only 4.0:1 here). */
+  --ds-color-primary-text: #8b95e8;
 
   --ds-color-inverse-canvas: #ffffff;
   --ds-color-inverse-surface-1: #f7f8f8;
@@ -143,6 +163,7 @@
   --color-primary: var(--ds-color-primary);
   --color-primary-hover: var(--ds-color-primary-hover);
   --color-primary-focus: var(--ds-color-primary-focus);
+  --color-primary-text: var(--ds-color-primary-text);
   --color-brand-secure: var(--ds-color-brand-secure);
   --color-on-primary: var(--ds-color-on-primary);
 
@@ -305,6 +326,49 @@ body {
     pointer-events: none;
     z-index: 0;
   }
+
+  /*
+   * Gradient headline. `background-clip: text` needs a transparent fill, which
+   * renders the text invisible wherever the gradient does not paint — Windows
+   * High Contrast Mode being the common case. Only opt in where we know the
+   * gradient survives.
+   */
+  .gradient-heading {
+    color: var(--ds-color-ink);
+  }
+
+  @supports (background-clip: text) or (-webkit-background-clip: text) {
+    @media not (forced-colors: active) {
+      .gradient-heading {
+        background-image: linear-gradient(
+          to right,
+          var(--ds-color-ink),
+          var(--ds-color-ink) 55%,
+          var(--ds-color-ink-muted)
+        );
+        -webkit-background-clip: text;
+        background-clip: text;
+        color: transparent;
+      }
+    }
+  }
+}
+
+/* ---------------------------------------------------------------------------
+ * Brand colour as text.
+ *
+ * `--ds-color-primary` (#5e6ad2) is tuned to be a *background* — as a text
+ * colour it only reaches 4.01:1 on the dark surfaces, short of the 4.5:1 WCAG
+ * AA needs for body copy. Rather than patch ~30 call sites, `text-primary` is
+ * redirected here to the accessible text variant, while `bg-primary`,
+ * `border-primary` and the /alpha variants keep the true brand colour.
+ *
+ * Deliberately unlayered: Tailwind emits its utilities inside `@layer
+ * utilities`, and unlayered rules win over layered ones regardless of
+ * specificity, so this also covers `hover:` / `group-hover:` variants.
+ * --------------------------------------------------------------------------- */
+.text-primary {
+  color: var(--ds-color-primary-text);
 }
 
 /* ---------------------------------------------------------------------------

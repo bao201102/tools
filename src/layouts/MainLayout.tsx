@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { NavLink, Outlet, useLocation } from 'react-router-dom'
 import {
   Maximize2, Minimize2, Braces, GitCompare, KeyRound, Code2, FileText, AlignLeft, Sigma,
@@ -14,6 +14,11 @@ import {
 } from '../lib/versionCheck'
 import { ThemeSwitcher } from '../components/ThemeSwitcher'
 import CommandPalette, { type PaletteItem } from '../components/CommandPalette'
+import { ErrorBoundary } from '../components/ErrorBoundary'
+import { useRouteSeo } from '../lib/seo'
+import { useModalBehaviour } from '../lib/useModalBehaviour'
+
+const FULL_WIDTH_STORAGE_KEY = 'tools-app:isFullWidth'
 
 type NavInternalItem = { kind: 'internal'; to: string; labelKey: TranslationKey; end?: boolean }
 type NavExternalItem = { kind: 'external'; href: string; labelKey: TranslationKey }
@@ -82,7 +87,7 @@ const paletteItems: PaletteItem[] = navGroups.flatMap(group =>
 function LogoMark() {
   return (
     <img
-      src="/favicon.png"
+      src="/favicon.svg"
       alt="NUB Portal"
       width={40}
       height={40}
@@ -153,7 +158,7 @@ function LanguageSwitcher() {
             aria-pressed={active}
             aria-label={opt.value === 'en' ? t('lang.english') : t('lang.vietnamese')}
             className={cn(
-              'rounded px-2 py-1 text-caption font-medium transition-colors',
+              'flex min-h-8 min-w-8 items-center justify-center rounded px-2 text-caption font-medium transition-colors',
               'outline-none focus-visible:ds-focus-ring',
               active
                 ? 'bg-primary text-on-primary shadow-sm'
@@ -186,16 +191,23 @@ function CloseIcon() {
 
 export default function MainLayout() {
   const { t, locale, setLocale } = useLocale()
+  useRouteSeo()
   const [navOpen, setNavOpen] = useState(false)
   const [openDropdown, setOpenDropdown] = useState<string | null>(null)
   const location = useLocation()
   const [updateAvailable, setUpdateAvailable] = useState(isUpdateAvailable)
   const [bannerDismissed, setBannerDismissed] = useState(false)
   const lastPathRef = useRef(location.pathname)
+  const drawerRef = useRef<HTMLDivElement>(null)
   const [isFullWidth, setIsFullWidth] = useState(() => {
     try {
-      const saved = localStorage.getItem('isFullWidth')
-      return saved !== 'false'
+      // Migrate the pre-prefix key written by older builds.
+      const legacy = localStorage.getItem('isFullWidth')
+      if (legacy !== null) {
+        localStorage.setItem(FULL_WIDTH_STORAGE_KEY, legacy)
+        localStorage.removeItem('isFullWidth')
+      }
+      return localStorage.getItem(FULL_WIDTH_STORAGE_KEY) !== 'false'
     } catch {
       return true
     }
@@ -204,25 +216,25 @@ export default function MainLayout() {
 
   useEffect(() => {
     try {
-      localStorage.setItem('isFullWidth', String(isFullWidth))
+      localStorage.setItem(FULL_WIDTH_STORAGE_KEY, String(isFullWidth))
     } catch {
       // Ignore
     }
   }, [isFullWidth])
 
-  useEffect(() => {
+  // Dismiss the overlays whenever the route changes, wherever the navigation
+  // came from. Adjusted during render rather than in an effect so the closed
+  // state is committed in the same pass — an effect would paint the new page
+  // once with the drawer still open.
+  const [pathAtRender, setPathAtRender] = useState(location.pathname)
+  if (pathAtRender !== location.pathname) {
+    setPathAtRender(location.pathname)
     setNavOpen(false)
     setOpenDropdown(null)
-  }, [location.pathname])
+  }
 
-  useEffect(() => {
-    if (!navOpen) return
-    const prev = document.body.style.overflow
-    document.body.style.overflow = 'hidden'
-    return () => {
-      document.body.style.overflow = prev
-    }
-  }, [navOpen])
+  const closeNav = useCallback(() => setNavOpen(false), [])
+  useModalBehaviour(drawerRef, navOpen, closeNav)
 
   // Close dropdown when clicking outside or pressing Escape
   useEffect(() => {
@@ -281,6 +293,20 @@ export default function MainLayout() {
 
   return (
     <div className={cn("flex h-dvh w-full flex-col overflow-hidden bg-canvas text-ink", isFullWidth && "layout-full-width")}>
+      {/* Skip link — first tab stop, visible only when focused */}
+      <a
+        href="#main-content"
+        className={cn(
+          'sr-only focus:not-sr-only',
+          'focus:fixed focus:left-4 focus:top-4 focus:z-[70]',
+          'focus:rounded-md focus:border focus:border-hairline focus:bg-surface-1',
+          'focus:px-4 focus:py-2 focus:text-sm focus:font-medium focus:text-ink focus:shadow-lg',
+          'outline-none focus-visible:ds-focus-ring'
+        )}
+      >
+        {t('a11y.skipToContent')}
+      </a>
+
       {/* Top navigation bar - JSONLint style */}
       <header className="sticky top-0 z-30 grid h-16 shrink-0 grid-cols-[1fr_auto_1fr] items-center border-b border-hairline bg-surface-1/85 backdrop-blur-md px-4 shadow-sm lg:px-6" style={{ paddingTop: 'env(safe-area-inset-top)' }}>
         {/* Logo */}
@@ -439,7 +465,7 @@ export default function MainLayout() {
                   aria-pressed={active}
                   aria-label={opt.value === 'en' ? t('lang.english') : t('lang.vietnamese')}
                   className={cn(
-                    'rounded px-2 py-1 text-caption font-medium transition-colors',
+                    'flex min-h-8 min-w-8 items-center justify-center rounded px-2 text-caption font-medium transition-colors',
                     'outline-none focus-visible:ds-focus-ring',
                     active
                       ? 'bg-primary text-on-primary shadow-sm'
@@ -510,7 +536,17 @@ export default function MainLayout() {
 
       {/* Mobile Nav Drawer */}
       <div
+        ref={drawerRef}
         id="mobile-nav"
+        // The drawer stays mounted so it can animate, so the dialog semantics
+        // are only asserted while it is actually open — otherwise assistive
+        // tech sees a modal on the page at all times. `inert` does the rest:
+        // closed, the drawer is merely translated off-screen, and without it
+        // its two dozen links stay in the tab order on mobile.
+        role={navOpen ? 'dialog' : undefined}
+        aria-modal={navOpen ? true : undefined}
+        aria-label={navOpen ? t('nav.menu') : undefined}
+        inert={!navOpen}
         className={cn(
           "fixed right-0 top-0 z-50 flex h-full w-72 flex-col border-l border-hairline/60 bg-surface-1 shadow-2xl lg:hidden",
           "transition-transform duration-300 ease-[cubic-bezier(0.32,0.72,0,1)]",
@@ -522,7 +558,7 @@ export default function MainLayout() {
           {/* Subtle gradient accent */}
           <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-primary/60 to-transparent" />
           <div className="flex items-center gap-3">
-            <img src="/favicon.png" alt="NUB" width={28} height={28} className="h-7 w-7 rounded-md object-cover" />
+            <img src="/favicon.svg" alt="NUB" width={28} height={28} className="h-7 w-7 rounded-md object-cover" />
             <span className="font-display text-base font-semibold tracking-tight text-ink">NUB Portal</span>
           </div>
           <button
@@ -626,11 +662,13 @@ export default function MainLayout() {
 
       {/* Main content area */}
       <div className="relative flex min-h-0 flex-1 flex-col">
-        <main className="flex min-h-0 min-w-0 flex-1 flex-col pb-[env(safe-area-inset-bottom)]">
+        <main id="main-content" tabIndex={-1} className="flex min-h-0 min-w-0 flex-1 flex-col pb-[env(safe-area-inset-bottom)] outline-none">
           <div className="flex min-h-0 h-full flex-1 flex-col overflow-y-auto bg-canvas">
             <div className="flex flex-col min-h-full w-full">
               <div className="flex-1 flex flex-col min-h-0 page-content-wrapper">
-                <Outlet context={{ navOpen }} />
+                <ErrorBoundary resetKey={location.pathname}>
+                  <Outlet context={{ navOpen }} />
+                </ErrorBoundary>
               </div>
               <footer className="shrink-0 border-t border-hairline/60 bg-surface-1/40 py-8 px-4 text-center backdrop-blur-md">
                 <div className="mx-auto max-w-[1300px] flex flex-col items-center justify-between gap-4 sm:flex-row text-xs text-ink-subtle">
@@ -642,7 +680,7 @@ export default function MainLayout() {
                       href="https://github.com/bao201102/tools"
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="hover:text-primary transition-colors duration-250 font-medium"
+                      className="inline-flex min-h-6 items-center px-1 font-medium transition-colors duration-250 hover:text-primary rounded-sm outline-none focus-visible:ds-focus-ring"
                     >
                       GitHub
                     </a>
@@ -651,7 +689,7 @@ export default function MainLayout() {
                       href="https://gold.nub.io.vn/"
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="hover:text-primary transition-colors duration-250 font-medium"
+                      className="inline-flex min-h-6 items-center px-1 font-medium transition-colors duration-250 hover:text-primary rounded-sm outline-none focus-visible:ds-focus-ring"
                     >
                       Gold Price
                     </a>
@@ -660,7 +698,7 @@ export default function MainLayout() {
                       href="https://vps-monitoring.nub.io.vn/"
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="hover:text-primary transition-colors duration-250 font-medium"
+                      className="inline-flex min-h-6 items-center px-1 font-medium transition-colors duration-250 hover:text-primary rounded-sm outline-none focus-visible:ds-focus-ring"
                     >
                       VPS Monitor
                     </a>
@@ -669,7 +707,7 @@ export default function MainLayout() {
                       href="https://pastebin.nub.io.vn/"
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="hover:text-primary transition-colors duration-250 font-medium"
+                      className="inline-flex min-h-6 items-center px-1 font-medium transition-colors duration-250 hover:text-primary rounded-sm outline-none focus-visible:ds-focus-ring"
                     >
                       Pastebin
                     </a>

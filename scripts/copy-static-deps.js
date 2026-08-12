@@ -29,11 +29,23 @@ function copyFileIfChanged(src, dest) {
   return true; // Copied (changed or new)
 }
 
+/**
+ * Monaco ships UI translations for 13 languages (~1.7 MB). The app is English
+ * and Vietnamese only, and Monaco has no Vietnamese bundle — it falls back to
+ * the built-in English strings — so none of these are ever requested. Skipping
+ * them keeps them out of the Docker image.
+ */
+function isUnusedMonacoLocale(name) {
+  return /^nls\.messages\.[\w-]+\.js\.js$/.test(name);
+}
+
 // Helper to recursively sync directories (copy new/changed, delete deleted)
 function syncDir(src, dest) {
   fs.mkdirSync(dest, { recursive: true });
 
-  const srcEntries = fs.readdirSync(src, { withFileTypes: true });
+  const srcEntries = fs
+    .readdirSync(src, { withFileTypes: true })
+    .filter(e => !isUnusedMonacoLocale(e.name));
   const srcNames = new Set(srcEntries.map(e => e.name));
 
   let copiedCount = 0;
