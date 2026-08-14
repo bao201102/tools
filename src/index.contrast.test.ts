@@ -47,9 +47,15 @@ function contrast(a: string, b: string): number {
 const AA_TEXT = 4.5
 const AA_LARGE = 3
 
+/*
+ * surface-3 is the worst case in BOTH themes: it is the lightest surface behind
+ * dark text and the lightest behind light text. surface-4 is defined but never
+ * used as a background (nothing references `bg-surface-4`), so calibrating
+ * against it would reject colours that no user can actually see.
+ */
 describe.each([
   { scope: 'root' as const, label: 'light', worstSurface: 'surface-3' },
-  { scope: 'dark' as const, label: 'dark', worstSurface: 'surface-2' },
+  { scope: 'dark' as const, label: 'dark', worstSurface: 'surface-3' },
 ])('$label theme text tokens', ({ scope, worstSurface }) => {
   const background = token(worstSurface, scope)
 

@@ -1,3 +1,97 @@
+# NUB Portal — what actually ships
+
+> **Read this section before changing colours.** Everything below it describes
+> Linear's *marketing site*, which this project started from. That reference is
+> kept intact for intent and vocabulary, but it is not a description of this app:
+> Linear ships dark-only marketing with pricing cards and testimonials; this is a
+> dual-theme developer tool. Where the two disagree, this section wins.
+>
+> Canonical values live in `src/index.css` as `--ds-*` custom properties.
+> `src/index.contrast.test.ts` reads that file directly and fails the build if a
+> token drops below WCAG AA — so these numbers cannot silently rot.
+
+## Text colour and contrast
+
+Every text token is calibrated against **`surface-3`**, the lowest-contrast
+background actually in use. (`surface-4` is defined but nothing references
+`bg-surface-4`; calibrating against it would reject colours no user can see.)
+
+| Token          | Light     | on surface-3 | Dark      | on surface-3 |
+| -------------- | --------- | ------------ | --------- | ------------ |
+| `ink`          | `#212121` | 14.13:1      | `#f7f8f8` | 14.35:1      |
+| `ink-muted`    | `#5a5a5a` | 6.05:1       | `#d0d6e0` | 10.45:1      |
+| `ink-subtle`   | `#5f5f5f` | 5.60:1       | `#a8aeb8` | 6.84:1       |
+| `ink-tertiary` | `#6b6b6b` | 4.68:1       | `#8b9098` | 4.75:1       |
+| `primary-text` | `#4b57c4` | 5.33:1       | `#8b95e8` | 5.50:1       |
+
+`ink-tertiary` sits ~0.2 above the 4.5:1 floor in both themes. It is the first
+thing to break — lighten it and the section labels, `kbd` hints and drawer
+headings all fail AA at once.
+
+### Brand colour splits in two
+
+`primary` (`#5e6ad2`) is tuned as a **background**. As text it only reaches
+4.12:1 (light) / 3.25:1 (dark) on surface-3 — below AA. So:
+
+- **`primary`** — `bg-primary`, `border-primary`, `/alpha` variants. Unchanged brand.
+- **`primary-text`** — every use of the brand as readable text.
+
+`src/index.css` redirects `.text-primary` to `primary-text` with a rule that is
+**deliberately unlayered**: Tailwind emits utilities inside `@layer utilities`,
+and unlayered rules beat layered ones regardless of specificity, so the redirect
+also covers `hover:` and `group-hover:` variants. That single rule replaced ~30
+call-site edits. `bg-primary` is untouched by it.
+
+`on-primary` (`#ffffff`) on `primary` is 4.70:1 — fine for the ≥14px/500 button
+labels it is used on.
+
+### Gradient headline
+
+`.gradient-heading` (used on the home `h1`) needs `color: transparent` for
+`background-clip: text`, which makes the text invisible wherever the gradient
+does not paint. It is therefore wrapped in
+`@supports (background-clip: text)` **and** `@media not (forced-colors: active)`,
+with a plain `color: var(--ds-color-ink)` fallback outside both. Do not use
+`bg-clip-text` directly on new headings — reuse this class.
+
+## Divergences from the Linear reference below
+
+These were already different before the accessibility pass and are intentional —
+do not "restore" them:
+
+| Token           | Linear doc | This app  | Why |
+| --------------- | ---------- | --------- | --- |
+| `primary-hover` | `#828fff`  | `#7983df` | Lighter hover was too close to the light-theme surface. |
+| `primary-focus` | `#5e69d1`  | `#4d59c2` | Darker focus ring reads on both themes. |
+| `ink-subtle`    | `#8a8f98`  | see table | Failed AA in both themes. |
+| `ink-tertiary`  | `#62666d`  | see table | Failed AA in both themes (2.46:1 light). |
+
+The Linear doc also states "don't ship a light-mode page" and leaves light mode
+undocumented. This app ships a full light theme; both are specified above.
+
+## Touch targets
+
+WCAG 2.2 AA asks for 24×24 CSS px minimum. Floors applied here:
+
+- Icon buttons and drawer rows: **44px** (`min-h-11`).
+- Header controls, language toggle: **32px** (`min-h-8`).
+- Inline text links in the footer: **24px** (`min-h-6`), the absolute floor.
+
+## Responsive type
+
+The `card-title` token (22px) is too large for a 166px-wide card at 375px — it
+wrapped to three lines and pushed cards to 292px tall. Home cards use
+`text-body sm:text-card-title` and clamp the description with
+`line-clamp-3 sm:line-clamp-none`, which brought the tallest card to 247px.
+Prefer scaling a token down at the call site over redefining the token.
+
+---
+
+# Linear marketing reference
+
+> Origin material. Useful for vocabulary, spacing rhythm and component naming.
+> Superseded by the section above wherever the two conflict.
+
 ## Overview
 
 Linear's marketing canvas is the deepest dark surface in this collection — `{colors.canvas}` is #010102, essentially pure black with a faint blue tint. On top sits a four-step surface ladder (`{colors.surface-1}` through `{colors.surface-4}`) for cards, panels, and lifted tiles, with hairline borders running from `{colors.hairline}` (#23252a) up through `{colors.hairline-strong}` and `{colors.hairline-tertiary}`. Light gray text (`{colors.ink}` #f7f8f8) carries the body and headlines.

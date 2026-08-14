@@ -2,8 +2,13 @@
 @config "../tailwind.config.js";
 
 /*
- * Design system source: DESIGN.md (Linear marketing canvas + dev-tool extensions).
- * Canonical tokens: --ds-* on :root. Tailwind @theme maps them to utilities (bg-*, text-*, etc.).
+ * This file is the canonical source for the design tokens; DESIGN.md documents
+ * them and the constraints they satisfy — see its "NUB Portal — what actually
+ * ships" section, not the Linear reference below it.
+ *
+ * Text colours are calibrated for WCAG AA against surface-3, the lowest-contrast
+ * background in use. src/index.contrast.test.ts parses this file and fails if a
+ * token drops below the threshold, so update the doc when you change a value here.
  */
 
 :root {
